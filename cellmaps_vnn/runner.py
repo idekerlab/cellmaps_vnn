@@ -7,6 +7,7 @@ from cellmaps_utils import logutils
 from cellmaps_utils.provenance import ProvenanceUtil
 
 import cellmaps_vnn
+from cellmaps_vnn.exceptions import CellmapsvnnError
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class CellmapsvnnRunner(object):
     """
     Class to run algorithm
     """
+
     def __init__(self, outdir=None,
                  exitcode=None,
                  skip_logging=True,
@@ -55,7 +57,6 @@ class CellmapsvnnRunner(object):
         """
         Runs cellmaps_vnn
 
-
         :return:
         """
         exitcode = 99
@@ -80,6 +81,5 @@ class CellmapsvnnRunner(object):
             logutils.write_task_finish_json(outdir=self._outdir,
                                             start_time=self._start_time,
                                             status=exitcode)
-
 
         return exitcode
