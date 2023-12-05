@@ -7,7 +7,9 @@ import logging.config
 from cellmaps_utils import logutils
 from cellmaps_utils import constants
 import cellmaps_vnn
+from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner
+from cellmaps_vnn.train import VNNTrain
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,11 @@ def _parse_arguments(desc, args):
     """
     parser = argparse.ArgumentParser(description=desc,
                                      formatter_class=constants.ArgParseFormatter)
+    subparsers = parser.add_subparsers(dest='command', help='Command to run. Type <command> -h for more help')
+    subparsers.required = True
+
+    VNNTrain.add_subparser(subparsers)
+    VNNPredict.add_subparser(subparsers)
     parser.add_argument('outdir',
                         help='Directory to write results to')
     parser.add_argument('--logconf', default=None,
@@ -80,10 +87,20 @@ def main(args):
 
     try:
         logutils.setup_cmd_logging(theargs)
-        return CellmapsvnnRunner(outdir=theargs.outdir,
-                                                      exitcode=theargs.exitcode,
-                                                      skip_logging=theargs.skip_logging,
-                                                      input_data_dict=theargs.__dict__).run()
+        # TODO: maybe VNNTrain and VNNPredict should use CellmapsvnnRunner
+        # return CellmapsvnnRunner(outdir=theargs.outdir,
+        #                          exitcode=theargs.exitcode,
+        #                          skip_logging=theargs.skip_logging,
+        #                          input_data_dict=theargs.__dict__).run()
+        # TODO: below initial implementation (subject to change)
+        if theargs.command == VNNTrain.COMMAND:
+            cmd = VNNTrain(theargs)
+        elif theargs.command == VNNPredict.COMMAND:
+            cmd = VNNPredict(theargs)
+        else:
+            raise Exception('Invalid command: ' + str(theargs.command))
+
+        return cmd.run()
     except Exception as e:
         logger.exception('Caught exception: ' + str(e))
         return 2
