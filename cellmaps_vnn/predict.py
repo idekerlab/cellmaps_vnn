@@ -29,8 +29,8 @@ class VNNPredict:
                                        description=desc,
                                        # TODO: choose formatter
                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument('--data', help='Path to the input data for prediction')
-        parser.add_argument('--model', help='Path to the trained model in RO-Crate')
+        parser.add_argument('--data', required=True, help='Path to the input data for prediction')
+        parser.add_argument('--model', required=True, help='Path to the trained model in RO-Crate')
         # TODO: Add other necessary arguments
         return parser
 

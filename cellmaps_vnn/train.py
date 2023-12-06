@@ -30,9 +30,31 @@ class VNNTrain:
                                        description=desc,
                                        # TODO: choose formatter
                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument('--hierarchy', help='Path to hierarchy.cx2 file in RO-Crate')
-        parser.add_argument('--parent_hierarchy', help='Path to parent_hierarchy.cx2 file in RO-Crate')
-        parser.add_argument('--training_data', help='Training data')
+        parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
+        parser.add_argument('--parent_hierarchy', required=True, help='Path to parent_hierarchy.cx2 file in RO-Crate')
+        parser.add_argument('--training_data', required=True, help='Training data')
+        # TODO: verify
+        parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
+        parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
+        parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
+        parser.add_argument('--alpha', help='Loss parameter alpha', type=float, default=0.3)
+        parser.add_argument('--batchsize', help='Batchsize', type=int, default=64)
+        parser.add_argument('--modeldir', help='Folder for trained models', type=str, default='MODEL/')
+        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
+        parser.add_argument('--genotype_hiddens',
+                            help='Mapping for the number of neurons in each term in genotype parts',
+                            type=int, default=4)
+        parser.add_argument('--optimize', help='Hyper-parameter optimization', type=int, default=1)
+        parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
+        parser.add_argument('--std', help='Standardization File', type=str, default='MODEL/std.txt')
+        parser.add_argument('--patience', help='Early stopping epoch limit', type=int, default=30)
+        parser.add_argument('--delta', help='Minimum change in loss to be considered an improvement', type=float,
+                            default=0.001)
+        parser.add_argument('--min_dropout_layer', help='Start dropout from this Layer number', type=int, default=2)
+        parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
+        # removed: onto (replaced with hierarchy), train (replaced with training_data),
+        # gene2id and cell2id, mutations, cn_deletions, cn_amplifications
+
         # TODO: Add other necessary arguments
         return parser
 
