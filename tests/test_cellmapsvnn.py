@@ -7,6 +7,8 @@ import tempfile
 import shutil
 
 import unittest
+from unittest.mock import MagicMock
+
 from cellmaps_vnn.runner import CellmapsvnnRunner
 
 
@@ -22,7 +24,7 @@ class TestCellmapsvnnrunner(unittest.TestCase):
     def test_constructor(self):
         """Tests constructor"""
         myobj = CellmapsvnnRunner(outdir='foo', skip_logging=True,
-                                                       exitcode=0)
+                                  exitcode=0)
 
         self.assertIsNotNone(myobj)
 
@@ -30,9 +32,11 @@ class TestCellmapsvnnrunner(unittest.TestCase):
         """ Tests run()"""
         temp_dir = tempfile.mkdtemp()
         try:
+            cmd = MagicMock()
             myobj = CellmapsvnnRunner(outdir=os.path.join(temp_dir, 'foo'),
-                                                         skip_logging=True,
-                                                         exitcode=4)
+                                      command=cmd,
+                                      skip_logging=True,
+                                      exitcode=4)
             self.assertEqual(4, myobj.run())
         finally:
             shutil.rmtree(temp_dir)
