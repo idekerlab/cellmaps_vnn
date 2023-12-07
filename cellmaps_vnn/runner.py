@@ -18,6 +18,7 @@ class CellmapsvnnRunner(object):
     """
 
     def __init__(self, outdir=None,
+                 command=None,
                  exitcode=None,
                  skip_logging=True,
                  input_data_dict=None,
@@ -42,6 +43,7 @@ class CellmapsvnnRunner(object):
             raise CellmapsvnnError('outdir is None')
 
         self._outdir = os.path.abspath(outdir)
+        self._command = command
         self._exitcode = exitcode
         self._start_time = int(time.time())
         if skip_logging is None:
@@ -73,6 +75,11 @@ class CellmapsvnnRunner(object):
                                            start_time=self._start_time,
                                            data={'commandlineargs': self._input_data_dict},
                                            version=cellmaps_vnn.__version__)
+
+            if self._command:
+                self._exitcode = self._command.run()
+            else:
+                raise CellmapsvnnError("No command provided to CellmapsvnnRunner")
 
             # set exit code to value passed in via constructor
             exitcode = self._exitcode

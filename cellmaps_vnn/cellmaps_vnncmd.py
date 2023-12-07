@@ -87,12 +87,7 @@ def main(args):
 
     try:
         logutils.setup_cmd_logging(theargs)
-        # TODO: maybe VNNTrain and VNNPredict should use CellmapsvnnRunner
-        # return CellmapsvnnRunner(outdir=theargs.outdir,
-        #                          exitcode=theargs.exitcode,
-        #                          skip_logging=theargs.skip_logging,
-        #                          input_data_dict=theargs.__dict__).run()
-        # TODO: below initial implementation (subject to change)
+
         if theargs.command == VNNTrain.COMMAND:
             cmd = VNNTrain(theargs)
         elif theargs.command == VNNPredict.COMMAND:
@@ -100,7 +95,13 @@ def main(args):
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
 
-        return cmd.run()
+        runner = CellmapsvnnRunner(outdir=theargs.outdir,
+                                   command=cmd,
+                                   exitcode=theargs.exitcode,
+                                   skip_logging=theargs.skip_logging,
+                                   input_data_dict=theargs.__dict__)
+
+        return runner.run()
     except Exception as e:
         logger.exception('Caught exception: ' + str(e))
         return 2
