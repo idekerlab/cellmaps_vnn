@@ -1,5 +1,5 @@
 # train.py
-import argparse
+from cellmaps_utils import constants
 
 
 class VNNTrain:
@@ -28,8 +28,7 @@ class VNNTrain:
         parser = subparsers.add_parser(VNNTrain.COMMAND,
                                        help='Train a Visual Neural Network',
                                        description=desc,
-                                       # TODO: choose formatter
-                                       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                       formatter_class=constants.ArgParseFormatter)
         parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
         parser.add_argument('--parent_hierarchy', required=True, help='Path to parent_hierarchy.cx2 file in RO-Crate')
         parser.add_argument('--training_data', required=True, help='Training data')
