@@ -1,6 +1,8 @@
 # train.py
 from cellmaps_utils import constants
 
+from cellmaps_vnn.data_wrapper import DataWrapper
+
 
 class VNNTrain:
     COMMAND = 'train'
@@ -10,7 +12,6 @@ class VNNTrain:
         Constructor for training Visual Neural Network.
         """
         self._theargs = theargs
-        # TODO: Initialize other necessary variables or configurations
 
     @staticmethod
     def add_subparser(subparsers):
@@ -30,9 +31,15 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
-        parser.add_argument('--parent_hierarchy', required=True, help='Path to parent_hierarchy.cx2 file in RO-Crate')
+        parser.add_argument('--hierarchy_parent', required=True, help='Path to hierarchy_parent.cx2 file in RO-Crate')
         parser.add_argument('--training_data', required=True, help='Training data')
-        # TODO: verify
+        # removed: onto (replaced with hierarchy), train (replaced with training_data)
+        parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
+        parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
+        parser.add_argument('--mutations', help='Mutation information for cell lines', type=str)
+        parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
+        parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines', type=str)
+        # TODO: verify above arguments
         parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
         parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
         parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
@@ -51,8 +58,6 @@ class VNNTrain:
                             default=0.001)
         parser.add_argument('--min_dropout_layer', help='Start dropout from this Layer number', type=int, default=2)
         parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
-        # removed: onto (replaced with hierarchy), train (replaced with training_data),
-        # gene2id and cell2id, mutations, cn_deletions, cn_amplifications
 
         # TODO: Add other necessary arguments
         return parser
@@ -62,4 +67,5 @@ class VNNTrain:
         The logic for training the Visual Neural Network.
         """
         # TODO: Implement training logic
+        data_wrapper = DataWrapper(self._theargs)
         pass

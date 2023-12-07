@@ -1,6 +1,7 @@
 import sys
 import networkx as nx
 import networkx.algorithms.components.connected as nxacc
+import numpy as np
 from ndex2.cx2 import RawCX2NetworkFactory, CX2NetworkXFactory
 
 
@@ -18,12 +19,19 @@ class DataWrapper:
         self.batchsize = args.batchsize
         self.modeldir = args.modeldir
         self.cuda = args.cuda
-        self.train = args.train
         self.patience = args.patience
         self.delta = args.delta
         self.min_dropout_layer = args.min_dropout_layer
         self.dropout_fraction = args.dropout_fraction
-        self.load_graph(args.hierarchy)
+        # self.mutations = np.genfromtxt(args.mutations, delimiter=',')
+        # self.cn_deletions = np.genfromtxt(args.cn_deletions, delimiter=',')
+        # self.cn_amplifications = np.genfromtxt(args.cn_amplifications, delimiter=',')
+        # self.cell_features = np.dstack([self.mutations, self.cn_deletions, self.cn_amplifications])
+        # self.train_feature, self.train_label, self.val_feature, self.val_label = self.prepare_train_data()
+        # self.cell_id_mapping = util.load_mapping(args.cell2id, 'cell lines')
+        # self.gene_id_mapping = util.load_mapping(args.gene2id, 'genes')
+        self.train = args.training_data
+        # self.load_graph(args.hierarchy)
 
     def load_graph(self, file_name):
 

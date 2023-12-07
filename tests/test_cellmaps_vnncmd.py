@@ -24,7 +24,7 @@ class TestCellmaps_vnn(unittest.TestCase):
         """Tests parse arguments"""
         res = cellmaps_vnncmd._parse_arguments('hi', ['train',
                                                       '--hierarchy', 'foohier',
-                                                      '--parent_hierarchy', 'fooparent',
+                                                      '--hierarchy_parent', 'fooparent',
                                                       '--training_data', 'footrain', 'outdir'])
 
         self.assertEqual('outdir', res.outdir)
@@ -34,7 +34,7 @@ class TestCellmaps_vnn(unittest.TestCase):
 
         someargs = ['-vv', '--logconf', 'hi', '--exitcode', '3', 'train',
                     '--hierarchy', 'foohier',
-                    '--parent_hierarchy', 'fooparent',
+                    '--hierarchy_parent', 'fooparent',
                     '--training_data', 'footrain', 'outdir']
         res = cellmaps_vnncmd._parse_arguments('hi', someargs)
 
@@ -52,7 +52,7 @@ class TestCellmaps_vnn(unittest.TestCase):
             outdir = os.path.join(temp_dir, 'out')
             res = cellmaps_vnncmd.main(['myprog.py', '--skip_logging', 'train',
                                         '--hierarchy', 'foohier',
-                                        '--parent_hierarchy', 'fooparent',
+                                        '--hierarchy_parent', 'fooparent',
                                         '--training_data', 'footrain', outdir])
             self.assertEqual(res, 0)
         finally:
