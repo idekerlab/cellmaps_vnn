@@ -82,7 +82,7 @@ class CellmapsvnnRunner(object):
                 raise CellmapsvnnError("No command provided to CellmapsvnnRunner")
 
             # set exit code to value passed in via constructor
-            exitcode = 0
+            exitcode = self._exitcode if self._exitcode is not None else 0
         finally:
             # write a task finish file
             logutils.write_task_finish_json(outdir=self._outdir,
