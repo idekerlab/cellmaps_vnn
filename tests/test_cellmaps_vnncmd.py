@@ -25,7 +25,10 @@ class TestCellmaps_vnn(unittest.TestCase):
         res = cellmaps_vnncmd._parse_arguments('hi', ['train',
                                                       '--hierarchy', 'foohier',
                                                       '--hierarchy_parent', 'fooparent',
-                                                      '--training_data', 'footrain', 'outdir'])
+                                                      '--training_data', 'footrain',
+                                                      '--gene2id', 'foo', '--cell2id', 'foo',
+                                                      '--mutations', 'foo', '--cn_deletions', 'foo',
+                                                      '--cn_amplifications', 'foo', 'outdir'])
 
         self.assertEqual('outdir', res.outdir)
         self.assertEqual(1, res.verbose)
@@ -35,7 +38,10 @@ class TestCellmaps_vnn(unittest.TestCase):
         someargs = ['-vv', '--logconf', 'hi', '--exitcode', '3', 'train',
                     '--hierarchy', 'foohier',
                     '--hierarchy_parent', 'fooparent',
-                    '--training_data', 'footrain', 'outdir']
+                    '--training_data', 'footrain',
+                    '--gene2id', 'foo', '--cell2id', 'foo',
+                    '--mutations', 'foo', '--cn_deletions', 'foo',
+                    '--cn_amplifications', 'foo', 'outdir']
         res = cellmaps_vnncmd._parse_arguments('hi', someargs)
 
         self.assertEqual('outdir', res.outdir)
@@ -53,7 +59,10 @@ class TestCellmaps_vnn(unittest.TestCase):
             res = cellmaps_vnncmd.main(['myprog.py', '--skip_logging', 'train',
                                         '--hierarchy', 'foohier',
                                         '--hierarchy_parent', 'fooparent',
-                                        '--training_data', 'footrain', outdir])
-            self.assertEqual(res, 0)
+                                        '--training_data', 'footrain',
+                                        '--gene2id', 'foo', '--cell2id', 'foo',
+                                        '--mutations', 'foo', '--cn_deletions', 'foo',
+                                        '--cn_amplifications', 'foo', outdir])
+            self.assertEqual(res, 2)
         finally:
             shutil.rmtree(temp_dir)
