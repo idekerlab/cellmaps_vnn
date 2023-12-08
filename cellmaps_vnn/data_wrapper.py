@@ -36,9 +36,9 @@ class TrainingDataWrapper:
         self._training_data = theargs.training_data
         self.cell_id_mapping = util.load_mapping(theargs.cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(theargs.gene2id, 'genes')
-        self.mutations = np.genfromtxt(theargs.mutations, delimiter=',')
-        self.cn_deletions = np.genfromtxt(theargs.cn_deletions, delimiter=',')
-        self.cn_amplifications = np.genfromtxt(theargs.cn_amplifications, delimiter=',')
+        self.mutations = util.load_numpy_data(theargs.mutations)
+        self.cn_deletions = util.load_numpy_data(theargs.cn_deletions)
+        self.cn_amplifications = util.load_numpy_data(theargs.cn_amplifications)
 
         self.cell_features = np.dstack([self.mutations, self.cn_deletions, self.cn_amplifications])
         self.train_feature, self.train_label, self.val_feature, self.val_label = self._prepare_train_data()
@@ -85,28 +85,27 @@ class TrainingDataWrapper:
 
     def _load_graph(self, file_name):
 
-        digraph = nx.DiGraph()
+        try:
+            digraph = self._create_digraph(file_name)
+            roots = [n for n in digraph.nodes if digraph.in_degree(n) == 0]
+            ugraph = digraph.to_undirected()
+            connected_sub_graph_list = list(nx.connected_components(ugraph))
+
+            if len(roots) != 1 or len(connected_sub_graph_list) != 1:
+                raise ValueError("Graph must have exactly one root and be fully connected")
+
+            self.root = roots[0]
+            # TODO: determine term_size_map and term_direct_gene_map
+            # self.term_size_map = term_size_map
+            # self.term_direct_gene_map = term_direct_gene_map
+
+        except Exception as e:
+            print("Error loading graph:", e)
+            sys.exit(1)
+
+    def _create_digraph(self, file_name):
         cx2factory = RawCX2NetworkFactory()
         nxfactory = CX2NetworkXFactory()
-        digraph = nxfactory.get_graph(cx2factory.get_cx2network(file_name), digraph)
-        roots = [n for n in digraph.nodes if digraph.in_degree(n) == 0]
-
-        ugraph = digraph.to_undirected()
-        connected_sub_graph_list = list(nxacc.connected_components(ugraph))
-
-        print('There are', len(roots), 'roots:', roots[0])
-        print('There are', len(digraph.nodes()), 'terms')
-        print('There are', len(connected_sub_graph_list), 'connected componenets')
-
-        if len(roots) > 1:
-            print('There are more than 1 root of ontology. Please use only one root.')
-            sys.exit(1)
-        if len(connected_sub_graph_list) > 1:
-            print('There are more than connected components. Please connect them.')
-            sys.exit(1)
-
+        digraph = nxfactory.get_graph(cx2factory.get_cx2network(file_name), nx.DiGraph())
         self.digraph = digraph
-        self.root = roots[0]
-        # TODO: determine term_size_map and term_direct_gene_mapa
-        # self.term_size_map = term_size_map
-        # self.term_direct_gene_map = term_direct_gene_map
+        return digraph
