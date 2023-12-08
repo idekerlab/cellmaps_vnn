@@ -45,43 +45,45 @@ class TrainingDataWrapper:
         self._load_graph(self._hierarchy)
 
     def _prepare_train_data(self):
-        train_features, val_features, train_labels, val_labels = self._load_train_data()
+        train_features, train_labels, val_features, val_labels = self._load_train_data()
         return (torch.Tensor(train_features), torch.FloatTensor(train_labels), torch.Tensor(val_features),
                 torch.FloatTensor(val_labels))
 
     def _load_train_data(self):
-        all_df = pd.read_csv(self._training_data,
-                             sep='\t', header=None, names=['cell_line', 'smiles', 'auc', 'dataset'])
-
-        train_cell_lines = list(set(all_df['cell_line']))
-        val_cell_lines = []
-        val_size = int(len(train_cell_lines) / 5)
-
-        for _ in range(val_size):
-            r = rd.randint(0, len(train_cell_lines) - 1)
-            val_cell_lines.append(train_cell_lines.pop(r))
-
-        val_df = all_df.query('cell_line in @val_cell_lines').reset_index(drop=True)
-        train_df = all_df.query('cell_line in @train_cell_lines').reset_index(drop=True)
-
+        all_df = pd.read_csv(self._training_data, sep='\t', header=None,
+                             names=['cell_line', 'smiles', 'auc', 'dataset'])
+        train_df, val_df = self._split_train_val_data(all_df)
         std_df = util.calc_std_vals(train_df, self.zscore_method)
         std_df.to_csv(self.std, sep='\t', header=False, index=False)
         train_df = util.standardize_data(train_df, std_df)
         val_df = util.standardize_data(val_df, std_df)
+        train_features, train_labels = self._extract_features_labels(train_df)
+        val_features, val_labels = self._extract_features_labels(val_df)
+        return train_features, train_labels, val_features, val_labels
 
-        train_features = []
-        train_labels = []
-        for row in train_df.values:
-            train_features.append([self.cell_id_mapping[row[0]]])
-            train_labels.append([float(row[2])])
+    def _split_train_val_data(self, all_df):
+        train_cell_lines = list(set(all_df['cell_line']))
+        val_cell_lines = self._select_validation_cell_lines(train_cell_lines)
+        val_df = all_df.query('cell_line in @val_cell_lines').reset_index(drop=True)
+        train_df = all_df.query('cell_line in @train_cell_lines').reset_index(drop=True)
+        return train_df, val_df
 
-        val_features = []
-        val_labels = []
-        for row in val_df.values:
-            val_features.append([self.cell_id_mapping[row[0]]])
-            val_labels.append([float(row[2])])
+    @staticmethod
+    def _select_validation_cell_lines(train_cell_lines):
+        val_size = int(len(train_cell_lines) / 5)
+        val_cell_lines = []
+        for _ in range(val_size):
+            r = rd.randint(0, len(train_cell_lines) - 1)
+            val_cell_lines.append(train_cell_lines.pop(r))
+        return val_cell_lines
 
-        return train_features, val_features, train_labels, val_labels
+    def _extract_features_labels(self, df):
+        features = []
+        labels = []
+        for row in df.values:
+            features.append([self.cell_id_mapping[row[0]]])
+            labels.append([float(row[2])])
+        return features, labels
 
     def _load_graph(self, file_name):
 
