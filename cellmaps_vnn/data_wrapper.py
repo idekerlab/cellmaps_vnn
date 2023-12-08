@@ -1,6 +1,5 @@
 import sys
 import networkx as nx
-import networkx.algorithms.components.connected as nxacc
 import numpy as np
 import pandas as pd
 import random as rd
@@ -8,6 +7,7 @@ import torch
 from ndex2.cx2 import RawCX2NetworkFactory, CX2NetworkXFactory
 
 import cellmaps_vnn.util as util
+from cellmaps_vnn.exceptions import CellmapsvnnError
 
 
 class TrainingDataWrapper:
@@ -92,7 +92,7 @@ class TrainingDataWrapper:
             connected_sub_graph_list = list(nx.connected_components(ugraph))
 
             if len(roots) != 1 or len(connected_sub_graph_list) != 1:
-                raise ValueError("Graph must have exactly one root and be fully connected")
+                raise CellmapsvnnError("Graph must have exactly one root and be fully connected")
 
             self.root = roots[0]
             # TODO: determine term_size_map and term_direct_gene_map
