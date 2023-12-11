@@ -1,4 +1,6 @@
 import sys
+
+import ndex2
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -88,7 +90,7 @@ class TrainingDataWrapper:
     def _load_graph(self, file_name):
 
         try:
-            digraph = self._create_digraph(file_name)
+            digraph, cx2network = self._create_digraph(file_name)
             roots = [n for n in digraph.nodes if digraph.in_degree(n) == 0]
             ugraph = digraph.to_undirected()
             connected_sub_graph_list = list(nx.connected_components(ugraph))
@@ -97,9 +99,7 @@ class TrainingDataWrapper:
                 raise CellmapsvnnError("Graph must have exactly one root and be fully connected")
 
             self.root = roots[0]
-            # TODO: determine term_size_map and term_direct_gene_map
-            # self.term_size_map = term_size_map
-            # self.term_direct_gene_map = term_direct_gene_map
+            self._generate_term_maps(cx2network)
 
         except Exception as e:
             print("Error loading graph:", e)
@@ -108,6 +108,39 @@ class TrainingDataWrapper:
     def _create_digraph(self, file_name):
         cx2factory = RawCX2NetworkFactory()
         nxfactory = CX2NetworkXFactory()
-        digraph = nxfactory.get_graph(cx2factory.get_cx2network(file_name), nx.DiGraph())
+        cx2network = cx2factory.get_cx2network(file_name)
+        digraph = nxfactory.get_graph(cx2network, nx.DiGraph())
         self.digraph = digraph
-        return digraph
+        return digraph, cx2network
+
+    def _generate_term_maps(self, cx2_network):
+        term_direct_gene_map = {}
+        term_size_map = {}
+        gene_set = set()
+
+        for node_id, node_data in cx2_network.get_nodes().items():
+            node_name = node_data[ndex2.constants.ASPECT_VALUES][ndex2.constants.NODE_NAME]
+            if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
+                for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList']:
+                    if gene_identifier not in self.gene_id_mapping:
+                        continue
+                    if gene_identifier not in term_direct_gene_map:
+                        term_direct_gene_map[node_name] = set()
+                        # TODO: probably it needs to be changed to node_id, now it is like the original implementation
+                    term_direct_gene_map[node_name].add(self.gene_id_mapping[gene_identifier])
+                    gene_set.add(gene_identifier)
+
+        for term in self.digraph.nodes():
+            term_gene_set = term_direct_gene_map.get(term, set())
+            descendants = nx.descendants(self.digraph, term)
+            for child in descendants:
+                if child in term_direct_gene_map:
+                    term_gene_set = term_gene_set | term_direct_gene_map[child]
+
+            if len(term_gene_set) == 0:
+                raise CellmapsvnnError(f'There is an empty term, please delete term: {term}')
+            else:
+                term_size_map[term] = len(term_gene_set)
+
+        self.term_size_map = term_size_map
+        self.term_direct_gene_map = term_direct_gene_map
