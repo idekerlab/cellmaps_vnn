@@ -118,7 +118,7 @@ class TrainingDataWrapper:
         gene_set = set()
 
         for node_id, node_data in cx2_network.get_nodes().items():
-            node_name = node_data[ndex2.constants.ASPECT_VALUES][ndex2.constants.NODE_NAME]
+            node_name = node_data[ndex2.constants.ASPECT_VALUES]['name']
             if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
                 for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList']:
                     if gene_identifier not in self.gene_id_mapping:
