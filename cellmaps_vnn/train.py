@@ -2,6 +2,7 @@
 from cellmaps_utils import constants
 
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
+from cellmaps_vnn.vnn_trainer import VNNTrainer
 
 
 class VNNTrain:
@@ -68,4 +69,8 @@ class VNNTrain:
         """
         # TODO: Implement training logic
         data_wrapper = TrainingDataWrapper(self._theargs)
-        pass
+        if self._theargs.optimize == 1:
+            VNNTrainer(data_wrapper).train_model()
+        else:
+            print("Wrong value for optimize.")
+            exit(1)
