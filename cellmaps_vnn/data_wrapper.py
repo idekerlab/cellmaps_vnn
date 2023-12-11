@@ -102,8 +102,7 @@ class TrainingDataWrapper:
             self._generate_term_maps(cx2network)
 
         except Exception as e:
-            print("Error loading graph:", e)
-            sys.exit(1)
+            raise CellmapsvnnError(f"Error loading graph: {e}")
 
     def _create_digraph(self, file_name):
         cx2factory = RawCX2NetworkFactory()
