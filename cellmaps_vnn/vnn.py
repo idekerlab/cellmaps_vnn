@@ -2,7 +2,7 @@ import sys
 import copy
 import torch
 import torch.nn as nn
-from data_wrapper import TrainingDataWrapper
+from cellmaps_vnn.data_wrapper import TrainingDataWrapper
 
 
 class VNN(nn.Module):

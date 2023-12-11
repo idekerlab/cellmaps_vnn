@@ -2,9 +2,9 @@ import time
 import torch.utils.data as du
 from torch.autograd import Variable
 
-from data_wrapper import *
-from vnn import *
-from ccc_loss import *
+from cellmaps_vnn.data_wrapper import *
+from cellmaps_vnn.vnn import *
+from cellmaps_vnn.ccc_loss import *
 
 
 class VNNTrainer:
