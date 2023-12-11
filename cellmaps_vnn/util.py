@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import torch
-from torch._numpy import inf
+from torch._six import inf
 
 from cellmaps_vnn.exceptions import CellmapsvnnError
 
