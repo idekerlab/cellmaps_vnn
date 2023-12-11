@@ -123,7 +123,7 @@ class TrainingDataWrapper:
                 for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList']:
                     if gene_identifier not in self.gene_id_mapping:
                         continue
-                    if gene_identifier not in term_direct_gene_map:
+                    if node_name not in term_direct_gene_map:
                         term_direct_gene_map[node_name] = set()
                         # TODO: probably it needs to be changed to node_id, now it is like the original implementation
                     term_direct_gene_map[node_name].add(self.gene_id_mapping[gene_identifier])
