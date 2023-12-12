@@ -62,7 +62,8 @@ class TestCellmaps_vnn(unittest.TestCase):
                                         '--training_data', 'footrain',
                                         '--gene2id', 'foo', '--cell2id', 'foo',
                                         '--mutations', 'foo', '--cn_deletions', 'foo',
-                                        '--cn_amplifications', 'foo', outdir])
+                                        '--cn_amplifications', 'foo', '--model', os.path.join(temp_dir, 'model/'),
+                                        outdir])
             self.assertEqual(res, 2)
         finally:
             shutil.rmtree(temp_dir)
