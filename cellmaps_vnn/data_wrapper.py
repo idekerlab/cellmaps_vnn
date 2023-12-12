@@ -105,18 +105,19 @@ class TrainingDataWrapper:
             if len(roots) != 1 or len(connected_sub_graph_list) != 1:
                 raise CellmapsvnnError("Graph must have exactly one root and be fully connected")
 
+            self.digraph = digraph
             self.root = roots[0]
             self._generate_term_maps(cx2network)
 
         except Exception as e:
             raise CellmapsvnnError(f"Error loading graph: {e}")
 
-    def _create_digraph(self, file_name):
+    @staticmethod
+    def _create_digraph(file_name):
         cx2factory = RawCX2NetworkFactory()
         nxfactory = CX2NetworkXFactory()
         cx2network = cx2factory.get_cx2network(file_name)
         digraph = nxfactory.get_graph(cx2network, nx.DiGraph())
-        self.digraph = digraph
         return digraph, cx2network
 
     def _generate_term_maps(self, cx2_network):
