@@ -65,6 +65,21 @@ def load_numpy_data(file_path):
         raise CellmapsvnnError(f"Error loading data from {file_path}: {e}")
 
 
+def load_cell_features(mutations, cn_deletions, cn_amplifications):
+    """
+    Load cell/drug features.
+
+    :param mutations:
+    :param cn_deletions:
+    :param cn_amplifications:
+    :return: Combined cell features.
+    """
+    mutations = load_numpy_data(mutations)
+    cn_deletions = load_numpy_data(cn_deletions)
+    cn_amplifications = load_numpy_data(cn_amplifications)
+    return np.dstack([mutations, cn_deletions, cn_amplifications])
+
+
 def load_mapping(mapping_file, mapping_type):
     """
     TODO
