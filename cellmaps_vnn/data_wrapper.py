@@ -39,11 +39,8 @@ class TrainingDataWrapper:
         self._training_data = theargs.training_data
         self.cell_id_mapping = util.load_mapping(theargs.cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(theargs.gene2id, 'genes')
-        self.mutations = util.load_numpy_data(theargs.mutations)
-        self.cn_deletions = util.load_numpy_data(theargs.cn_deletions)
-        self.cn_amplifications = util.load_numpy_data(theargs.cn_amplifications)
 
-        self.cell_features = np.dstack([self.mutations, self.cn_deletions, self.cn_amplifications])
+        self.cell_features = util.load_cell_features(theargs.mutations, theargs.cn_deletions, theargs.cn_amplifications)
         self.train_feature, self.train_label, self.val_feature, self.val_label = self._prepare_train_data()
         self._load_graph(self._hierarchy)
 
