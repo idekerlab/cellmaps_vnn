@@ -171,8 +171,8 @@ class VNNPredict:
         for i, (inputdata, labels) in enumerate(data_loader):
             cuda_features = self._process_input(inputdata, cell_features)
             aux_out_map, hidden_embeddings_map = model(cuda_features)
-            test_predict = torch.cat([test_predict, aux_out_map['final'].data], dim=0) if test_predict.size()[0] else \
-            aux_out_map['final'].data
+            test_predict = torch.cat([test_predict, aux_out_map['final'].data], dim=0) \
+                if test_predict.size()[0] else aux_out_map['final'].data
 
             self._save_hidden_outputs(hidden_embeddings_map, hidden_folder)
             self._register_gradient_hooks(hidden_embeddings_map, saved_grads)
