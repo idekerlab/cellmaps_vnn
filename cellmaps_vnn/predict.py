@@ -65,14 +65,13 @@ class VNNPredict:
             # Load data and model for prediction
             predict_data, cell2id_mapping = self._prepare_predict_data(
                 self._theargs.predict_data, self._theargs.cell2id, self._theargs.zscore_method, self._theargs.std)
-            num_genes = len(util.load_mapping(self._theargs.gene2id, "genes"))
 
             # Load cell features
             cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
                                                     self._theargs.cn_amplifications)
 
             # Perform prediction
-            self.predict(predict_data, num_genes, self._theargs.model, self._theargs.hidden, self._theargs.batchsize,
+            self.predict(predict_data, self._theargs.model, self._theargs.hidden, self._theargs.batchsize,
                          self._theargs.result, cell_features)
 
         except Exception as e:
