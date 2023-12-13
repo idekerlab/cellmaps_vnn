@@ -120,19 +120,15 @@ class TrainingDataWrapper:
     def _generate_term_maps(self, cx2_network):
         term_direct_gene_map = {}
         term_size_map = {}
-        gene_set = set()
 
         for node_id, node_data in cx2_network.get_nodes().items():
-            node_name = node_data[ndex2.constants.ASPECT_VALUES]['name']
             if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
                 for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList']:
                     if gene_identifier not in self.gene_id_mapping:
                         continue
-                    if node_name not in term_direct_gene_map:
-                        term_direct_gene_map[node_name] = set()
-                        # TODO: probably it needs to be changed to node_id, now it is like the original implementation
-                    term_direct_gene_map[node_name].add(self.gene_id_mapping[gene_identifier])
-                    gene_set.add(gene_identifier)
+                    if node_id not in term_direct_gene_map:
+                        term_direct_gene_map[node_id] = set()
+                    term_direct_gene_map[node_id].add(self.gene_id_mapping[gene_identifier])
 
         for term in self.digraph.nodes():
             term_gene_set = term_direct_gene_map.get(term, set())
