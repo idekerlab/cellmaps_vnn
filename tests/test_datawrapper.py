@@ -72,9 +72,7 @@ class TestTrainingDataWrapper(unittest.TestCase):
         mock_prepare_train_data.assert_called_once()
         mock_load_graph.assert_called_once()
 
-    @patch('cellmaps_vnn.data_wrapper.TrainingDataWrapper._load_graph')
-    # TODO: does not need to be mocked if _load_graph fixed
-    def test_init(self, mock_load_graph):
+    def test_init(self):
         wrapper = TrainingDataWrapper(self.theargs)
         self.assertEqual(wrapper._hierarchy, self.theargs.hierarchy)
         self.assertEqual(wrapper.num_hiddens_genotype, self.theargs.genotype_hiddens)

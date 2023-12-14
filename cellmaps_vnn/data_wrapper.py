@@ -123,7 +123,7 @@ class TrainingDataWrapper:
 
         for node_id, node_data in cx2_network.get_nodes().items():
             if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
-                for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList']:
+                for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList'].split():
                     if gene_identifier not in self.gene_id_mapping:
                         continue
                     if node_id not in term_direct_gene_map:
