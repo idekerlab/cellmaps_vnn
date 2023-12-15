@@ -102,7 +102,7 @@ class TrainingDataWrapper:
             if len(roots) != 1 or len(connected_sub_graph_list) != 1:
                 raise CellmapsvnnError("Graph must have exactly one root and be fully connected")
 
-            self.digraph = digraph
+            self.digraph = self._convert_graph_to_string_nodes(digraph)
             self.root = roots[0]
             self._generate_term_maps(cx2network)
 
@@ -122,6 +122,7 @@ class TrainingDataWrapper:
         term_size_map = {}
 
         for node_id, node_data in cx2_network.get_nodes().items():
+            node_id = str(node_id)
             if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
                 for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList'].split():
                     if gene_identifier not in self.gene_id_mapping:
@@ -144,3 +145,24 @@ class TrainingDataWrapper:
 
         self.term_size_map = term_size_map
         self.term_direct_gene_map = term_direct_gene_map
+
+    @staticmethod
+    def _convert_graph_to_string_nodes(original_graph):
+        """
+        Converts a graph with integer nodes to a graph with string nodes.
+
+        Parameters:
+        original_graph (nx.Graph): The original graph with integer nodes.
+
+        Returns:
+        nx.Graph: A new graph with the same structure but with string nodes.
+        """
+        new_graph = type(original_graph)()
+
+        for node in original_graph.nodes():
+            new_graph.add_node(str(node))
+
+        for edge in original_graph.edges():
+            new_graph.add_edge(str(edge[0]), str(edge[1]))
+
+        return new_graph
