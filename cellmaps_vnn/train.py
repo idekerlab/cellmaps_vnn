@@ -1,8 +1,12 @@
 # train.py
 from cellmaps_utils import constants
+import logging
 
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
+from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
+
+logger = logging.getLogger(__name__)
 
 
 class VNNTrain:
@@ -39,7 +43,8 @@ class VNNTrain:
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
         parser.add_argument('--mutations', required=True, help='Mutation information for cell lines', type=str)
         parser.add_argument('--cn_deletions', required=True, help='Copy number deletions for cell lines', type=str)
-        parser.add_argument('--cn_amplifications', required=True, help='Copy number amplifications for cell lines', type=str)
+        parser.add_argument('--cn_amplifications', required=True, help='Copy number amplifications for cell lines',
+                            type=str)
         # TODO: verify above arguments
         parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
         parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
@@ -60,17 +65,20 @@ class VNNTrain:
         parser.add_argument('--min_dropout_layer', help='Start dropout from this Layer number', type=int, default=2)
         parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
 
-        # TODO: Add other necessary arguments
+        # TODO: Refactor arguments
         return parser
 
     def run(self):
         """
         The logic for training the Visual Neural Network.
         """
-        # TODO: Implement training logic
-        data_wrapper = TrainingDataWrapper(self._theargs)
-        if self._theargs.optimize == 1:
-            VNNTrainer(data_wrapper).train_model()
-        else:
-            print("Wrong value for optimize.")
-            exit(1)
+        try:
+            data_wrapper = TrainingDataWrapper(self._theargs)
+            if self._theargs.optimize == 1:
+                VNNTrainer(data_wrapper).train_model()
+            else:
+                logger.error(f"The value {self._theargs.optimize} is wrong value for optimize.")
+                raise CellmapsvnnError(f"The value {self._theargs.optimize} is wrong value for optimize.")
+        except Exception as e:
+            logger.error(f"Training error: {e}")
+            raise CellmapsvnnError(f"Encountered problem in training: {e}")
