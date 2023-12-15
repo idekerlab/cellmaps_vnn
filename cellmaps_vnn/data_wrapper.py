@@ -118,18 +118,8 @@ class TrainingDataWrapper:
         return digraph, cx2network
 
     def _generate_term_maps(self, cx2_network):
-        term_direct_gene_map = {}
+        term_direct_gene_map = self._get_direct_genes(cx2_network)
         term_size_map = {}
-
-        for node_id, node_data in cx2_network.get_nodes().items():
-            node_id = str(node_id)
-            if 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
-                for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList'].split():
-                    if gene_identifier not in self.gene_id_mapping:
-                        continue
-                    if node_id not in term_direct_gene_map:
-                        term_direct_gene_map[node_id] = set()
-                    term_direct_gene_map[node_id].add(self.gene_id_mapping[gene_identifier])
 
         for term in self.digraph.nodes():
             term_gene_set = term_direct_gene_map.get(term, set())
@@ -145,6 +135,43 @@ class TrainingDataWrapper:
 
         self.term_size_map = term_size_map
         self.term_direct_gene_map = term_direct_gene_map
+
+    def _get_direct_genes(self, cx2_network):
+        term_direct_gene_map = {}
+        child_genes_map = {}
+
+        for edge_id, edge_data in cx2_network.get_edges().items():
+            parent_node_id = edge_data['s']
+            child_node_id = edge_data['t']
+
+            if parent_node_id not in child_genes_map:
+                child_genes_map[parent_node_id] = set()
+
+            child_node_genes = self._get_genes_of_node(cx2_network, child_node_id)
+            child_genes_map[parent_node_id].update(child_node_genes)
+
+        for node_id, node_data in cx2_network.get_nodes().items():
+            node_id_str = str(node_id)
+            all_genes = self._get_genes_of_node(cx2_network, node_id)
+            direct_genes = all_genes - child_genes_map.get(node_id, set())
+            if len(direct_genes) > 0:
+                term_direct_gene_map[node_id_str] = direct_genes
+
+        return term_direct_gene_map
+
+    def _get_genes_of_node(self, cx2_network, node_id):
+        """
+        Retrieves genes associated with a specific node.
+        """
+        genes = set()
+        node_data = cx2_network.get_node(node_id)
+
+        if node_data and 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
+            for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList'].split():
+                if gene_identifier in self.gene_id_mapping:
+                    genes.add(self.gene_id_mapping[gene_identifier])
+
+        return genes
 
     @staticmethod
     def _convert_graph_to_string_nodes(original_graph):
