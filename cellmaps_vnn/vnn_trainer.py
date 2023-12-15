@@ -28,7 +28,7 @@ class VNNTrainer:
         term_mask_map = util.create_term_mask(self.model.term_direct_gene_map, self.model.gene_dim,
                                               self.data_wrapper.cuda)
         for name, param in self.model.named_parameters():
-            term_name = int(name.split('_')[0])
+            term_name = name.split('_')[0]
             if '_direct_gene_layer.weight' in name:
                 param.data = torch.mul(param.data, term_mask_map[term_name]) * 0.1
             else:
@@ -81,7 +81,7 @@ class VNNTrainer:
                 for name, param in self.model.named_parameters():
                     if '_direct_gene_layer.weight' not in name:
                         continue
-                    term_name = int(name.split('_')[0])
+                    term_name = name.split('_')[0]
                     param.grad.data = torch.mul(param.grad.data, term_mask_map[term_name])
 
                 _gradnorms[i] = util.get_grad_norm(self.model.parameters(), 2.0).unsqueeze(0)  # Save gradnorm for batch
