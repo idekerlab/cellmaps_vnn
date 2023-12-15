@@ -70,7 +70,7 @@ class VNN(nn.Module):
 
             # if there are some genes directly annotated with the term, add a layer taking in all genes and
             # forwarding out only those genes
-            self.add_module(str(term) + '_direct_gene_layer', nn.Linear(self.gene_dim, len(gene_set)))
+            self.add_module(term + '_direct_gene_layer', nn.Linear(self.gene_dim, len(gene_set)))
 
     # start from bottom (leaves), and start building a neural network using the given ontology
     # adding modules --- the modules are not connected yet
@@ -109,11 +109,11 @@ class VNN(nn.Module):
                 term_hidden = self.term_dim_map[term]
 
                 if i >= self.min_dropout_layer:
-                    self.add_module(str(term) + '_dropout_layer', nn.Dropout(p=self.dropout_fraction))
-                self.add_module(str(term) + '_linear_layer', nn.Linear(input_size, term_hidden))
-                self.add_module(str(term) + '_batchnorm_layer', nn.BatchNorm1d(term_hidden))
-                self.add_module(str(term) + '_aux_linear_layer1', nn.Linear(term_hidden, 1))
-                self.add_module(str(term) + '_aux_linear_layer2', nn.Linear(1, 1))
+                    self.add_module(term + '_dropout_layer', nn.Dropout(p=self.dropout_fraction))
+                self.add_module(term + '_linear_layer', nn.Linear(input_size, term_hidden))
+                self.add_module(term + '_batchnorm_layer', nn.BatchNorm1d(term_hidden))
+                self.add_module(term + '_aux_linear_layer1', nn.Linear(term_hidden, 1))
+                self.add_module(term + '_aux_linear_layer2', nn.Linear(1, 1))
 
             i += 1
             digraph.remove_nodes_from(leaves)
@@ -134,7 +134,7 @@ class VNN(nn.Module):
         gene_input = torch.cat(feat_out_list, dim=1)
         term_gene_out_map = {}
         for term, _ in self.term_direct_gene_map.items():
-            term_gene_out_map[term] = self._modules[str(term) + '_direct_gene_layer'](gene_input)
+            term_gene_out_map[term] = self._modules[term + '_direct_gene_layer'](gene_input)
 
         for i, layer in enumerate(self.term_layer_list):
 
@@ -149,14 +149,14 @@ class VNN(nn.Module):
 
                 child_input = torch.cat(child_input_list, 1)
                 if i >= self.min_dropout_layer:
-                    dropout_out = self._modules[str(term) + '_dropout_layer'](child_input)
-                    term_nn_out = self._modules[str(term) + '_linear_layer'](dropout_out)
+                    dropout_out = self._modules[term + '_dropout_layer'](child_input)
+                    term_nn_out = self._modules[term + '_linear_layer'](dropout_out)
                 else:
-                    term_nn_out = self._modules[str(term) + '_linear_layer'](child_input)
+                    term_nn_out = self._modules[term + '_linear_layer'](child_input)
                 tanh_out = torch.tanh(term_nn_out)
-                hidden_embeddings_map[term] = self._modules[str(term) + '_batchnorm_layer'](tanh_out)
-                aux_layer1_out = torch.tanh(self._modules[str(term) + '_aux_linear_layer1'](hidden_embeddings_map[term]))
-                aux_out_map[term] = self._modules[str(term) + '_aux_linear_layer2'](aux_layer1_out)
+                hidden_embeddings_map[term] = self._modules[term + '_batchnorm_layer'](tanh_out)
+                aux_layer1_out = torch.tanh(self._modules[term + '_aux_linear_layer1'](hidden_embeddings_map[term]))
+                aux_out_map[term] = self._modules[term + '_aux_linear_layer2'](aux_layer1_out)
 
         final_input = hidden_embeddings_map[self.root]
         aux_layer_out = torch.tanh(self._modules['final_aux_linear_layer'](final_input))
