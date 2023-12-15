@@ -103,7 +103,7 @@ class TrainingDataWrapper:
                 raise CellmapsvnnError("Graph must have exactly one root and be fully connected")
 
             self.digraph = self._convert_graph_to_string_nodes(digraph)
-            self.root = roots[0]
+            self.root = str(roots[0])
             self._generate_term_maps(cx2network)
 
         except Exception as e:
