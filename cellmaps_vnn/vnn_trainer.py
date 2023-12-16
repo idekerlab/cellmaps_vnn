@@ -99,8 +99,14 @@ class VNNTrainer:
                 train_predict = torch.cat([train_predict, aux_out_map['final'].data], dim=0)
                 train_label_gpu = torch.cat([train_label_gpu, cuda_labels], dim=0)
 
-            loss = self._compute_loss(aux_out_map, cuda_labels, term_mask_map)
-            loss.backward()
+            total_loss = 0
+            for name, output in aux_out_map.items():
+                loss = CCCLoss()
+                if name == 'final':
+                    total_loss += loss(output, cuda_labels)
+                else:
+                    total_loss += self.data_wrapper.alpha * loss(output, cuda_labels)
+            total_loss.backward()
 
             for name, param in self.model.named_parameters():
                 if '_direct_gene_layer.weight' not in name:
@@ -111,8 +117,6 @@ class VNNTrainer:
             # Save gradnorm for batch
             _gradnorms[i] = util.get_grad_norm(self.model.parameters(), 2.0).unsqueeze(0)
             optimizer.step()
-
-            total_loss += loss.item()
 
         # Save total gradnorm for epoch
         gradnorms = sum(_gradnorms).unsqueeze(0).cpu().numpy()[0]
@@ -145,7 +149,10 @@ class VNNTrainer:
                 val_predict = torch.cat([val_predict, aux_out_map['final'].data], dim=0)
                 val_label_gpu = torch.cat([val_label_gpu, cuda_labels], dim=0)
 
-            val_loss += self._compute_loss(aux_out_map, cuda_labels).item()
+            for name, output in aux_out_map.items():
+                loss = CCCLoss()
+                if name == 'final':
+                    val_loss += loss(output, cuda_labels)
 
         return val_predict, val_loss, val_label_gpu
 
@@ -165,33 +172,6 @@ class VNNTrainer:
         cuda_features = Variable(features.cuda(self.data_wrapper.cuda))
         cuda_labels = Variable(labels.cuda(self.data_wrapper.cuda))
         return cuda_features, cuda_labels
-
-    def _compute_loss(self, output_map, labels, term_mask_map=None):
-        """
-        Computes the loss for the given outputs and labels.
-
-        :param output_map: Map of outputs from the model.
-        :type output_map: dict
-        :param labels: Labels tensor.
-        :type labels: Tensor
-        :param term_mask_map: Term mask map for weight adjustments.
-        :type term_mask_map: Tensor, optional
-
-        :returns : Computed loss.
-        :rtype : torch.Tensor
-        """
-        total_loss = 0
-        loss_fn = CCCLoss()
-
-        for name, output in output_map.items():
-            if term_mask_map and name in term_mask_map:
-                output = torch.mul(output, term_mask_map[name])
-            if name == 'final':
-                total_loss += loss_fn(output, labels)
-            else:
-                total_loss += self.data_wrapper.alpha * loss_fn(output, labels)
-
-        return total_loss
 
     def _initialize_model_parameters(self, term_mask_map):
         """
