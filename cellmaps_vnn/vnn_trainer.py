@@ -243,7 +243,7 @@ class VNNTrainer:
         """
         if min_loss is None or val_loss < min_loss - self.data_wrapper.delta:
             min_loss = val_loss
-            torch.save(self.model, f"{self.data_wrapper.modeldir}/model_epoch_{epoch}.pt")
+            torch.save(self.model, f"{self.data_wrapper.modeldir}/model_final.pt")
             print(f"Model saved at epoch {epoch}")
 
         return min_loss
