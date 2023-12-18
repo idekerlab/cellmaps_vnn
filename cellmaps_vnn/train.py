@@ -35,6 +35,7 @@ class VNNTrain:
                                        help='Train a Visual Neural Network',
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
+        parser.add_argument('outdir', help='Directory to write results to')
         parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
         parser.add_argument('--hierarchy_parent', required=True, help='Path to hierarchy_parent.cx2 file in RO-Crate')
         parser.add_argument('--training_data', required=True, help='Training data')
@@ -51,7 +52,6 @@ class VNNTrain:
         parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
         parser.add_argument('--alpha', help='Loss parameter alpha', type=float, default=0.3)
         parser.add_argument('--batchsize', help='Batchsize', type=int, default=64)
-        parser.add_argument('--modeldir', help='Folder for trained models', type=str, default='MODEL/')
         parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts',

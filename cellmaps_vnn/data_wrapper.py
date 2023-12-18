@@ -25,7 +25,7 @@ class TrainingDataWrapper:
         self.alpha = theargs.alpha
         self.epochs = theargs.epoch
         self.batchsize = theargs.batchsize
-        self.modeldir = self._setup_model_dir(theargs.modeldir)
+        self.modeldir = theargs.outdir
         self.cuda = theargs.cuda
         self.zscore_method = theargs.zscore_method
         self.std = theargs.std
@@ -43,12 +43,6 @@ class TrainingDataWrapper:
         self.cell_features = util.load_cell_features(theargs.mutations, theargs.cn_deletions, theargs.cn_amplifications)
         self.train_feature, self.train_label, self.val_feature, self.val_label = self._prepare_train_data()
         self._load_graph(self._hierarchy)
-
-    @staticmethod
-    def _setup_model_dir(model_dir):
-        if not os.path.exists(model_dir):
-            os.mkdir(model_dir)
-        return model_dir
 
     def _prepare_train_data(self):
         train_features, train_labels, val_features, val_labels = self._load_train_data()

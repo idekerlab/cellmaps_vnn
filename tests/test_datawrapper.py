@@ -23,10 +23,10 @@ class MockArgs:
         self.alpha = 0.5
         self.epoch = 10
         self.batchsize = 32
-        self.modeldir = os.path.join(temp_dir, 'model')
+        self.outdir = temp_dir
         self.cuda = False
         self.zscore_method = 'standard'
-        self.std = os.path.join(temp_dir, 'model/std.txt')
+        self.std = os.path.join(temp_dir, 'std.txt')
         self.patience = 5
         self.delta = 0.1
         self.min_dropout_layer = 1

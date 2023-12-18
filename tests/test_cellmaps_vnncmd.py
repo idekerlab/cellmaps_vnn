@@ -35,13 +35,13 @@ class TestCellmaps_vnn(unittest.TestCase):
         self.assertEqual(0, res.exitcode)
         self.assertEqual(None, res.logconf)
 
-        someargs = ['-vv', '--logconf', 'hi', '--exitcode', '3', 'train',
+        someargs = ['-vv', '--logconf', 'hi', '--exitcode', '3', 'train', 'outdir',
                     '--hierarchy', 'foohier',
                     '--hierarchy_parent', 'fooparent',
                     '--training_data', 'footrain',
                     '--gene2id', 'foo', '--cell2id', 'foo',
                     '--mutations', 'foo', '--cn_deletions', 'foo',
-                    '--cn_amplifications', 'foo', 'outdir']
+                    '--cn_amplifications', 'foo']
         res = cellmaps_vnncmd._parse_arguments('hi', someargs)
 
         self.assertEqual('outdir', res.outdir)
@@ -56,14 +56,13 @@ class TestCellmaps_vnn(unittest.TestCase):
         # try where loading config is successful
         try:
             outdir = os.path.join(temp_dir, 'out')
-            res = cellmaps_vnncmd.main(['myprog.py', '--skip_logging', 'train',
+            res = cellmaps_vnncmd.main(['myprog.py', '--skip_logging', 'train', outdir,
                                         '--hierarchy', 'foohier',
                                         '--hierarchy_parent', 'fooparent',
                                         '--training_data', 'footrain',
                                         '--gene2id', 'foo', '--cell2id', 'foo',
                                         '--mutations', 'foo', '--cn_deletions', 'foo',
-                                        '--cn_amplifications', 'foo', '--model', os.path.join(temp_dir, 'model/'),
-                                        outdir])
+                                        '--cn_amplifications', 'foo'])
             self.assertEqual(res, 2)
         finally:
             shutil.rmtree(temp_dir)

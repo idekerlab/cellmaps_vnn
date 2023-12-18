@@ -32,8 +32,6 @@ def _parse_arguments(desc, args):
 
     VNNTrain.add_subparser(subparsers)
     VNNPredict.add_subparser(subparsers)
-    parser.add_argument('outdir',
-                        help='Directory to write results to')
     parser.add_argument('--logconf', default=None,
                         help='Path to python logging configuration file in '
                              'this format: https://docs.python.org/3/library/'

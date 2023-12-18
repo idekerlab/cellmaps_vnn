@@ -39,6 +39,7 @@ class VNNPredict:
                                        help='Run prediction using a trained model',
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
+        parser.add_argument('outdir', help='Directory to write results to')
         parser.add_argument('--predict_data', required=True, help='Path to the dataset to be predicted', type=str)
         parser.add_argument('--model', required=True, help='Path to the trained model in RO-Crate', type=str)
         parser.add_argument('--batchsize', help='Batchsize', type=int, default=1000)
