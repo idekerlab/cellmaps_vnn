@@ -28,7 +28,7 @@ class TrainingDataWrapper:
         self.modeldir = theargs.outdir
         self.cuda = theargs.cuda
         self.zscore_method = theargs.zscore_method
-        self.std = theargs.std
+        self.std = os.path.join(self.modeldir, theargs.std)
         self.patience = theargs.patience
         self.delta = theargs.delta
         self.min_dropout_layer = theargs.min_dropout_layer
