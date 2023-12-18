@@ -40,18 +40,16 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--predict_data', required=True, help='Path to the dataset to be predicted', type=str)
         parser.add_argument('--model', required=True, help='Path to the trained model in RO-Crate', type=str)
-        parser.add_argument('--batchsize', help='Batchsize', type=int, default=1000)
+        parser.add_argument('--predict_data', required=True, help='Path to the dataset to be predicted', type=str)
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
-        parser.add_argument('--hidden', help='Hidden output folder', type=str, default='hidden/')
-        parser.add_argument('--result', help='Result file prefix', type=str, default='/predict')
-        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
         parser.add_argument('--mutations', required=True, help='Mutation information for cell lines', type=str)
         parser.add_argument('--cn_deletions', required=True, help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', required=True, help='Copy number amplifications for cell lines',
                             type=str)
+        parser.add_argument('--batchsize', help='Batchsize', type=int, default=1000)
+        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
         parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
         parser.add_argument('--std', help='Standardization File', type=str, default='std.txt')
         # TODO: Add other necessary arguments - shall common arguments be extracted to cmd file
@@ -72,9 +70,14 @@ class VNNPredict:
             cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
                                                     self._theargs.cn_amplifications)
 
+            result_file_prefix = os.path.join(self._theargs.outdir, 'predict')
+            hidden_dir = os.path.join(self._theargs.outdir, 'hidden/')
+            if not os.path.exists(hidden_dir):
+                os.mkdir(hidden_dir)
+
             # Perform prediction
-            self.predict(predict_data, self._theargs.model, self._theargs.hidden, self._theargs.batchsize,
-                         self._theargs.result, cell_features)
+            self.predict(predict_data, self._theargs.model, hidden_dir, self._theargs.batchsize,
+                         result_file_prefix, cell_features)
 
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
@@ -106,7 +109,7 @@ class VNNPredict:
             label.append([float(row[2])])
         return feature, label
 
-    def predict(self, predict_data, model_file, hidden_folder, batch_size, result_file, cell_features):
+    def predict(self, predict_data, model_file, hidden_folder, batch_size, result_file='predict', cell_features=None):
         """
         Perform prediction using the trained model.
 
