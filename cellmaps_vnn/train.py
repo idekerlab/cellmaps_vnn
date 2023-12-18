@@ -39,14 +39,12 @@ class VNNTrain:
         parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
         parser.add_argument('--hierarchy_parent', required=True, help='Path to hierarchy_parent.cx2 file in RO-Crate')
         parser.add_argument('--training_data', required=True, help='Training data')
-        # removed: onto (replaced with hierarchy), train (replaced with training_data)
         parser.add_argument('--gene2id', required=True, help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
         parser.add_argument('--mutations', required=True, help='Mutation information for cell lines', type=str)
         parser.add_argument('--cn_deletions', required=True, help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', required=True, help='Copy number amplifications for cell lines',
                             type=str)
-        # TODO: verify above arguments
         parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
         parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
         parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
