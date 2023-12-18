@@ -21,7 +21,6 @@ class VNNPredict:
         Constructor for predicting with a trained model.
         """
         self._theargs = theargs
-        # TODO: Initialize other necessary variables or configurations
 
     @staticmethod
     def add_subparser(subparsers):
@@ -40,7 +39,7 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--model', required=True, help='Path to the trained model in RO-Crate', type=str)
+        parser.add_argument('--modeldir', required=True, help='Path to RO-Crate with the trained model', type=str)
         parser.add_argument('--predict_data', required=True, help='Path to the dataset to be predicted', type=str)
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
@@ -51,8 +50,8 @@ class VNNPredict:
         parser.add_argument('--batchsize', help='Batchsize', type=int, default=1000)
         parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
         parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
-        parser.add_argument('--std', help='Standardization File', type=str, default='std.txt')
-        # TODO: Add other necessary arguments - shall common arguments be extracted to cmd file
+        parser.add_argument('--std', help='Standardization File (if not set standardization file from RO-Crate '
+                                          'will be used)', type=str)
         return parser
 
     def run(self):
@@ -60,11 +59,13 @@ class VNNPredict:
         The logic for running predictions with the model.
         """
         try:
+            model = os.path.join(self._theargs.modeldir, 'model_final.pt')
+            std = os.path.join(self._theargs.modeldir, 'std.txt') if self._theargs.std is None else self._theargs.std
             torch.set_printoptions(precision=5)
 
             # Load data and model for prediction
             predict_data, cell2id_mapping = self._prepare_predict_data(
-                self._theargs.predict_data, self._theargs.cell2id, self._theargs.zscore_method, self._theargs.std)
+                self._theargs.predict_data, self._theargs.cell2id, self._theargs.zscore_method, std)
 
             # Load cell features
             cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
@@ -76,7 +77,7 @@ class VNNPredict:
                 os.mkdir(hidden_dir)
 
             # Perform prediction
-            self.predict(predict_data, self._theargs.model, hidden_dir, self._theargs.batchsize,
+            self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
                          result_file_prefix, cell_features)
 
         except Exception as e:
