@@ -1,10 +1,13 @@
 import time
+import logging
 import torch.utils.data as du
 from torch.autograd import Variable
 
 from cellmaps_vnn.data_wrapper import *
 from cellmaps_vnn.vnn import *
 from cellmaps_vnn.ccc_loss import *
+
+logger = logging.getLogger(__name__)
 
 
 class VNNTrainer:
@@ -45,7 +48,7 @@ class VNNTrainer:
 
         optimizer = self._configure_optimizer()
 
-        print("epoch\ttrain_corr\ttrain_loss\ttrue_auc\tpred_auc\tval_corr\tval_loss\tgrad_norm\telapsed_time")
+        logger.info("epoch\ttrain_corr\ttrain_loss\ttrue_auc\tpred_auc\tval_corr\tval_loss\tgrad_norm\telapsed_time")
         min_loss = None
 
         for epoch in range(self.data_wrapper.epochs):
@@ -59,8 +62,8 @@ class VNNTrainer:
             epoch_end_time = time.time()
 
             elapsed_time = epoch_end_time - epoch_start_time
-            print(f"{epoch}\t{train_corr:.4f}\t{total_loss:.4f}\t{true_auc:.4f}\t{pred_auc:.4f}\t"
-                  f"{val_corr:.4f}\t{val_loss:.4f}\t{gradnorms:.4f}\t{elapsed_time:.4f}")
+            logger.info(f"{epoch}\t{train_corr:.4f}\t{total_loss:.4f}\t{true_auc:.4f}\t{pred_auc:.4f}\t"
+                        f"{val_corr:.4f}\t{val_loss:.4f}\t{gradnorms:.4f}\t{elapsed_time:.4f}")
 
             min_loss = self._save_model_if_improved(min_loss, val_loss, epoch)
 
@@ -244,6 +247,6 @@ class VNNTrainer:
         if min_loss is None or val_loss < min_loss - self.data_wrapper.delta:
             min_loss = val_loss
             torch.save(self.model, f"{self.data_wrapper.modeldir}/model_final.pt")
-            print(f"Model saved at epoch {epoch}")
+            logger.info(f"Model saved at epoch {epoch}")
 
         return min_loss

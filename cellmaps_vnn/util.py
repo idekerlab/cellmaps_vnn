@@ -1,12 +1,14 @@
 import math
 import os
-
+import logging
 import numpy as np
 import pandas as pd
 import torch
 from torch import inf
 
 from cellmaps_vnn.exceptions import CellmapsvnnError
+
+logger = logging.getLogger(__name__)
 
 
 def calc_std_vals(df, zscore_method):
@@ -138,7 +140,7 @@ def load_mapping(mapping_file, mapping_type):
         mapping[line[1]] = int(line[0])
 
     file_handle.close()
-    print('Total number of {} = {}'.format(mapping_type, len(mapping)))  # TODO: logging
+    logger.info('Total number of {} = {}'.format(mapping_type, len(mapping)))
     return mapping
 
 
