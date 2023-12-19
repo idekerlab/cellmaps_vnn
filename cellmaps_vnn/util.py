@@ -11,7 +11,16 @@ from cellmaps_vnn.exceptions import CellmapsvnnError
 
 def calc_std_vals(df, zscore_method):
     """
-    TODO
+    Calculates standard deviation values for a given DataFrame based on the specified z-score method
+    ('zscore' and 'robustz').
+
+    :param df: the data to be standardized.
+    :type df: pandas.DataFrame
+    :param zscore_method: Method to use for standardization ('zscore' or 'robustz').
+    :type zscore_method: str
+
+    :returns std_df: DataFrame with standard deviation values for each dataset.
+    :rtype std_df: pandas.DataFrame
     """
     std_df = pd.DataFrame(columns=['dataset', 'center', 'scale'])
     std_list = []
@@ -44,7 +53,16 @@ def calc_std_vals(df, zscore_method):
 
 def standardize_data(df, std_df):
     """
-    TODO
+    Standardizes the data based on provided standard deviation values. This function applies z-score standardization
+    to the 'auc' column of the DataFrame, using the standard deviation values provided.
+
+    :param df: the data to be standardized.
+    :type df: pandas.DataFrame
+    :param std_df: the standard deviation values.
+    :type std_df: pandas.DataFrame
+
+    :returns merged: DataFrame with the standardized 'z' values.
+    :rtype merged: pandas.DataFrame
     """
     merged = pd.merge(df, std_df, how="left", on=['dataset'], sort=False)
     merged['z'] = (merged['auc'] - merged['center']) / merged['scale']
@@ -54,7 +72,16 @@ def standardize_data(df, std_df):
 
 def load_numpy_data(file_path):
     """
-    TODO
+    Reads a file at the specified path and attempts to convert it into a NumPy array.
+    If the file is not found or any other error occurs, an exception is raised.
+
+    :param file_path: Path to the file to be loaded.
+    :type file_path: str
+
+    :returns: Data loaded from the file.
+    :rtype: numpy.ndarray
+
+    :raises CellmapsvnnError: If the file is not found or an error occurs during loading.
     """
     if not os.path.isfile(file_path):
         raise CellmapsvnnError(f"File {file_path} not found.")
@@ -67,12 +94,19 @@ def load_numpy_data(file_path):
 
 def load_cell_features(mutations, cn_deletions, cn_amplifications):
     """
-    Load cell/drug features.
+    Loads and combines cell/drug features from given mutation, CN deletion, and CN amplification files.
 
-    :param mutations:
-    :param cn_deletions:
-    :param cn_amplifications:
-    :return: Combined cell features.
+    Each feature set is loaded as a NumPy array and then combined into a single array.
+
+    :param mutations: Path to the mutations data file.
+    :type mutations: str
+    :param cn_deletions: Path to the CN deletions data file.
+    :type cn_deletions: str
+    :param cn_amplifications: Path to the CN amplifications data file.
+    :type cn_amplifications: str
+
+    :returns: Combined cell features.
+    :rtype: numpy.ndarray
     """
     mutations = load_numpy_data(mutations)
     cn_deletions = load_numpy_data(cn_deletions)
@@ -82,7 +116,17 @@ def load_cell_features(mutations, cn_deletions, cn_amplifications):
 
 def load_mapping(mapping_file, mapping_type):
     """
-    TODO
+    Loads a mapping from a file and returns it as a dictionary.
+
+    :param mapping_file: Path to the mapping file.
+    :type mapping_file: str
+    :param mapping_type: Description of the mapping (e.g., 'gene to ID').
+    :type mapping_type: str
+
+    :returns mapping: Dictionary containing the mapping from the file.
+    :rtype mapping: dict
+
+    :raises CellmapsvnnError: If the mapping file is not found.
     """
     if not os.path.isfile(mapping_file):
         raise CellmapsvnnError(f"Mapping file {mapping_file} not found.")
@@ -94,13 +138,26 @@ def load_mapping(mapping_file, mapping_type):
         mapping[line[1]] = int(line[0])
 
     file_handle.close()
-    print('Total number of {} = {}'.format(mapping_type, len(mapping)))
+    print('Total number of {} = {}'.format(mapping_type, len(mapping)))  # TODO: logging
     return mapping
 
 
-# build mask: matrix (nrows = number of relevant gene set, ncols = number all genes)
-# elements of matrix are 1 if the corresponding gene is one of the relevant genes
 def create_term_mask(term_direct_gene_map, gene_dim, cuda_id):
+    """
+    Creates a term mask map for gene sets. This function generates a mask for each term where the mask is
+    a matrix with rows equal to the number of relevant gene set and columns equal to the total number of genes.
+    Each element is set to 1 if the corresponding gene is one of the relevant genes.
+
+    :param term_direct_gene_map: Mapping of terms to their respective gene sets.
+    :type term_direct_gene_map: dict
+    :param gene_dim: Total number of genes.
+    :type gene_dim: int
+    :param cuda_id: CUDA ID for tensor operations.
+    :type cuda_id: int
+
+    :returns term_mask_map: Dictionary of term masks.
+    :rtype term_mask_map: dict
+    """
     term_mask_map = {}
     for term, gene_set in term_direct_gene_map.items():
         mask = torch.zeros(len(gene_set), gene_dim).cuda(cuda_id)
@@ -111,6 +168,17 @@ def create_term_mask(term_direct_gene_map, gene_dim, cuda_id):
 
 
 def build_input_vector(input_data, cell_features):
+    """
+    Builds an input vector for model training using cell features.
+
+    :param input_data: Input data containing cell indices.
+    :type input_data: Tensor
+    :param cell_features: Cell features array.
+    :type cell_features: numpy.ndarray
+
+    :returns feature: Input feature tensor for the model.
+    :rtype feature: Tensor
+    """
     genedim = len(cell_features[0, :])
     featdim = len(cell_features[0, 0, :])
     feature = np.zeros((input_data.size()[0], genedim, featdim))
@@ -123,15 +191,19 @@ def build_input_vector(input_data, cell_features):
 
 
 def get_grad_norm(model_params, norm_type):
-    """Gets gradient norm of an iterable of model_params.
+    """
+    Computes the gradient norm of model parameters.
+
     The norm is computed over all gradients together, as if they were
     concatenated into a single vector. Gradients are modified in-place.
-    Arguments:
-        model_params (Iterable[Tensor] or Tensor): an iterable of Tensors or a
-            single Tensor that will have gradients normalized
-        norm_type (float or int): type of the used p-norm. Can be ``'inf'`` for
-            infinity norm.
-    Returns: Total norm of the model_params (viewed as a single vector).
+
+    :param model_params: Iterable of model parameters or a single Tensor that will have gradients normalized.
+    :type model_params: Iterable[Tensor] or Tensor
+    :param norm_type: Type of the p-norm to use (can be 'inf' for infinity norm).
+    :type norm_type: float or int
+
+    :returns: Total norm of the model parameters (viewed as a single vector).
+    :rtype: Tensor
     """
     if isinstance(model_params, torch.Tensor):  # check if parameters are tensorobject
         model_params = [model_params]  # change to list
@@ -150,6 +222,17 @@ def get_grad_norm(model_params, norm_type):
 
 
 def pearson_corr(x, y):
+    """
+    Computes the Pearson correlation coefficient between two tensors.
+
+    :param x: First variable tensor.
+    :type x: Tensor
+    :param y: Second variable tensor.
+    :type y: Tensor
+
+    :returns: Pearson correlation coefficient.
+    :rtype: Tensor
+    """
     xx = x - torch.mean(x)
     yy = y - torch.mean(y)
 
