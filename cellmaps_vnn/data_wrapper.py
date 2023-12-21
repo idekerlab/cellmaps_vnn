@@ -34,8 +34,8 @@ class TrainingDataWrapper:
         self.min_dropout_layer = theargs.min_dropout_layer
         self.dropout_fraction = theargs.dropout_fraction
 
-        self._hierarchy = theargs.hierarchy
-        self._hierarchy_parent = theargs.hierarchy_parent  # not sure if needed
+        self._hierarchy = os.path.join(theargs.inputdir, 'hierarchy.cx2')
+        self._hierarchy_parent = os.path.join(theargs.inputdir, 'hierarchy_parent.cx2')  # not sure if needed
         self._training_data = theargs.training_data
         self.cell_id_mapping = util.load_mapping(theargs.cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(theargs.gene2id, 'genes')

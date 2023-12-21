@@ -95,6 +95,7 @@ def main(args):
 
         runner = CellmapsvnnRunner(outdir=theargs.outdir,
                                    command=cmd,
+                                   inputdir=theargs.inputdir,
                                    exitcode=theargs.exitcode,
                                    skip_logging=theargs.skip_logging,
                                    input_data_dict=theargs.__dict__)

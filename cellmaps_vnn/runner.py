@@ -19,6 +19,10 @@ class CellmapsvnnRunner(object):
 
     def __init__(self, outdir=None,
                  command=None,
+                 inputdir=None,
+                 name=None,
+                 organization_name=None,
+                 project_name=None,
                  exitcode=None,
                  skip_logging=True,
                  input_data_dict=None,
@@ -44,6 +48,12 @@ class CellmapsvnnRunner(object):
 
         self._outdir = os.path.abspath(outdir)
         self._command = command
+        self._inputdir = inputdir
+        self._name = name
+        self._project_name = project_name
+        self._organization_name = organization_name
+        self._keywords = None
+        self._description = None
         self._exitcode = exitcode
         self._start_time = int(time.time())
         if skip_logging is None:
@@ -54,6 +64,33 @@ class CellmapsvnnRunner(object):
         self._provenance_utils = provenance_utils
 
         logger.debug('In constructor')
+
+    def _update_provenance_fields(self):
+        """
+
+        :return:
+        """
+        prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(self._inputdir,
+                                                                                override_name=self._name,
+                                                                                override_project_name=
+                                                                                self._project_name,
+                                                                                override_organization_name=
+                                                                                self._organization_name,
+                                                                                extra_keywords=[
+                                                                                    'VNN',
+                                                                                    'Visible Neural Network',
+                                                                                    str(self._command)
+                                                                                    ])
+        if self._name is None:
+            self._name = prov_attrs.get_name()
+
+        if self._organization_name is None:
+            self._organization_name = prov_attrs.get_organization_name()
+
+        if self._project_name is None:
+            self._project_name = prov_attrs.get_project_name()
+        self._keywords = prov_attrs.get_keywords()
+        self._description = prov_attrs.get_description()
 
     def run(self):
         """

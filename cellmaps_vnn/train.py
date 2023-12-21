@@ -36,9 +36,7 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--hierarchy', required=True, help='Path to hierarchy.cx2 file in RO-Crate')
-        parser.add_argument('--hierarchy_parent', required=True, help='Path to hierarchy_parent.cx2 file in RO-Crate')
-        parser.add_argument('--training_data', required=True, help='Training data')
+        parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with hierarchy.cx2 file.')
         parser.add_argument('--gene2id', required=True, help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
         parser.add_argument('--mutations', required=True, help='Mutation information for cell lines', type=str)
