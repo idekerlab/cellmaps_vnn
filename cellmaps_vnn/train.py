@@ -1,7 +1,11 @@
 # train.py
+import os
+from datetime import date
+
 from cellmaps_utils import constants
 import logging
 
+import cellmaps_vnn
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
 from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
@@ -77,3 +81,27 @@ class VNNTrain:
         except Exception as e:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
+
+    # def register_outputs(self):
+    #     self._register_model_file()
+
+    # def _register_model_file(self):
+    #     """
+    #     TODO
+    #
+    #     """
+    #     description = self._description
+    #     description += ' Co-Embedding file'
+    #     keywords = self._keywords
+    #     keywords.extend(['file'])
+    #     data_dict = {'name': os.path.basename() + ' coembedding output file',
+    #                  'description': description,
+    #                  'keywords': keywords,
+    #                  'data-format': 'tsv',
+    #                  'author': cellmaps_vnn.__name__,
+    #                  'version': cellmaps_vnn.__version__,
+    #                  'date-published': date.today().strftime(self._provenance_utils.get_default_date_format_str())}
+    #     self._coembedding_id = self._provenance_utils.register_dataset(self._outdir,
+    #                                                                    source_file=self.get_coembedding_file(),
+    #                                                                    data_dict=data_dict,
+    #                                                                    skip_copy=True)

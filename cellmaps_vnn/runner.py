@@ -80,7 +80,7 @@ class CellmapsvnnRunner(object):
                                                                                     'VNN',
                                                                                     'Visible Neural Network',
                                                                                     str(self._command)
-                                                                                    ])
+                                                                                ])
         if self._name is None:
             self._name = prov_attrs.get_name()
 
@@ -91,6 +91,44 @@ class CellmapsvnnRunner(object):
             self._project_name = prov_attrs.get_project_name()
         self._keywords = prov_attrs.get_keywords()
         self._description = prov_attrs.get_description()
+
+    def _create_rocrate(self):
+        """
+        Creates rocrate for output directory
+
+        :raises CellMapsProvenanceError: If there is an error
+        """
+        logger.debug('Registering rocrate with FAIRSCAPE')
+
+        try:
+            self._provenance_utils.register_rocrate(self._outdir,
+                                                    name=self._name,
+                                                    organization_name=self._organization_name,
+                                                    project_name=self._project_name,
+                                                    description=self._description,
+                                                    keywords=self._keywords)
+        except TypeError as te:
+            raise CellmapsvnnError('Invalid provenance: ' + str(te))
+        except KeyError as ke:
+            raise CellmapsvnnError('Key missing in provenance: ' + str(ke))
+
+    def _register_software(self):
+        """
+        Registers this tool
+
+        :raises CellMapsImageEmbeddingError: If fairscape call fails
+        """
+        software_keywords = self._keywords
+        software_keywords.extend(['tools', cellmaps_vnn.__name__])
+        software_description = self._description + ' ' + cellmaps_vnn.__description__
+        self._softwareid = self._provenance_utils.register_software(self._outdir,
+                                                                    name=cellmaps_vnn.__name__,
+                                                                    description=software_description,
+                                                                    author=cellmaps_vnn.__author__,
+                                                                    version=cellmaps_vnn.__version__,
+                                                                    file_format='py',
+                                                                    keywords=software_keywords,
+                                                                    url=cellmaps_vnn.__repo_url__)
 
     def run(self):
         """
@@ -112,9 +150,17 @@ class CellmapsvnnRunner(object):
                                            start_time=self._start_time,
                                            data={'commandlineargs': self._input_data_dict},
                                            version=cellmaps_vnn.__version__)
+            self._update_provenance_fields()
+
+            self._create_rocrate()
+
+            self._register_software()
+
+            generated_dataset_ids = []
 
             if self._command:
                 self._command.run()
+                # TODO: generated_dataset_ids.extend(self._command.register_outputs())
             else:
                 raise CellmapsvnnError("No command provided to CellmapsvnnRunner")
 
