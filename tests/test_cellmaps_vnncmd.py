@@ -22,13 +22,12 @@ class TestCellmaps_vnn(unittest.TestCase):
 
     def test_parse_arguments(self):
         """Tests parse arguments"""
-        res = cellmaps_vnncmd._parse_arguments('hi', ['train',
-                                                      '--hierarchy', 'foohier',
-                                                      '--hierarchy_parent', 'fooparent',
+        res = cellmaps_vnncmd._parse_arguments('hi', ['train', 'outdir',
+                                                      '--inputdir', 'foodir',
                                                       '--training_data', 'footrain',
                                                       '--gene2id', 'foo', '--cell2id', 'foo',
                                                       '--mutations', 'foo', '--cn_deletions', 'foo',
-                                                      '--cn_amplifications', 'foo', 'outdir'])
+                                                      '--cn_amplifications', 'foo'])
 
         self.assertEqual('outdir', res.outdir)
         self.assertEqual(1, res.verbose)
@@ -36,8 +35,7 @@ class TestCellmaps_vnn(unittest.TestCase):
         self.assertEqual(None, res.logconf)
 
         someargs = ['-vv', '--logconf', 'hi', '--exitcode', '3', 'train', 'outdir',
-                    '--hierarchy', 'foohier',
-                    '--hierarchy_parent', 'fooparent',
+                    '--inputdir', 'foodir',
                     '--training_data', 'footrain',
                     '--gene2id', 'foo', '--cell2id', 'foo',
                     '--mutations', 'foo', '--cn_deletions', 'foo',
@@ -57,8 +55,7 @@ class TestCellmaps_vnn(unittest.TestCase):
         try:
             outdir = os.path.join(temp_dir, 'out')
             res = cellmaps_vnncmd.main(['myprog.py', '--skip_logging', 'train', outdir,
-                                        '--hierarchy', 'foohier',
-                                        '--hierarchy_parent', 'fooparent',
+                                        '--inputdir', 'foodir',
                                         '--training_data', 'footrain',
                                         '--gene2id', 'foo', '--cell2id', 'foo',
                                         '--mutations', 'foo', '--cn_deletions', 'foo',

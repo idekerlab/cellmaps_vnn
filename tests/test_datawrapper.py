@@ -31,6 +31,7 @@ class MockArgs:
         self.delta = 0.1
         self.min_dropout_layer = 1
         self.dropout_fraction = 0.3
+        self.inputdir = examples_dir
         self.hierarchy = os.path.join(examples_dir, 'hierarchy.cx2')
         self.hierarchy_parent = os.path.join(examples_dir, 'hierarchy_parent.cx2')
         self.training_data = os.path.join(examples_dir, 'training_data.txt')
