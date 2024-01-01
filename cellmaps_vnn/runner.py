@@ -150,11 +150,11 @@ class CellmapsvnnRunner(object):
                                            start_time=self._start_time,
                                            data={'commandlineargs': self._input_data_dict},
                                            version=cellmaps_vnn.__version__)
-            # self._update_provenance_fields()
-            #
-            # self._create_rocrate()
-            #
-            # self._register_software()
+            self._update_provenance_fields()
+
+            self._create_rocrate()
+
+            self._register_software()
 
             generated_dataset_ids = []
 
