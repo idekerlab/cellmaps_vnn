@@ -16,6 +16,11 @@ from cellmaps_vnn.exceptions import CellmapsvnnError
 class TrainingDataWrapper:
 
     def __init__(self, theargs):
+        """
+        Initializes the TrainingDataWrapper object with configuration and training data parameters.
+
+        :param theargs: Arguments containing configuration and training parameters.
+        """
 
         self.root = None
         self.digraph = None
@@ -46,11 +51,23 @@ class TrainingDataWrapper:
         self._load_graph(self._hierarchy)
 
     def _prepare_train_data(self):
+        """
+        Prepares the training data for model training.
+
+        :return: Tensors for train features, train labels, validation features, and validation labels.
+        :rtype: Tuple(Tensor, FloatTensor, Tensor, FloatTensor)
+        """
         train_features, train_labels, val_features, val_labels = self._load_train_data()
         return (torch.Tensor(train_features), torch.FloatTensor(train_labels), torch.Tensor(val_features),
                 torch.FloatTensor(val_labels))
 
     def _load_train_data(self):
+        """
+        Loads and processes the training data from a file.
+
+        :return: Features and labels for both training and validation data.
+        :rtype: Tuple(List, List, List, List)
+        """
         all_df = pd.read_csv(self._training_data, sep='\t', header=None,
                              names=['cell_line', 'smiles', 'auc', 'dataset'])
         train_df, val_df = self._split_train_val_data(all_df)
@@ -63,6 +80,15 @@ class TrainingDataWrapper:
         return train_features, train_labels, val_features, val_labels
 
     def _split_train_val_data(self, all_df):
+        """
+        Splits the data into training and validation datasets.
+
+        :param all_df: DataFrame containing the entire dataset.
+        :type all_df: pandas.DataFrame
+
+        :return: DataFrames for training and validation datasets.
+        :rtype: Tuple(pandas.DataFrame, pandas.DataFrame)
+        """
         train_cell_lines = list(set(all_df['cell_line']))
         val_cell_lines = self._select_validation_cell_lines(train_cell_lines)
         val_df = all_df.query('cell_line in @val_cell_lines').reset_index(drop=True)
@@ -71,6 +97,15 @@ class TrainingDataWrapper:
 
     @staticmethod
     def _select_validation_cell_lines(train_cell_lines):
+        """
+        Selects cell lines for validation from the training cell lines.
+
+        :param train_cell_lines: List of cell lines to choose from for validation.
+        :type train_cell_lines: List
+
+        :return: Selected cell lines for validation.
+        :rtype: List
+        """
         val_size = int(len(train_cell_lines) / 5)
         val_cell_lines = []
         for _ in range(val_size):
@@ -79,6 +114,15 @@ class TrainingDataWrapper:
         return val_cell_lines
 
     def _extract_features_labels(self, df):
+        """
+        Extracts features and labels from a data frame.
+
+        :param df: DataFrame containing the data.
+        :type df: pandas.DataFrame
+
+        :return: Extracted features and labels.
+        :rtype: Tuple(List, List)
+        """
         features = []
         labels = []
         for row in df.values:
@@ -87,6 +131,14 @@ class TrainingDataWrapper:
         return features, labels
 
     def _load_graph(self, file_name):
+        """
+        Loads a graph from a file and performs initial processing.
+
+        :param file_name: Name of the file containing the graph data.
+        :type file_name: str
+
+        :raises CellmapsvnnError: If the graph does not meet specified criteria.
+        """
 
         try:
             digraph, cx2network = self._create_digraph(file_name)
@@ -106,6 +158,15 @@ class TrainingDataWrapper:
 
     @staticmethod
     def _create_digraph(file_name):
+        """
+        Creates a directed graph from a given file.
+
+        :param file_name: Name of the file containing the graph data.
+        :type file_name: str
+
+        :return: A directed graph and its CX2 network representation.
+        :rtype: Tuple(nx.DiGraph, CX2Network)
+        """
         cx2factory = RawCX2NetworkFactory()
         nxfactory = CX2NetworkXFactory()
         cx2network = cx2factory.get_cx2network(file_name)
@@ -113,6 +174,12 @@ class TrainingDataWrapper:
         return digraph, cx2network
 
     def _generate_term_maps(self, cx2_network):
+        """
+        Generates term maps from a CX2 network.
+
+        :param cx2_network: CX2 network representation of the graph.
+        :type cx2_network: CX2Network
+        """
         term_direct_gene_map = self._get_direct_genes(cx2_network)
         term_size_map = {}
 
@@ -132,6 +199,15 @@ class TrainingDataWrapper:
         self.term_direct_gene_map = term_direct_gene_map
 
     def _get_direct_genes(self, cx2_network):
+        """
+        Extracts direct gene associations from a CX2 network.
+
+        :param cx2_network: CX2 network representation of the graph.
+        :type cx2_network: CX2Network
+
+        :return: A map of terms to their directly associated genes.
+        :rtype: Dict
+        """
         term_direct_gene_map = {}
         child_genes_map = {}
 
@@ -156,7 +232,15 @@ class TrainingDataWrapper:
 
     def _get_genes_of_node(self, cx2_network, node_id):
         """
-        Retrieves genes associated with a specific node.
+        Retrieves genes associated with a specific node in the CX2 network.
+
+        :param cx2_network: CX2 network representation of the graph.
+        :type cx2_network: CX2Network
+        :param node_id: The ID of the node.
+        :type node_id: int
+
+        :return: A set of genes associated with the node.
+        :rtype: Set
         """
         genes = set()
         node_data = cx2_network.get_node(node_id)
@@ -173,11 +257,11 @@ class TrainingDataWrapper:
         """
         Converts a graph with integer nodes to a graph with string nodes.
 
-        Parameters:
-        original_graph (nx.Graph): The original graph with integer nodes.
+        :param original_graph: The original graph with integer nodes.
+        :type original_graph: nx.Graph
 
-        Returns:
-        nx.Graph: A new graph with the same structure but with string nodes.
+        :return new_graph: A new graph with the same structure but with string nodes.
+        :rtype new_graph: nx.Graph
         """
         new_graph = type(original_graph)()
 

@@ -67,8 +67,9 @@ class CellmapsvnnRunner(object):
 
     def _update_provenance_fields(self):
         """
-
-        :return:
+        Updates the provenance attributes by merging the ROCrate provenance attributes
+        from the input directory with optional overrides for the name, project name, and organization name
+        and additional keywords.
         """
         prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(self._inputdir,
                                                                                 override_name=self._name,

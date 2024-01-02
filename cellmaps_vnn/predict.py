@@ -56,7 +56,10 @@ class VNNPredict:
 
     def run(self):
         """
-        The logic for running predictions with the model.
+        The logic for running predictions with the model. It executes the prediction process
+        using the trained model and input data.
+
+        :raises CellmapsvnnError: If an error occurs during the prediction process.
         """
         try:
             model = os.path.join(self._theargs.inputdir, 'model_final.pt')
@@ -85,13 +88,42 @@ class VNNPredict:
             raise CellmapsvnnError(f"Encountered problem in prediction flow: {e}")
 
     def _prepare_predict_data(self, test_file, cell2id_mapping_file, zscore_method, std_file):
+        """
+        Prepares the prediction data for the model.
+
+        :param test_file: Path to the file containing the test dataset.
+        :type test_file: str
+        :param cell2id_mapping_file: Path to the file containing the cell to ID mapping.
+        :type cell2id_mapping_file: str
+        :param zscore_method: Method used for z-score standardization.
+        :type zscore_method: str
+        :param std_file: Path to the standardization file.
+        :type std_file: str
+
+        :return: A tuple containing test features and labels as tensors, and the cell2id mapping.
+        :rtype: Tuple(Tensor, Tensor), dict
+        """
         cell2id_mapping = util.load_mapping(cell2id_mapping_file, 'cell lines')
         test_features, test_labels = self._load_pred_data(test_file, cell2id_mapping, zscore_method, std_file)
         return (torch.Tensor(test_features), torch.Tensor(test_labels)), cell2id_mapping
 
     @staticmethod
     def _load_pred_data(test_file, cell2id, zscore_method, train_std_file):
+        """
+        Loads and processes prediction data from a file.
 
+        :param test_file: Path to the file containing the test dataset.
+        :type test_file: str
+        :param cell2id: Dictionary mapping cell lines to their respective IDs.
+        :type cell2id: dict
+        :param zscore_method: Method used for z-score standardization.
+        :type zscore_method: str
+        :param train_std_file: Path to the training standardization file.
+        :type train_std_file: str
+
+        :return: Features and labels for the prediction data.
+        :rtype: List, List
+        """
         train_std_df = pd.read_csv(train_std_file, sep='\t', header=None, names=['dataset', 'center', 'scale'])
         test_df = pd.read_csv(test_file, sep='\t', header=None, names=['cell_line', 'smiles', 'auc', 'dataset'])
         test_std_df = util.calc_std_vals(test_df, zscore_method)
