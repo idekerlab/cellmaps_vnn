@@ -1,7 +1,2 @@
 cellmaps_utils
-numpy
-networkx
 ndex2>=3.6.0
-torch
-torchvision
-torchaudio
