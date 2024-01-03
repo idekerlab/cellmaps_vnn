@@ -39,7 +39,7 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--traindir', required=True, help='Path to RO-Crate with the trained model', type=str)
+        parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
         parser.add_argument('--predict_data', required=True, help='Path to the dataset to be predicted', type=str)
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
@@ -62,8 +62,8 @@ class VNNPredict:
         :raises CellmapsvnnError: If an error occurs during the prediction process.
         """
         try:
-            model = os.path.join(self._theargs.traindir, 'model_final.pt')
-            std = os.path.join(self._theargs.traindir, 'std.txt') if self._theargs.std is None else self._theargs.std
+            model = os.path.join(self._theargs.inputdir, 'model_final.pt')
+            std = os.path.join(self._theargs.inputdir, 'std.txt') if self._theargs.std is None else self._theargs.std
             torch.set_printoptions(precision=5)
 
             # Load data and model for prediction
