@@ -1,0 +1,16 @@
+name: cellmaps_cuda11_env
+channels:
+  - pytorch
+  - r
+  - defaults
+  - conda-forge
+dependencies:
+  - cudatoolkit=11.1
+  - torchaudio
+  - torchvision
+  - optuna
+  - python=3.8
+  - pytorch
+  - scikit-learn
+  - networkx
+  - pandas
