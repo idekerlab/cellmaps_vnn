@@ -2,7 +2,8 @@
 Usage
 =====
 
-This page should provide information on how to use cellmaps_vnn
+The tool cellmaps_vnn allows to build Visible Neural Network (VNN) using hierarchy in CX2 format. It takes as an input
+a directory containing hierarchy and parent network (the output of cellmaps_generate_hierarchy tool).
 
 In a project
 --------------
