@@ -366,7 +366,7 @@ class VNNPredict:
 
         hidden_dir = self._get_hidden_dir_path()
         for entry in tqdm(os.listdir(hidden_dir), desc='FAIRSCAPE hidden files registration'):
-            data_dict['data_format'] = entry.split('.')[-1]
+            data_dict['data-format'] = entry.split('.')[-1]
             dest_path = os.path.join(hidden_dir, entry)
             data_dict['name'] = os.path.basename(dest_path) + f' hidden file'
             data_dict['keywords'] = ['hidden', 'file']
