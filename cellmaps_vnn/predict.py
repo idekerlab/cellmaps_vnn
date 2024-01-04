@@ -1,5 +1,7 @@
 import os
 import logging
+from datetime import date
+
 import numpy as np
 import pandas as pd
 import torch
@@ -7,6 +9,7 @@ import torch.utils.data as du
 from torch.autograd import Variable
 from cellmaps_utils import constants
 
+import cellmaps_vnn
 from cellmaps_vnn import util
 from cellmaps_vnn.exceptions import CellmapsvnnError
 
@@ -21,6 +24,7 @@ class VNNPredict:
         Constructor for predicting with a trained model.
         """
         self._theargs = theargs
+        self._number_feature_grads = 0
 
     @staticmethod
     def add_subparser(subparsers):
@@ -74,14 +78,13 @@ class VNNPredict:
             cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
                                                     self._theargs.cn_amplifications)
 
-            result_file_prefix = os.path.join(self._theargs.outdir, 'predict')
             hidden_dir = os.path.join(self._theargs.outdir, 'hidden/')
             if not os.path.exists(hidden_dir):
                 os.mkdir(hidden_dir)
 
             # Perform prediction
             self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
-                         result_file_prefix, cell_features)
+                         cell_features)
 
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
@@ -142,7 +145,13 @@ class VNNPredict:
             label.append([float(row[2])])
         return feature, label
 
-    def predict(self, predict_data, model_file, hidden_folder, batch_size, result_file='predict', cell_features=None):
+    def _get_predict_dest_file(self):
+        return os.path.join(self._theargs.outdir, 'predict.txt')
+
+    def _get_feature_grad_dest_file(self, grad):
+        return os.path.join(self._theargs.outdir, f'predict_feature_grad_{grad}.txt')
+
+    def predict(self, predict_data, model_file, hidden_folder, batch_size, cell_features=None):
         """
         Perform prediction using the trained model.
 
@@ -150,19 +159,18 @@ class VNNPredict:
         :param model_file: Path to the trained model file.
         :param hidden_folder: Directory to store hidden layer outputs.
         :param batch_size: Size of each batch for prediction.
-        :param result_file: File path prefix for storing prediction results.
         :param cell_features: Additional cell features for prediction.
         """
         try:
             model = self._load_model(model_file)
             test_loader = self._create_data_loader(predict_data, batch_size)
-            test_predict, saved_grads = self._predict(model, test_loader, cell_features, hidden_folder, result_file)
+            test_predict, saved_grads = self._predict(model, test_loader, cell_features, hidden_folder)
 
             predict_label_gpu = predict_data[1].cuda(self._theargs.cuda)
             test_corr = util.pearson_corr(test_predict, predict_label_gpu)
             logger.info(f"Test correlation {model.root}: {test_corr:.4f}")
 
-            np.savetxt(f'{result_file}.txt', test_predict.cpu().numpy(), '%.4e')
+            np.savetxt(self._get_predict_dest_file(), test_predict.cpu().numpy(), '%.4e')
 
         except Exception as e:
             logger.error(f"Prediction error: {e}")
@@ -191,7 +199,7 @@ class VNNPredict:
         predict_feature, predict_label = predict_data
         return du.DataLoader(du.TensorDataset(predict_feature, predict_label), batch_size=batch_size, shuffle=False)
 
-    def _predict(self, model, data_loader, cell_features, hidden_folder, result_file):
+    def _predict(self, model, data_loader, cell_features, hidden_folder):
         """
         Run the prediction process and save outputs.
 
@@ -199,7 +207,6 @@ class VNNPredict:
         :param data_loader: DataLoader containing the prediction data.
         :param cell_features: Additional cell features for prediction.
         :param hidden_folder: Directory to store hidden layer outputs.
-        :param result_file: File path prefix for storing prediction results.
         :return: Tuple of prediction results and saved gradients.
         """
         test_predict = torch.zeros(0, 0).cuda(self._theargs.cuda)
@@ -215,7 +222,7 @@ class VNNPredict:
             self._register_gradient_hooks(hidden_embeddings_map, saved_grads)
             self._backpropagate(aux_out_map)
 
-            self._save_gradients(cuda_features, result_file)
+            self._save_gradients(cuda_features)
             self._save_hidden_gradients(saved_grads, hidden_folder)
 
         return test_predict, saved_grads
@@ -268,16 +275,16 @@ class VNNPredict:
         """
         aux_out_map['final'].backward(torch.ones_like(aux_out_map['final']))
 
-    def _save_gradients(self, cuda_features, result_file):
+    def _save_gradients(self, cuda_features):
         """
         Save gradients for each feature.
 
         :param cuda_features: CUDA features variable.
-        :param result_file: File path prefix for storing gradients.
         """
-        for i in range(len(cuda_features[0, 0, :])):
+        self._number_feature_grads = len(cuda_features[0, 0, :])
+        for i in range(self._number_feature_grads):
             feature_grad = cuda_features.grad.data[:, :, i]
-            grad_file = f'{result_file}_feature_grad_{i}.txt'
+            grad_file = self._get_feature_grad_dest_file(i)
             with open(grad_file, 'ab') as f:
                 np.savetxt(f, feature_grad.cpu().numpy(), '%.4e', delimiter='\t')
 
@@ -294,4 +301,52 @@ class VNNPredict:
                 np.savetxt(f, hidden_grad.data.cpu().numpy(), '%.4e', delimiter='\t')
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
-        return []
+        output_ids = list()
+        output_ids.append(self._register_predict_file(outdir, description, keywords, provenance_utils))
+        for i in range(self._number_feature_grads):
+            output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
+        return output_ids
+
+    def _register_predict_file(self, outdir, description, keywords, provenance_utils):
+        """
+        TODO
+
+        """
+        dest_path = self._get_predict_dest_file()
+        description = description
+        description += ' prediction result file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + ' prediction result file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_feature_grad_file(self, outdir, description, keywords, provenance_utils, grad):
+        """
+        TODO
+
+        """
+        dest_path = self._get_feature_grad_dest_file(grad)
+        description = description
+        description += f' prediction feature grad {grad} file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + f' prediction feature grad {grad} file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
