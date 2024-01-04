@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import date
-
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import torch
@@ -78,7 +78,7 @@ class VNNPredict:
             cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
                                                     self._theargs.cn_amplifications)
 
-            hidden_dir = os.path.join(self._theargs.outdir, 'hidden/')
+            hidden_dir = self._get_hidden_dir_path()
             if not os.path.exists(hidden_dir):
                 os.mkdir(hidden_dir)
 
@@ -150,6 +150,9 @@ class VNNPredict:
 
     def _get_feature_grad_dest_file(self, grad):
         return os.path.join(self._theargs.outdir, f'predict_feature_grad_{grad}.txt')
+
+    def _get_hidden_dir_path(self):
+        return os.path.join(self._theargs.outdir, 'hidden/')
 
     def predict(self, predict_data, model_file, hidden_folder, batch_size, cell_features=None):
         """
@@ -305,6 +308,7 @@ class VNNPredict:
         output_ids.append(self._register_predict_file(outdir, description, keywords, provenance_utils))
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
+        output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))
         return output_ids
 
     def _register_predict_file(self, outdir, description, keywords, provenance_utils):
@@ -350,3 +354,24 @@ class VNNPredict:
                                                        source_file=dest_path,
                                                        data_dict=data_dict)
         return dataset_id
+
+    def _register_hidden_files(self, outdir, description, keywords, provenance_utils):
+        data_dict = {'name': cellmaps_vnn.__name__ + ' hidden file',
+                     'description': description + ' hidden file',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+
+        hidden_files_ids = list()
+
+        hidden_dir = self._get_hidden_dir_path()
+        for entry in tqdm(os.listdir(hidden_dir), desc='FAIRSCAPE hidden files registration'):
+            data_dict['data_format'] = entry.split('.')[-1]
+            dest_path = os.path.join(hidden_dir, entry)
+            data_dict['name'] = os.path.basename(dest_path) + f' hidden file'
+            data_dict['keywords'] = ['hidden', 'file']
+            dataset_id = provenance_utils.register_dataset(outdir,
+                                                           source_file=dest_path,
+                                                           data_dict=data_dict)
+            hidden_files_ids.append(dataset_id)
+        return hidden_files_ids
