@@ -21,6 +21,8 @@ class VNNTrain:
         Constructor for training Visual Neural Network.
         """
         self._theargs = theargs
+        self._theargs.modelfile = self._get_model_dest_file()
+        self._theargs.stdfile = self._get_std_dest_file()
 
     @staticmethod
     def add_subparser(subparsers):
@@ -82,26 +84,58 @@ class VNNTrain:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
 
-    # def register_outputs(self):
-    #     self._register_model_file()
+    def _get_model_dest_file(self):
+        return os.path.join(self._theargs.outdir, 'model_final.pt')
 
-    # def _register_model_file(self):
-    #     """
-    #     TODO
-    #
-    #     """
-    #     description = self._description
-    #     description += ' Co-Embedding file'
-    #     keywords = self._keywords
-    #     keywords.extend(['file'])
-    #     data_dict = {'name': os.path.basename() + ' coembedding output file',
-    #                  'description': description,
-    #                  'keywords': keywords,
-    #                  'data-format': 'tsv',
-    #                  'author': cellmaps_vnn.__name__,
-    #                  'version': cellmaps_vnn.__version__,
-    #                  'date-published': date.today().strftime(self._provenance_utils.get_default_date_format_str())}
-    #     self._coembedding_id = self._provenance_utils.register_dataset(self._outdir,
-    #                                                                    source_file=self.get_coembedding_file(),
-    #                                                                    data_dict=data_dict,
-    #                                                                    skip_copy=True)
+    def _get_std_dest_file(self):
+        return os.path.join(self._theargs.outdir, self._theargs.std)
+
+    def register_outputs(self, outdir, description, keywords, provenance_utils):
+        id_model = self._register_model_file(outdir, description, keywords, provenance_utils)
+        id_std = self._register_std_file(outdir, description, keywords, provenance_utils)
+        return [id_model,  id_std]
+
+    def _register_model_file(self, outdir, description, keywords, provenance_utils):
+        """
+        TODO
+
+        """
+        dest_path = self._get_model_dest_file()
+        description = description
+        description += ' Model file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + ' trained model file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'pt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_std_file(self, outdir, description, keywords, provenance_utils):
+        """
+        TODO
+
+        """
+        dest_path = self._get_std_dest_file()
+        description = description
+        description += ' standard deviation file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + ' standard deviation file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
+

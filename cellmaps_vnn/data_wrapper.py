@@ -31,10 +31,10 @@ class TrainingDataWrapper:
         self.epochs = theargs.epoch
         self.batchsize = theargs.batchsize
         self.outdir = theargs.outdir
-        self.modelfile = os.path.join(self.outdir, 'model_final.pt')
+        self.modelfile = theargs.modelfile
         self.cuda = theargs.cuda
         self.zscore_method = theargs.zscore_method
-        self.std = os.path.join(theargs.outdir, theargs.std)
+        self.std = theargs.stdfile
         self.patience = theargs.patience
         self.delta = theargs.delta
         self.min_dropout_layer = theargs.min_dropout_layer

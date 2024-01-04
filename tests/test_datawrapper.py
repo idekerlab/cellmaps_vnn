@@ -26,7 +26,8 @@ class MockArgs:
         self.outdir = temp_dir
         self.cuda = False
         self.zscore_method = 'standard'
-        self.std = os.path.join(temp_dir, 'std.txt')
+        self.stdfile = os.path.join(temp_dir, 'std.txt')
+        self.modelfile = os.path.join(temp_dir, 'model_final.pt')
         self.patience = 5
         self.delta = 0.1
         self.min_dropout_layer = 1

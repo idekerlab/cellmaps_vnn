@@ -292,3 +292,6 @@ class VNNPredict:
             hidden_grad_file = os.path.join(hidden_folder, f'{element}.hidden_grad')
             with open(hidden_grad_file, 'ab') as f:
                 np.savetxt(f, hidden_grad.data.cpu().numpy(), '%.4e', delimiter='\t')
+
+    def register_outputs(self, outdir, description, keywords, provenance_utils):
+        return []

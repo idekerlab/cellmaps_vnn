@@ -131,6 +131,26 @@ class CellmapsvnnRunner(object):
                                                                     keywords=software_keywords,
                                                                     url=cellmaps_vnn.__repo_url__)
 
+    def _register_computation(self, generated_dataset_ids=[]):
+        """
+        Registers the computation run details with the FAIRSCAPE platform.
+
+        :param generated_dataset_ids: List of IDs for the datasets generated during the computation.
+        :type generated_dataset_ids: list
+        # Todo: added in used dataset, software and what is being generated
+        :return:
+        """
+        logger.debug('Getting id of input rocrate')
+        input_dataset_id = self._provenance_utils.get_id_of_rocrate(self._inputdir)
+        self._provenance_utils.register_computation(self._outdir,
+                                                    name=cellmaps_vnn.__name__ + ' computation',
+                                                    run_by=str(self._provenance_utils.get_login()),
+                                                    command=str(self._input_data_dict),
+                                                    description='run of ' + cellmaps_vnn.__name__,
+                                                    used_software=[self._softwareid],
+                                                    used_dataset=[input_dataset_id],
+                                                    generated=generated_dataset_ids)
+
     def run(self):
         """
         Runs cellmaps_vnn
@@ -161,10 +181,13 @@ class CellmapsvnnRunner(object):
 
             if self._command:
                 self._command.run()
-                # TODO: generated_dataset_ids.extend(self._command.register_outputs())
+                generated_dataset_ids.extend(self._command.register_outputs(
+                    self._outdir, self._description, self._keywords, self._provenance_utils))
             else:
                 raise CellmapsvnnError("No command provided to CellmapsvnnRunner")
 
+            # register generated datasets
+            self._register_computation(generated_dataset_ids=generated_dataset_ids)
             # set exit code to value passed in via constructor
             exitcode = self._exitcode if self._exitcode is not None else 0
         finally:
