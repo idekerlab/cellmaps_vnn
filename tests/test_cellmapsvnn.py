@@ -41,6 +41,7 @@ class TestCellmapsvnnrunner(unittest.TestCase):
                                   organization_name='hierarchy org',
                                   project_name='hierarchy project')
             cmd = MagicMock()
+            cmd.COMMAND = 'train'
             myobj = CellmapsvnnRunner(outdir=os.path.join(temp_dir, 'foo'),
                                       inputdir=hier_dir,
                                       command=cmd,
