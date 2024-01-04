@@ -80,7 +80,7 @@ class CellmapsvnnRunner(object):
                                                                                 extra_keywords=[
                                                                                     'VNN',
                                                                                     'Visible Neural Network',
-                                                                                    str(self._command)
+                                                                                    self._command.COMMAND
                                                                                 ])
         if self._name is None:
             self._name = prov_attrs.get_name()
