@@ -85,20 +85,47 @@ class VNNTrain:
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
 
     def _get_model_dest_file(self):
+        """
+        Returns the file path for saving the trained model file.
+
+        :return: The file path for the model file.
+        """
         return os.path.join(self._theargs.outdir, 'model_final.pt')
 
     def _get_std_dest_file(self):
+        """
+        Returns the file path for saving the standard deviation file.
+
+        :return: The file path for the standard deviation file.
+        """
         return os.path.join(self._theargs.outdir, self._theargs.std)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the model and standard deviation files with the FAIRSCAPE service for data provenance.
+        It generates dataset IDs for each registered file.
+
+        :param outdir: The directory where the output files are stored.
+        :param description: Description for the output files.
+        :param keywords: List of keywords associated with the files.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: A list of dataset IDs for the registered model and standard deviation files.
+        """
         id_model = self._register_model_file(outdir, description, keywords, provenance_utils)
         id_std = self._register_std_file(outdir, description, keywords, provenance_utils)
         return [id_model,  id_std]
 
     def _register_model_file(self, outdir, description, keywords, provenance_utils):
         """
-        TODO
+        Registers the trained model file with the FAIRSCAPE service for data provenance.
 
+        :param outdir: The output directory where the model file is stored.
+        :param description: Description of the model file for provenance registration.
+        :param keywords: List of keywords associated with the model file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered model file.
         """
         dest_path = self._get_model_dest_file()
         description = description
@@ -119,8 +146,14 @@ class VNNTrain:
 
     def _register_std_file(self, outdir, description, keywords, provenance_utils):
         """
-        TODO
+        Registers the standard deviation file with the FAIRSCAPE service for data provenance.
 
+        :param outdir: The output directory where the standard deviation file is stored.
+        :param description: Description of the standard deviation file for provenance registration.
+        :param keywords: List of keywords associated with the standard deviation file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered standard deviation file.
         """
         dest_path = self._get_std_dest_file()
         description = description
