@@ -146,12 +146,27 @@ class VNNPredict:
         return feature, label
 
     def _get_predict_dest_file(self):
+        """
+        Returns the file path for saving the prediction results.
+
+        :return: The file path to the prediction results file.
+        """
         return os.path.join(self._theargs.outdir, 'predict.txt')
 
     def _get_feature_grad_dest_file(self, grad):
+        """
+        Returns the file path for saving the gradient of a specific feature.
+
+        :return: The file path to the prediction feature grad file.
+        """
         return os.path.join(self._theargs.outdir, f'predict_feature_grad_{grad}.txt')
 
     def _get_hidden_dir_path(self):
+        """
+        Returns the path to the directory where hidden layer outputs will be stored.
+
+        :return: The file path to the hidden directory.
+        """
         return os.path.join(self._theargs.outdir, 'hidden/')
 
     def predict(self, predict_data, model_file, hidden_folder, batch_size, cell_features=None):
@@ -304,6 +319,17 @@ class VNNPredict:
                 np.savetxt(f, hidden_grad.data.cpu().numpy(), '%.4e', delimiter='\t')
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers all output files (predictions, feature gradients, and hidden files)
+        with the FAIRSCAPE service for data provenance.
+
+        :param outdir: The directory where the output files are stored.
+        :param description: Description for the output files.
+        :param keywords: List of keywords associated with the files.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: A list of dataset IDs for the registered files.
+        """
         output_ids = list()
         output_ids.append(self._register_predict_file(outdir, description, keywords, provenance_utils))
         for i in range(self._number_feature_grads):
@@ -313,8 +339,14 @@ class VNNPredict:
 
     def _register_predict_file(self, outdir, description, keywords, provenance_utils):
         """
-        TODO
+        Registers the prediction result file with the FAIRSCAPE service for data provenance.
 
+        :param outdir: The output directory where the outputs are stored.
+        :param description: Description of the file for provenance registration.
+        :param keywords: List of keywords associated with the file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered file.
         """
         dest_path = self._get_predict_dest_file()
         description = description
@@ -335,8 +367,15 @@ class VNNPredict:
 
     def _register_feature_grad_file(self, outdir, description, keywords, provenance_utils, grad):
         """
-        TODO
+        Registers the feature gradient file with the FAIRSCAPE service for data provenance.
 
+        :param outdir: The output directory where the file is stored.
+        :param description: Description of the file for provenance registration.
+        :param keywords: List of keywords associated with the file.
+        :param provenance_utils: The utility class for provenance registration.
+        :param grad: The specific gradient index for the feature.
+
+        :return: The dataset ID assigned to the registered file.
         """
         dest_path = self._get_feature_grad_dest_file(grad)
         description = description
@@ -356,8 +395,18 @@ class VNNPredict:
         return dataset_id
 
     def _register_hidden_files(self, outdir, description, keywords, provenance_utils):
-        data_dict = {'name': cellmaps_vnn.__name__ + ' hidden file',
-                     'description': description + ' hidden file',
+        """
+        Registers the output files from the hidden layers with the FAIRSCAPE service for data provenance.
+
+        :param outdir: The directory where the hidden layer output files are stored.
+        :param description: A general description for the hidden files.
+        :param keywords: A list of keywords associated with the hidden files.
+        :param provenance_utils: An instance of the utility class used for handling the provenance registration.
+
+        :return: A list of dataset IDs, each corresponding to a registered hidden file.
+        """
+        data_dict = {'name': cellmaps_vnn.__name__ + ' hidden layer output file',
+                     'description': description + ' hidden layer output file',
                      'author': cellmaps_vnn.__name__,
                      'version': cellmaps_vnn.__version__,
                      'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
@@ -365,6 +414,7 @@ class VNNPredict:
         hidden_files_ids = list()
 
         hidden_dir = self._get_hidden_dir_path()
+        cntr = 0
         for entry in tqdm(os.listdir(hidden_dir), desc='FAIRSCAPE hidden files registration'):
             data_dict['data-format'] = entry.split('.')[-1]
             dest_path = os.path.join(hidden_dir, entry)
@@ -374,4 +424,9 @@ class VNNPredict:
                                                            source_file=dest_path,
                                                            data_dict=data_dict)
             hidden_files_ids.append(dataset_id)
+            cntr += 1
+            if cntr > 5:
+                # Todo: https://github.com/fairscape/fairscape-cli/issues/9
+                logger.error('FAIRSCAPE cannot handle too many files, skipping rest')
+                break
         return hidden_files_ids
