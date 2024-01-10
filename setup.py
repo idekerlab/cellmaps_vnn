@@ -20,7 +20,8 @@ with open('HISTORY.rst') as history_file:
 
 requirements = ['cellmaps_utils']
 
-setup_requirements = [ ]
+setup_requirements = ['cellmaps_utils==0.1.0a22',
+                      'ndex2>=3.7.0,<4.0.0']
 
 test_requirements = [ ]
 

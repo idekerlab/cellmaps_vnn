@@ -1,2 +1,2 @@
-cellmaps_utils
-ndex2>=3.6.0
+cellmaps_utils==0.1.0a22
+ndex2>=3.7.0
