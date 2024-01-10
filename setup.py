@@ -18,12 +18,20 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['cellmaps_utils']
+requirements = ['cellmaps_utils==0.1.0a22',
+                'ndex2>=3.7.0,<4.0.0',
+                'optuna',
+                'scikit-learn',
+                'networkx',
+                'pandas',
+                'torch',
+                'torchvision',
+                'torchaudio'
+                ]
 
-setup_requirements = ['cellmaps_utils==0.1.0a22',
-                      'ndex2>=3.7.0,<4.0.0']
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="Christopher Churas",
@@ -33,10 +41,10 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     description="Python Boilerplate contains all the boilerplate you need to create a Python package with command line",
     install_requires=requirements,
