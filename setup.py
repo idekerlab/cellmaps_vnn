@@ -18,7 +18,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['cellmaps_utils==0.1.0a22',
+requirements = ['cellmaps_utils==0.1.0a23',
                 'ndex2>=3.7.0,<4.0.0',
                 'optuna',
                 'scikit-learn',

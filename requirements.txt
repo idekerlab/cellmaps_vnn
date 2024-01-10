@@ -1,4 +1,4 @@
-cellmaps_utils==0.1.0a22
+cellmaps_utils==0.1.0a23
 ndex2>=3.7.0
 optuna
 scikit-learn
