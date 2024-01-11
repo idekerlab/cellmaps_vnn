@@ -150,7 +150,7 @@ def load_mapping(mapping_file, mapping_type):
     return mapping
 
 
-def create_term_mask(term_direct_gene_map, gene_dim, cuda_id):
+def create_term_mask(term_direct_gene_map, gene_dim, cuda_id=None):
     """
     Creates a term mask map for gene sets. This function generates a mask for each term where the mask is
     a matrix with rows equal to the number of relevant gene set and columns equal to the total number of genes.
@@ -168,7 +168,9 @@ def create_term_mask(term_direct_gene_map, gene_dim, cuda_id):
     """
     term_mask_map = {}
     for term, gene_set in term_direct_gene_map.items():
-        mask = torch.zeros(len(gene_set), gene_dim).cuda(cuda_id)
+        mask = torch.zeros(len(gene_set), gene_dim)
+        if cuda_id is not None and torch.cuda.is_available():
+            mask = mask.cuda(cuda_id)
         for i, gene_id in enumerate(gene_set):
             mask[i, gene_id] = 1
         term_mask_map[term] = mask
