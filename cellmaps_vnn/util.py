@@ -29,6 +29,8 @@ def calc_std_vals(df, zscore_method):
 
     if zscore_method == 'zscore':
         for name, group in df.groupby(['dataset'])['auc']:
+            if isinstance(name, tuple) and len(name) == 1:
+                name = name[0]
             center = group.mean()
             scale = group.std()
             if math.isnan(scale) or scale == 0.0:
@@ -38,6 +40,8 @@ def calc_std_vals(df, zscore_method):
 
     elif zscore_method == 'robustz':
         for name, group in df.groupby(['dataset'])['auc']:
+            if isinstance(name, tuple) and len(name) == 1:
+                name = name[0]
             center = group.median()
             scale = group.quantile(0.75) - group.quantile(0.25)
             if math.isnan(scale) or scale == 0.0:
@@ -46,6 +50,8 @@ def calc_std_vals(df, zscore_method):
             std_list.append(temp)
     else:
         for name, group in df.groupby(['dataset'])['auc']:
+            if isinstance(name, tuple) and len(name) == 1:
+                name = name[0]
             temp = pd.DataFrame([[name, 0.0, 1.0]], columns=std_df.columns)
             std_list.append(temp)
 
