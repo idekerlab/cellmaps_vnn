@@ -25,6 +25,7 @@ class VNNPredict:
         """
         self._theargs = theargs
         self._number_feature_grads = 0
+        self.use_cuda = torch.cuda.is_available() and self._theargs.cuda is not None
 
     @staticmethod
     def add_subparser(subparsers):
@@ -169,6 +170,11 @@ class VNNPredict:
         """
         return os.path.join(self._theargs.outdir, 'hidden/')
 
+    def _to_device(self, tensor):
+        if self.use_cuda:
+            return tensor.cuda(self._theargs.cuda)
+        return tensor
+
     def predict(self, predict_data, model_file, hidden_folder, batch_size, cell_features=None):
         """
         Perform prediction using the trained model.
@@ -184,7 +190,7 @@ class VNNPredict:
             test_loader = self._create_data_loader(predict_data, batch_size)
             test_predict, saved_grads = self._predict(model, test_loader, cell_features, hidden_folder)
 
-            predict_label_gpu = predict_data[1].cuda(self._theargs.cuda)
+            predict_label_gpu = self._to_device(predict_data[1])
             test_corr = util.pearson_corr(test_predict, predict_label_gpu)
             logger.info(f"Test correlation {model.root}: {test_corr:.4f}")
 
@@ -201,8 +207,10 @@ class VNNPredict:
         :param model_file: Path to the trained model file.
         :return: Loaded model.
         """
-        model = torch.load(model_file, map_location=f'cuda:{self._theargs.cuda}')
-        model.cuda(self._theargs.cuda)
+        model = torch.load(model_file,
+                           map_location=f'cuda:{self._theargs.cuda}' if self.use_cuda else torch.device("cpu"))
+        if self.use_cuda:
+            model.cuda(self._theargs.cuda)
         model.eval()
         return model
 
@@ -227,7 +235,9 @@ class VNNPredict:
         :param hidden_folder: Directory to store hidden layer outputs.
         :return: Tuple of prediction results and saved gradients.
         """
-        test_predict = torch.zeros(0, 0).cuda(self._theargs.cuda)
+        test_predict = torch.zeros(0, 0)
+        if self.use_cuda:
+            test_predict = test_predict.cuda(self._theargs.cuda)
         saved_grads = {}
 
         for i, (inputdata, labels) in enumerate(data_loader):
@@ -254,7 +264,7 @@ class VNNPredict:
         :return: Processed features as CUDA variables.
         """
         features = util.build_input_vector(inputdata, cell_features)
-        return Variable(features.cuda(self._theargs.cuda), requires_grad=True)
+        return Variable(self._to_device(features), requires_grad=True)
 
     def _save_hidden_outputs(self, hidden_embeddings_map, hidden_folder):
         """
