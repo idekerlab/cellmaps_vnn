@@ -222,7 +222,7 @@ def get_grad_norm(model_params, norm_type):
     if len(model_params) == 0:  # if no params provided, return tensor of 0
         return torch.tensor(0.)
 
-    device = model_params[0].grad.device  # get device
+    device = model_params[0].grad.device if torch.cuda.is_available() else torch.device("cpu")  # get device
     if norm_type == inf:  # infinity norm
         total_norm = max(p.grad.detach().abs().max().to(device) for p in model_params)
     else:  # total norm
