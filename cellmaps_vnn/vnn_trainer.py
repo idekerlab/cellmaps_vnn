@@ -25,6 +25,20 @@ class VNNTrainer:
         self.train_label = self.data_wrapper.train_label
         self.val_feature = self.data_wrapper.val_feature
         self.val_label = self.data_wrapper.val_label
+        self.use_cuda = torch.cuda.is_available() and self.data_wrapper.cuda is not None
+
+    def _to_device(self, tensor):
+        """
+        Moves a tensor to the appropriate device (GPU or CPU).
+
+        :param tensor: a tensor to be moved.
+        :type tensor: torch.Tensor
+        :returns: a tensor on GPU or CPU.
+        :rtype: torch.Tensor
+        """
+        if self.use_cuda:
+            return tensor.cuda(self.data_wrapper.cuda)
+        return tensor
 
     def train_model(self):
         """
@@ -34,7 +48,8 @@ class VNNTrainer:
         :rtype min_loss: float
         """
         self.model = VNN(self.data_wrapper)
-        self.model.cuda(self.data_wrapper.cuda)
+        if self.use_cuda:
+            self.model.cuda(self.data_wrapper.cuda)
 
         term_mask_map = util.create_term_mask(
             self.model.term_direct_gene_map, self.model.gene_dim, self.data_wrapper.cuda
@@ -84,9 +99,14 @@ class VNNTrainer:
         :rtype : Tuple[Tensor, float, float]
         """
         self.model.train()
-        train_predict = torch.zeros(0, 0).cuda(self.data_wrapper.cuda)
+
+        train_predict = torch.zeros(0, 0)
+        if self.use_cuda:
+            train_predict = train_predict.cuda(self.data_wrapper.cuda)
         # tensor for accumulating grad norms from each batch in this epoch
-        _gradnorms = torch.empty(len(train_loader)).cuda(self.data_wrapper.cuda)
+        _gradnorms = torch.empty(len(train_loader))
+        if self.use_cuda:
+            _gradnorms = _gradnorms.cuda(self.data_wrapper.cuda)
         total_loss = 0
         train_label_gpu = None
 
@@ -137,7 +157,9 @@ class VNNTrainer:
         :rtype : Tuple[Tensor, float]
         """
         self.model.eval()
-        val_predict = torch.zeros(0, 0).cuda(self.data_wrapper.cuda)
+        val_predict = torch.zeros(0, 0)
+        if self.use_cuda:
+            val_predict = val_predict.cuda(self.data_wrapper.cuda)
         val_loss = 0
         val_label_gpu = None
 
@@ -172,8 +194,8 @@ class VNNTrainer:
         :rtype : Tuple[Variable, Variable]
         """
         features = util.build_input_vector(inputdata, self.data_wrapper.cell_features)
-        cuda_features = Variable(features.cuda(self.data_wrapper.cuda))
-        cuda_labels = Variable(labels.cuda(self.data_wrapper.cuda))
+        cuda_features = Variable(self._to_device(features))
+        cuda_labels = Variable(self._to_device(labels))
         return cuda_features, cuda_labels
 
     def _initialize_model_parameters(self, term_mask_map):
