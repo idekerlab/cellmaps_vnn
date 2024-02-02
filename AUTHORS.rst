@@ -5,9 +5,10 @@ Credits
 Development Lead
 ----------------
 
-* Christopher Churas <tools@cm4ai.org>
+Joanna Lenkiewicz <jlenkiewicz@health.ucsd.edu>
+
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+Akshat Singhal <a2singha@ucsd.edu>
