@@ -16,8 +16,7 @@ cellmaps_vnn
 
 
 
-Python Boilerplate contains all the boilerplate you need to create a Python package with command line
-
+Cell Maps Visual Neural Network Toolkit
 
 * Free software: MIT license
 * Documentation: https://cellmaps-vnn.readthedocs.io.
