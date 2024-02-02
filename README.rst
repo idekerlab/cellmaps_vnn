@@ -27,6 +27,14 @@ Dependencies
 ------------
 
 * `cellmaps_utils <https://pypi.org/project/cellmaps-utils>`__
+* `ndex2 <https://pypi.org/project/ndex2>`__
+* `optuna <https://pypi.org/project/optuna>`__
+* `scikit-learn <https://pypi.org/project/scikit-learn>`__
+* `networkx <https://pypi.org/project/networkx>`__
+* `pandas <https://pypi.org/project/pandas>`__
+* `torch <https://pypi.org/project/torch>`__
+* `torchvision <https://pypi.org/project/torchvision>`__
+* `torchaudio <https://pypi.org/project/torchaudio>`__
 
 Compatibility
 -------------
