@@ -1,4 +1,4 @@
-NEST VNN
+NeST VNN
 ---------
 
 Cell feature files
