@@ -19,12 +19,12 @@ class RLIPPCalculator:
         self.genes = pd.read_csv(gene2idfile, sep='\t', header=None, names=['I', 'G'])['G']
         self.cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
         self.hidden_dir = hidden_dir
-        self.rlipp_file = os.path.join(outdir, "predict.txt")
-        self.gene_rho_file = os.path.join(outdir, "rlipp.out")
-        self.cpu_count = 8  # TODO: user can set it?
-        self.num_hiddens_genotype = 4  # TODO: what is it
+        self.rlipp_file = os.path.join(outdir, "rlipp.out")
+        self.gene_rho_file = os.path.join(outdir, "gene_rho.out")
+        self.cpu_count = 2  # TODO: user can set it?
+        self.num_hiddens_genotype = 4  # TODO: what is it?
         self.drugs = list(set(self.test_df['D']))
-        self.drug_count = 0  # TODO: what is it
+        self.drug_count = 0  # TODO: what is it?
         if self.drug_count == 0:
             self.drug_count = len(self.drugs)
 
