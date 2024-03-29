@@ -10,6 +10,19 @@ from sklearn.linear_model import RidgeCV
 
 
 class RLIPPCalculator:
+    """
+    A calculator for Relative Importance of Predictor Performance (RLIPP) scores.
+
+    Parameters:
+    outdir (str): Output directory for the RLIPP scores and gene correlations.
+    hierarchy (CX2Network): A hierarchy in HCX format.
+    test_data (str): Path to the CSV file containing test data.
+    predicted_data (str): Path to the file containing predicted values.
+    gene2idfile (str): Path to the file mapping genes to IDs.
+    cell2idfile (str): Path to the file mapping cells to IDs.
+    hidden_dir (str): Directory containing hidden layer outputs.
+    TODO: add other params
+    """
 
     def __init__(self, outdir, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir):
         self._hierarchy = hierarchy
@@ -28,15 +41,28 @@ class RLIPPCalculator:
         if self.drug_count == 0:
             self.drug_count = len(self.drugs)
 
-    # Create a map of a list of the position of a drug in the test file
     def create_drug_pos_map(self):
+        """
+        Creates a mapping from drugs to their positions in the test data file.
+
+        :return: A dictionary where keys are drugs and values are lists of positions in the test data.
+        :rtype: dict
+        """
         drug_pos_map = {d: [] for d in self.drugs}
         for i, row in self.test_df.iterrows():
             drug_pos_map[row['D']].append(i)
         return drug_pos_map
 
-    # Create a sorted map of spearman correlation values for every drug
     def create_drug_corr_map_sorted(self, drug_pos_map):
+        """
+        Creates a sorted mapping of drugs to their Spearman correlation values.
+
+        :param drug_pos_map: A dictionary mapping drugs to their positions in the test data.
+        :type drug_pos_map: dict
+
+        :return: A dictionary of drugs sorted by their Spearman correlation values in descending order.
+        :rtype: dict
+        """
         drug_corr_map = {}
         for d in self.drugs:
             if len(drug_pos_map[d]) == 0:
@@ -47,26 +73,71 @@ class RLIPPCalculator:
             drug_corr_map[d] = stats.spearmanr(test_vals, pred_vals)[0]
         return {drug: corr for drug, corr in sorted(drug_corr_map.items(), key=lambda item: item[1], reverse=True)}
 
-    # Load the hidden file for a given element
     def load_feature(self, element, size):
+        """
+        Loads hidden features for a given element.
+
+        :param element: The element (term or gene) whose features are to be loaded.
+        :type element: str
+        :param size: The number of columns (features) to load.
+        :type size: int
+
+        :return: A numpy array of the hidden features for the given element.
+        :rtype: numpy.ndarray
+        """
         file_name = self.hidden_dir + element + '.hidden'
         return np.loadtxt(file_name, usecols=range(size))
 
     def load_term_features(self, term):
+        """
+        Loads hidden features for a given term.
+
+        :param term: The term whose features are to be loaded.
+        :type term: str
+
+        :return: A numpy array of the hidden features for the given term.
+        :rtype: numpy.ndarray
+        """
         return self.load_feature(term, self.num_hiddens_genotype)
 
     def load_gene_features(self, gene):
+        """
+        Loads hidden features for a given gene.
+
+        :param gene: The gene whose features are to be loaded.
+        :type gene: str
+
+        :return: A numpy array of the hidden features for the given gene.
+        :rtype: numpy.ndarray
+        """
         return self.load_feature(gene, 1)
 
     def create_child_feature_map(self, feature_map, term):
+        """
+        Creates a map of child features for a given term.
+
+        :param feature_map: A dictionary mapping terms/genes to their features.
+        :type feature_map: dict
+        :param term: The term for which child features are to be created.
+        :type term: str
+
+        :return: A list of child features for the given term.
+        :rtype: list
+        """
         child_features = [term]
         child_features.extend(
             feature_map[edge_data['t']] for _, edge_data in self._hierarchy.get_edges().items() if
             edge_data['s'] == term)
         return child_features
 
-    # Load hidden features for all the terms and genes
     def load_all_features(self):
+        """
+        Loads hidden features for all terms and genes.
+
+        :return: A tuple containing two dictionaries, one mapping terms/genes to their features and the other mapping
+                 terms to their child features.
+        :rtype: (dict, dict)
+        """
         feature_map = {}
 
         # Load term features
@@ -92,17 +163,37 @@ class RLIPPCalculator:
 
         return feature_map, child_feature_map
 
-    # Get a hidden feature matrix of a given term's children
-    def get_child_features(self, term_child_features, position_map):
+    @staticmethod
+    def get_child_features(term_child_features, position_map):
+        """
+        Gets a matrix of hidden features for a given term's children.
+
+        :param term_child_features: A list of features for the children of a term.
+        :type term_child_features: list
+        :param position_map: A list of positions for which features are to be extracted.
+        :type position_map: list
+
+        :return: A matrix of hidden features for the children of the given term.
+        :rtype: numpy.ndarray
+        """
         child_features = []
         for f in term_child_features:
             child_features.append(np.take(f, position_map, axis=0))
         return np.column_stack([f for f in child_features])
 
-    # Executes 5-fold cross validated Ridge regression for a given hidden features matrix
-    # and returns the spearman correlation value of the predicted output
     def exec_lm(self, X, y):
+        """
+        Executes 5-fold cross-validated Ridge regression for a given hidden features matrix
+        and returns the Spearman correlation value of the predicted output.
 
+        :param X: The input matrix for regression.
+        :type X: numpy.ndarray
+        :param y: The target variable.
+        :type y: numpy.ndarray
+
+        :return: A tuple containing the Spearman correlation coefficient and p-value.
+        :rtype: (float, float)
+        """
         pca = PCA(n_components=self.num_hiddens_genotype)
         X_pca = pca.fit_transform(X)
 
@@ -111,9 +202,24 @@ class RLIPPCalculator:
         y_pred = regr.predict(X_pca)
         return stats.spearmanr(y_pred, y)
 
-    # Calculates RLIPP for a given term and drug
-    # Executes parallely
     def calc_term_rlipp(self, term_features, term_child_features, position_map, term, drug):
+        """
+        Calculates the RLIPP score for a given term and drug.
+
+        :param term_features: The features for the parent term.
+        :type term_features: numpy.ndarray
+        :param term_child_features: The features for the children of the term.
+        :type term_child_features: list
+        :param position_map: A list of positions for which RLIPP is to be calculated.
+        :type position_map: list
+        :param term: The term for which RLIPP is calculated.
+        :type term: str
+        :param drug: The drug for which RLIPP is calculated.
+        :type drug: str
+
+        :return: A formatted string containing the term, Spearman correlations, p-values, and RLIPP score.
+        :rtype: str
+        """
         X_parent = np.take(term_features, position_map, axis=0)
         X_child = self.get_child_features(term_child_features, position_map)
         y = np.take(self.predicted_vals, position_map)
@@ -123,17 +229,35 @@ class RLIPPCalculator:
         result = '{}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\n'.format(term, p_rho, p_pval, c_rho, c_pval, rlipp)
         return result
 
-    # Calculates Spearman correlation between Gene embeddings and Predicted AUC
     def calc_gene_rho(self, gene_features, position_map, gene, drug):
+        """
+        Calculates Spearman correlation between gene embeddings and predicted AUC.
+
+        :param gene_features: The features for the gene.
+        :type gene_features: numpy.ndarray
+        :param position_map: A list of positions for which correlation is to be calculated.
+        :type position_map: list
+        :param gene: The gene for which correlation is calculated.
+        :type gene: str
+        :param drug: The drug for which correlation is calculated.
+        :type drug: str
+
+        :return: A formatted string containing the gene, Spearman correlation, and p-value.
+        :rtype: str
+        """
         pred = np.take(self.predicted_vals, position_map)
         gene_embeddings = np.take(gene_features, position_map)
         rho, p_val = stats.spearmanr(pred, gene_embeddings)
         result = '{}\t{:.3e}\t{:.3e}\n'.format(gene, rho, p_val)
         return result
 
-    # Calculates RLIPP scores for top n drugs (n = drug_count), and
-    # prints the result in "Drug Term P_rho C_rho RLIPP" format
     def calc_scores(self):
+        """
+        Calculates RLIPP scores for top n drugs (n = drug_count),
+        and prints the result in "Drug Term P_rho C_rho RLIPP" format.
+
+        This method runs the calculation in parallel for efficiency.
+        """
         print('Starting score calculation')
 
         drug_pos_map = self.create_drug_pos_map()
