@@ -26,7 +26,9 @@ requirements = ['cellmaps_utils==0.1.0a23',
                 'pandas',
                 'torch',
                 'torchvision',
-                'torchaudio'
+                'torchaudio',
+                'scipy',
+                'joblib'
                 ]
 
 setup_requirements = []
