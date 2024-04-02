@@ -88,4 +88,7 @@ class VNNAnnotate:
         annotation_dict = self._aggregate_scores_from_diseases()
         self.annotate_hierarchy(annotation_dict)
 
+    def register_outputs(self, outdir, description, keywords, provenance_utils):
+        return []
+
 

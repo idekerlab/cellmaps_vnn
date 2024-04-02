@@ -3,7 +3,7 @@
 import os
 import time
 import logging
-from cellmaps_utils import logutils
+from cellmaps_utils import logutils, constants
 from cellmaps_utils.provenance import ProvenanceUtil
 
 import cellmaps_vnn
@@ -71,27 +71,43 @@ class CellmapsvnnRunner(object):
         from the input directory with optional overrides for the name, project name, and organization name
         and additional keywords.
         """
-        prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(self._inputdir,
-                                                                                override_name=self._name,
-                                                                                override_project_name=
-                                                                                self._project_name,
-                                                                                override_organization_name=
-                                                                                self._organization_name,
-                                                                                extra_keywords=[
-                                                                                    'VNN',
-                                                                                    'Visible Neural Network',
-                                                                                    self._command.COMMAND
-                                                                                ])
-        if self._name is None:
-            self._name = prov_attrs.get_name()
+        rocrate_dirs = []
+        dirs = []
+        if isinstance(self._inputdir, str):
+            dirs = [self._inputdir]
+        elif isinstance(self._inputdir, list):
+            dirs = self._inputdir
+        for entry in dirs:
+            if os.path.exists(os.path.join(entry, constants.RO_CRATE_METADATA_FILE)):
+                rocrate_dirs.append(entry)
+        if len(rocrate_dirs) > 0:
+            prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(rocrate_dirs,
+                                                                                    override_name=self._name,
+                                                                                    override_project_name=
+                                                                                    self._project_name,
+                                                                                    override_organization_name=
+                                                                                    self._organization_name,
+                                                                                    extra_keywords=[
+                                                                                        'VNN',
+                                                                                        'Visible Neural Network',
+                                                                                        self._command.COMMAND
+                                                                                    ])
+            if self._name is None:
+                self._name = prov_attrs.get_name()
 
-        if self._organization_name is None:
-            self._organization_name = prov_attrs.get_organization_name()
+            if self._organization_name is None:
+                self._organization_name = prov_attrs.get_organization_name()
 
-        if self._project_name is None:
-            self._project_name = prov_attrs.get_project_name()
-        self._keywords = prov_attrs.get_keywords()
-        self._description = prov_attrs.get_description()
+            if self._project_name is None:
+                self._project_name = prov_attrs.get_project_name()
+            self._keywords = prov_attrs.get_keywords()
+            self._description = prov_attrs.get_description()
+        else:
+            self._name = 'VNN tool'
+            self._organization_name = 'Example'
+            self._project_name = 'Example'
+            self._keywords = ['vnn']
+            self._description = 'Example input dataset VNN'
 
     def _create_rocrate(self):
         """
@@ -141,14 +157,22 @@ class CellmapsvnnRunner(object):
         :return:
         """
         logger.debug('Getting id of input rocrate')
-        input_dataset_id = self._provenance_utils.get_id_of_rocrate(self._inputdir)
+        used_dataset = []
+        if isinstance(self._inputdir, str):
+            if os.path.exists(os.path.join(self._inputdir, constants.RO_CRATE_METADATA_FILE)):
+                used_dataset = [self._provenance_utils.get_id_of_rocrate(self._inputdir)]
+        elif isinstance(self._inputdir, list):
+            for entry in self._inputdir:
+                if os.path.exists(os.path.join(entry, constants.RO_CRATE_METADATA_FILE)):
+                    used_dataset.append(self._provenance_utils.get_id_of_rocrate(entry))
+
         self._provenance_utils.register_computation(self._outdir,
                                                     name=cellmaps_vnn.__name__ + ' computation',
                                                     run_by=str(self._provenance_utils.get_login()),
                                                     command=str(self._input_data_dict),
                                                     description='run of ' + cellmaps_vnn.__name__,
                                                     used_software=[self._softwareid],
-                                                    used_dataset=[input_dataset_id],
+                                                    used_dataset=used_dataset,
                                                     generated=generated_dataset_ids)
 
     def run(self):

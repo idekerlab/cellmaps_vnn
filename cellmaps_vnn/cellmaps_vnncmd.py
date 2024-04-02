@@ -94,7 +94,7 @@ def main(args):
             cmd = VNNPredict(theargs)
         elif theargs.command == VNNAnnotate.COMMAND:
             cmd = VNNAnnotate(theargs)
-            theargs.inputdir = theargs.model_predictions[0]
+            theargs.inputdir = theargs.model_predictions
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
 
