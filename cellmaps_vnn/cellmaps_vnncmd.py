@@ -7,6 +7,7 @@ import logging.config
 from cellmaps_utils import logutils
 from cellmaps_utils import constants
 import cellmaps_vnn
+from cellmaps_vnn.annotate import VNNAnnotate
 from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
@@ -32,6 +33,7 @@ def _parse_arguments(desc, args):
 
     VNNTrain.add_subparser(subparsers)
     VNNPredict.add_subparser(subparsers)
+    VNNAnnotate.add_subparser(subparsers)
     parser.add_argument('--logconf', default=None,
                         help='Path to python logging configuration file in '
                              'this format: https://docs.python.org/3/library/'
@@ -90,6 +92,9 @@ def main(args):
             cmd = VNNTrain(theargs)
         elif theargs.command == VNNPredict.COMMAND:
             cmd = VNNPredict(theargs)
+        elif theargs.command == VNNAnnotate.COMMAND:
+            cmd = VNNAnnotate(theargs)
+            theargs.inputdir = theargs.model_predictions[0]
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
 
