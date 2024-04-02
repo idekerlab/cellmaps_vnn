@@ -85,7 +85,7 @@ class RLIPPCalculator:
         :return: A numpy array of the hidden features for the given element.
         :rtype: numpy.ndarray
         """
-        file_name = self.hidden_dir + element + '.hidden'
+        file_name = self.hidden_dir + "/" + str(element) + '.hidden'
         return np.loadtxt(file_name, usecols=range(size))
 
     def load_term_features(self, term):
