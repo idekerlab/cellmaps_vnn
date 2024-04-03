@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 from datetime import date
 from tqdm import tqdm
 import numpy as np
@@ -8,10 +9,12 @@ import torch
 import torch.utils.data as du
 from torch.autograd import Variable
 from cellmaps_utils import constants
+from ndex2.cx2 import RawCX2NetworkFactory
 
 import cellmaps_vnn
 from cellmaps_vnn import util
 from cellmaps_vnn.exceptions import CellmapsvnnError
+from cellmaps_vnn.rlipp_calculator import RLIPPCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +89,16 @@ class VNNPredict:
             # Perform prediction
             self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
                          cell_features)
+
+            # TODO: commented out until rlipp calculator is fixed
+            # hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
+            # factory = RawCX2NetworkFactory()
+            # hierarchy = factory.get_cx2network(hierarchy_file)
+            # # Perform interpretation
+            # calc = RLIPPCalculator(self._theargs.outdir, hierarchy,
+            #                        self._theargs.predict_data, self._get_predict_dest_file(),
+            #                        self._theargs.gene2id, self._theargs.cell2id, hidden_dir)
+            # calc.calc_scores()
 
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
@@ -345,6 +358,7 @@ class VNNPredict:
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
         output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))
+        output_ids.append(self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils))
         return output_ids
 
     def _register_predict_file(self, outdir, description, keywords, provenance_utils):
@@ -440,3 +454,19 @@ class VNNPredict:
                 logger.error('FAIRSCAPE cannot handle too many files, skipping rest')
                 break
         return hidden_files_ids
+
+    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
+        hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
+        shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
+                     'description': description + ' Hierarchy network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
