@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from cellmaps_utils import constants
+from cellmaps_vnn import constants
 from ndex2.cx2 import RawCX2NetworkFactory
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class VNNAnnotate:
         data = {}
 
         for directory in self._theargs.model_predictions:
-            filepath = os.path.join(directory, 'rlipp.out')
+            filepath = os.path.join(directory, constants.RLIPP_OUTPUT_FILE)
             with open(filepath, 'r') as file:
                 for line in file:
                     if line.startswith('Term') or not line.strip():
@@ -61,15 +62,15 @@ class VNNAnnotate:
 
         averaged_data = {k: np.mean(v, axis=0) for k, v in data.items()}
 
-        with open(os.path.join(self._theargs.outdir, 'rlipp.out'), 'w') as outfile:
+        with open(os.path.join(self._theargs.outdir, constants.RLIPP_OUTPUT_FILE), 'w') as outfile:
             outfile.write("Term\tP_rho\tP_pval\tC_rho\tC_pval\tRLIPP\tDisease\n")
             for (term, disease), values in averaged_data.items():
                 outfile.write(f"{term}\t" + "\t".join([f"{v:.5e}" for v in values]) + f"\t{disease}\n")
 
     def _aggregate_scores_from_diseases(self):
-        filepath = os.path.join(self._theargs.outdir, 'rlipp.out')
+        filepath = os.path.join(self._theargs.outdir, constants.RLIPP_OUTPUT_FILE)
         data = pd.read_csv(filepath, sep='\t')
-        average_p_rho = data.groupby('Term')['P_rho'].mean()
+        average_p_rho = data.groupby('Term')[constants.PRHO_SCORE].mean()
         average_p_rho_dict = average_p_rho.to_dict()
 
         return average_p_rho_dict
@@ -80,7 +81,7 @@ class VNNAnnotate:
         for term, p_rho in annotation_dict.items():
             node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
-                hierarchy.add_node_attribute(node_id, 'P_rho', p_rho, datatype='double')
+                hierarchy.add_node_attribute(node_id, constants.PRHO_SCORE, p_rho, datatype='double')
         hierarchy.write_as_raw_cx2(os.path.join(self._theargs.outdir, 'hierarchy.cx2'))
 
     def run(self):

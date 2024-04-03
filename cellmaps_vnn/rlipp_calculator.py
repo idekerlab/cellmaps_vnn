@@ -8,6 +8,8 @@ from joblib import Parallel, delayed
 from sklearn.decomposition import PCA
 from sklearn.linear_model import RidgeCV
 
+from cellmaps_vnn import constants
+
 
 class RLIPPCalculator:
     """
@@ -32,7 +34,7 @@ class RLIPPCalculator:
         self.genes = pd.read_csv(gene2idfile, sep='\t', header=None, names=['I', 'G'])['G']
         self.cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
         self.hidden_dir = hidden_dir
-        self.rlipp_file = os.path.join(outdir, "rlipp.out")
+        self.rlipp_file = os.path.join(outdir, constants.RLIPP_OUTPUT_FILE)
         self.gene_rho_file = os.path.join(outdir, "gene_rho.out")
         self.cpu_count = 2  # TODO: user can set it?
         self.num_hiddens_genotype = 4  # TODO: what is it?
