@@ -4,8 +4,10 @@ import os
 import numpy as np
 import pandas as pd
 from cellmaps_utils import constants
-from cellmaps_vnn import constants
+import cellmaps_vnn.constants as vnnconstants
 from ndex2.cx2 import RawCX2NetworkFactory
+
+from cellmaps_vnn.exceptions import CellmapsvnnError
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,14 @@ class VNNAnnotate:
 
     def __init__(self, theargs):
         self._theargs = theargs
-        self.hierarchy = theargs.hierarchy
+        if theargs.hierarchy is not None:
+            self.hierarchy = theargs.hierarchy
+        else:
+            hierarchy_path = os.path.join(theargs.model_predictions[0], 'hierarchy.cx2')
+            if os.path.exists(hierarchy_path):
+                self.hierarchy = hierarchy_path
+            else:
+                raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
 
     @staticmethod
     def add_subparser(subparsers):
@@ -46,7 +55,7 @@ class VNNAnnotate:
         data = {}
 
         for directory in self._theargs.model_predictions:
-            filepath = os.path.join(directory, constants.RLIPP_OUTPUT_FILE)
+            filepath = os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)
             with open(filepath, 'r') as file:
                 for line in file:
                     if line.startswith('Term') or not line.strip():
@@ -62,32 +71,32 @@ class VNNAnnotate:
 
         averaged_data = {k: np.mean(v, axis=0) for k, v in data.items()}
 
-        with open(os.path.join(self._theargs.outdir, constants.RLIPP_OUTPUT_FILE), 'w') as outfile:
+        with open(os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE), 'w') as outfile:
             outfile.write("Term\tP_rho\tP_pval\tC_rho\tC_pval\tRLIPP\tDisease\n")
             for (term, disease), values in averaged_data.items():
                 outfile.write(f"{term}\t" + "\t".join([f"{v:.5e}" for v in values]) + f"\t{disease}\n")
 
     def _aggregate_scores_from_diseases(self):
-        filepath = os.path.join(self._theargs.outdir, constants.RLIPP_OUTPUT_FILE)
+        filepath = os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
         data = pd.read_csv(filepath, sep='\t')
-        average_p_rho = data.groupby('Term')[constants.PRHO_SCORE].mean()
+        average_p_rho = data.groupby('Term')[vnnconstants.PRHO_SCORE].mean()
         average_p_rho_dict = average_p_rho.to_dict()
 
         return average_p_rho_dict
 
-    def annotate_hierarchy(self, annotation_dict):
+    def annotate(self, annotation_dict):
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
         for term, p_rho in annotation_dict.items():
             node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
-                hierarchy.add_node_attribute(node_id, constants.PRHO_SCORE, p_rho, datatype='double')
+                hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
         hierarchy.write_as_raw_cx2(os.path.join(self._theargs.outdir, 'hierarchy.cx2'))
 
     def run(self):
         self._aggregate_prediction_scores_from_models()
         annotation_dict = self._aggregate_scores_from_diseases()
-        self.annotate_hierarchy(annotation_dict)
+        self.annotate(annotation_dict)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         return []
