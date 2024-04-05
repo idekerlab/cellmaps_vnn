@@ -36,7 +36,7 @@ class RLIPPCalculator:
         self.hidden_dir = hidden_dir
         self.rlipp_file = os.path.join(outdir, constants.RLIPP_OUTPUT_FILE)
         self.gene_rho_file = os.path.join(outdir, "gene_rho.out")
-        self.cpu_count = 2  # TODO: user can set it?
+        self.cpu_count = 1  # TODO: user can set it?
         self.num_hiddens_genotype = 4  # TODO: what is it?
         self.drugs = list(set(self.test_df['D']))
         self.drug_count = 0  # TODO: what is it?
@@ -222,6 +222,8 @@ class RLIPPCalculator:
         :return: A formatted string containing the term, Spearman correlations, p-values, and RLIPP score.
         :rtype: str
         """
+        if not term_child_features:
+            return ''
         X_parent = np.take(term_features, position_map, axis=0)
         X_child = self.get_child_features(term_child_features, position_map)
         y = np.take(self.predicted_vals, position_map)

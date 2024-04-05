@@ -90,15 +90,14 @@ class VNNPredict:
             self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
                          cell_features)
 
-            # TODO: commented out until rlipp calculator is fixed
-            # hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
-            # factory = RawCX2NetworkFactory()
-            # hierarchy = factory.get_cx2network(hierarchy_file)
-            # # Perform interpretation
-            # calc = RLIPPCalculator(self._theargs.outdir, hierarchy,
-            #                        self._theargs.predict_data, self._get_predict_dest_file(),
-            #                        self._theargs.gene2id, self._theargs.cell2id, hidden_dir)
-            # calc.calc_scores()
+            hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
+            factory = RawCX2NetworkFactory()
+            hierarchy = factory.get_cx2network(hierarchy_file)
+            # Perform interpretation
+            calc = RLIPPCalculator(self._theargs.outdir, hierarchy,
+                                   self._theargs.predict_data, self._get_predict_dest_file(),
+                                   self._theargs.gene2id, self._theargs.cell2id, hidden_dir)
+            calc.calc_scores()
 
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
