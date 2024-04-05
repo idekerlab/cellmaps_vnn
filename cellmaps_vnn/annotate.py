@@ -52,6 +52,10 @@ class VNNAnnotate:
         parser.add_argument('--hierarchy', help='Path to hierarchy (optional), if not set the hierarchy will be '
                                                 'selected from the first RO-Crate passed in --model_predictions '
                                                 'argument', type=str)
+        parser.add_argument('--disease', help='Specify the disease or cancer type for which the annotations will be '
+                                              'focused. This allows the annotation process to tailor the results '
+                                              'according to the particular disease or cancer type. If not set, '
+                                              'prediction scores for all diseases will be aggregated .', type=str)
 
     def _get_rlipp_out_dest_file(self):
         return os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
@@ -93,6 +97,23 @@ class VNNAnnotate:
 
         return average_p_rho_dict
 
+    def _get_scores_for_disease(self, disease):
+        """
+        Retrieves prediction scores for a specific disease, returning a dictionary mapping each term
+        to its P_RHO score for the given disease.
+
+        :param disease: The disease or cancer type for which scores are requested.
+        :return: A dictionary with Term as keys and PRHO_SCORE as values for the specified disease.
+        """
+        filepath = self._get_rlipp_out_dest_file()
+        data = pd.read_csv(filepath, sep='\t')
+        filtered_data = data[data['Disease'] == disease]
+        if filtered_data.empty:
+            return {}
+        scores = filtered_data.set_index('Term')[vnnconstants.PRHO_SCORE].to_dict()
+
+        return scores
+
     def annotate(self, annotation_dict):
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
@@ -104,7 +125,10 @@ class VNNAnnotate:
 
     def run(self):
         self._aggregate_prediction_scores_from_models()
-        annotation_dict = self._aggregate_scores_from_diseases()
+        if self._theargs.disease is None:
+            annotation_dict = self._aggregate_scores_from_diseases()
+        else:
+            annotation_dict = self._get_scores_for_disease(self._theargs.disease)
         self.annotate(annotation_dict)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
