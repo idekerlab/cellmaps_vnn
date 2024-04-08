@@ -19,6 +19,14 @@ class VNNAnnotate:
     COMMAND = 'annotate'
 
     def __init__(self, theargs):
+        """
+        Constructor. Sets up the hierarchy path either directly from the arguments or by looking for
+        a hierarchy.cx2 file in the first RO-Crate directory provided. If neither is found, raises an error.
+
+        :param theargs: The arguments provided to the command line interface.
+        :type theargs: argparse.Namespace
+        :raises CellmapsvnnError: If no hierarchy path is specified or found.
+        """
         self._theargs = theargs
         if theargs.hierarchy is not None:
             self.hierarchy = theargs.hierarchy
@@ -58,13 +66,28 @@ class VNNAnnotate:
                                               'prediction scores for all diseases will be aggregated .', type=str)
 
     def _get_rlipp_out_dest_file(self):
+        """
+        Constructs the file path for the RLIPP output file within the specified output directory.
+
+        :return: The file path for the RLIPP output file.
+        :rtype: str
+        """
         return os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
 
     def _get_hierarchy_dest_file(self):
+        """
+        Constructs the file path for the hierarchy output file within the specified output directory.
+
+        :return: The file path for the hierarchy output file.
+        :rtype: str
+        """
         return os.path.join(self._theargs.outdir, 'hierarchy.cx2')
 
     def _aggregate_prediction_scores_from_models(self):
-
+        """
+        Aggregates prediction scores from multiple models' outputs by averaging them.
+        The aggregated scores are then saved to the RLIPP output destination file.
+        """
         data = {}
 
         for directory in self._theargs.model_predictions:
@@ -90,6 +113,12 @@ class VNNAnnotate:
                 outfile.write(f"{term}\t" + "\t".join([f"{v:.5e}" for v in values]) + f"\t{disease}\n")
 
     def _aggregate_scores_from_diseases(self):
+        """
+        Aggregates the prediction scores for all diseases by averaging P_rho score.
+
+        :return: A dictionary mapping each term to its averaged P_rho score across all diseases.
+        :rtype: dict
+        """
         filepath = self._get_rlipp_out_dest_file()
         data = pd.read_csv(filepath, sep='\t')
         average_p_rho = data.groupby('Term')[vnnconstants.PRHO_SCORE].mean()
@@ -99,11 +128,13 @@ class VNNAnnotate:
 
     def _get_scores_for_disease(self, disease):
         """
-        Retrieves prediction scores for a specific disease, returning a dictionary mapping each term
-        to its P_RHO score for the given disease.
+        Retrieves prediction scores for a specific disease, returning a dictionary mapping
+        each term to its P_rho score for the given disease.
 
         :param disease: The disease or cancer type for which scores are requested.
-        :return: A dictionary with Term as keys and PRHO_SCORE as values for the specified disease.
+        :type disease: str
+        :return: A dictionary with Term as keys and P_rho scores as values for the specified disease.
+        :rtype: dict
         """
         filepath = self._get_rlipp_out_dest_file()
         data = pd.read_csv(filepath, sep='\t')
@@ -115,6 +146,13 @@ class VNNAnnotate:
         return scores
 
     def annotate(self, annotation_dict):
+        """
+        Annotates the hierarchy with P_rho scores from the given annotation dictionary,
+        updating node attributes within the hierarchy file.
+
+        :param annotation_dict: A dictionary mapping terms to their P_rho scores.
+        :type annotation_dict: dict
+        """
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
         for term, p_rho in annotation_dict.items():
@@ -124,6 +162,10 @@ class VNNAnnotate:
         hierarchy.write_as_raw_cx2(self._get_hierarchy_dest_file())
 
     def run(self):
+        """
+        The logic for annotating hierarchy with prediction results from cellmaps_vnn. It aggregates prediction scores
+        from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
+        """
         self._aggregate_prediction_scores_from_models()
         if self._theargs.disease is None:
             annotation_dict = self._aggregate_scores_from_diseases()
@@ -132,6 +174,21 @@ class VNNAnnotate:
         self.annotate(annotation_dict)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the output files of the annotation process with the FAIRSCAPE service for data provenance.
+        This includes the annotated hierarchy and the RLIPP output files.
+
+        :param outdir: The output directory where the files are stored.
+        :type outdir: str
+        :param description: A description of the files for provenance registration.
+        :type description: str
+        :param keywords: A list of keywords associated with the files.
+        :type keywords: list
+        :param provenance_utils: The utility class for provenance registration.
+        :type provenance_utils: ProvenanceUtility
+        :return: A list of dataset IDs assigned to the registered files.
+        :rtype: list
+        """
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
         return [hierarchy_id, rlipp_id]
