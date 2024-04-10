@@ -159,6 +159,13 @@ class VNNAnnotate:
             node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
                 hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
+
+        # TODO: apply styles to hierarchy
+        # style_cx2 = factory.get_cx2network(os.path.join(os.path.dirname(cellmaps_vnn.__file__),
+        #                                                 'NeST-VNN_Palbociclib.cx2'))
+        # vis_prop = style_cx2.get_visual_properties()
+        # hierarchy.set_visual_properties(vis_prop)
+
         hierarchy.write_as_raw_cx2(self._get_hierarchy_dest_file())
 
     def run(self):
