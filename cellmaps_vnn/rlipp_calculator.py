@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 import time
@@ -7,8 +6,6 @@ from multiprocessing import Pool
 from joblib import Parallel, delayed
 from sklearn.decomposition import PCA
 from sklearn.linear_model import RidgeCV
-
-from cellmaps_vnn import constants
 
 
 class RLIPPCalculator:
@@ -23,9 +20,12 @@ class RLIPPCalculator:
     gene2idfile (str): Path to the file mapping genes to IDs.
     cell2idfile (str): Path to the file mapping cells to IDs.
     hidden_dir (str): Directory containing hidden layer outputs.
-    TODO: add other params
+    rlipp_file (str): Path of the output file where results of rlipp algorithm will be saved
+    gene_rho_file (str): Path of the output file where gene rho scores will be saved
+    cpu_count (int): No of available cores
+    num_hiddens_genotype (int): Mapping for the number of neurons in each term in genotype parts
+    drug_count (int): No of top performing drugs
     """
-
     def __init__(self, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
                  rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count):
         self._hierarchy = hierarchy
@@ -43,6 +43,13 @@ class RLIPPCalculator:
         self.drugs = list(set(self.test_df['D']))
         if self.drug_count == 0:
             self.drug_count = len(self.drugs)
+    #     self.pool = Pool(cpu_count)
+    #
+    # def __del__(self):
+    #     """
+    #     Ensure Pool is properly closed when the object is deleted
+    #     """
+    #     self.pool.close()
 
     def create_drug_pos_map(self):
         """
@@ -51,8 +58,10 @@ class RLIPPCalculator:
         :return: A dictionary where keys are drugs and values are lists of positions in the test data.
         :rtype: dict
         """
-        drug_pos_map = {d: [] for d in self.drugs}
+        drug_pos_map = {}
         for i, row in self.test_df.iterrows():
+            if row['D'] not in drug_pos_map:
+                drug_pos_map[row['D']] = []
             drug_pos_map[row['D']].append(i)
         return drug_pos_map
 
