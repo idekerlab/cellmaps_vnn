@@ -61,6 +61,11 @@ class VNNPredict:
         parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
         parser.add_argument('--std', help='Standardization File (if not set standardization file from RO-Crate '
                                           'will be used)', type=str)
+        parser.add_argument('--cpu_count', help='No of available cores', type=int, default=1)
+        parser.add_argument('--drug_count', help='No of top performing drugs', type=int, default=0)
+        parser.add_argument('--genotype_hiddens',
+                            help='Mapping for the number of neurons in each term in genotype parts', type=int,
+                            default=4)
         return parser
 
     def run(self):
@@ -94,10 +99,13 @@ class VNNPredict:
             hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
             factory = RawCX2NetworkFactory()
             hierarchy = factory.get_cx2network(hierarchy_file)
+            rlipp_file = os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
+            gene_rho_file = os.path.join(self._theargs.outdir, 'gene_rho.out')
             # Perform interpretation
-            calc = RLIPPCalculator(self._theargs.outdir, hierarchy,
-                                   self._theargs.predict_data, self._get_predict_dest_file(),
-                                   self._theargs.gene2id, self._theargs.cell2id, hidden_dir)
+            calc = RLIPPCalculator(hierarchy, self._theargs.predict_data, self._get_predict_dest_file(),
+                                   self._theargs.gene2id, self._theargs.cell2id, hidden_dir,
+                                   rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.drug_count,
+                                   self._theargs.genotype_hiddens)
             calc.calc_scores()
 
         except Exception as e:
