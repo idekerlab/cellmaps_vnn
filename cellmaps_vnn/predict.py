@@ -9,6 +9,7 @@ import torch
 import torch.utils.data as du
 from torch.autograd import Variable
 from cellmaps_utils import constants
+import cellmaps_vnn.constants as vnnconstants
 from ndex2.cx2 import RawCX2NetworkFactory
 
 import cellmaps_vnn
@@ -467,5 +468,35 @@ class VNNPredict:
                      'date-published': date.today().strftime('%m-%d-%Y')}
         dataset_id = provenance_utils.register_dataset(outdir,
                                                        source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_rlipp_file(self, outdir, description, keywords, provenance_utils):
+        rlipp_file = os.path.join(outdir, vnnconstants.RLIPP_OUTPUT_FILE)
+
+        data_dict = {'name': os.path.basename(rlipp_file) + ' RLIPP output file',
+                     'description': description + ' RLIPP output file',
+                     'keywords': keywords,
+                     'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=rlipp_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_gene_rho_file(self, outdir, description, keywords, provenance_utils):
+        gene_rho_file = os.path.join(outdir, 'gene_rho.out')
+
+        data_dict = {'name': os.path.basename(gene_rho_file) + ' Gene Rho file',
+                     'description': description + ' Gene Rho file',
+                     'keywords': keywords,
+                     'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=gene_rho_file,
                                                        data_dict=data_dict)
         return dataset_id
