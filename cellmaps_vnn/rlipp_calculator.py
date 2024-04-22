@@ -7,6 +7,8 @@ from joblib import Parallel, delayed
 from sklearn.decomposition import PCA
 from sklearn.linear_model import RidgeCV
 
+from cellmaps_vnn.exceptions import CellmapsvnnError
+
 
 class RLIPPCalculator:
     """
@@ -30,10 +32,27 @@ class RLIPPCalculator:
                  rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count):
         self._hierarchy = hierarchy
         self.terms = list(hierarchy.get_nodes().keys())
-        self.test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])
-        self.predicted_vals = np.loadtxt(predicted_data)
-        self.genes = pd.read_csv(gene2idfile, sep='\t', header=None, names=['I', 'G'])['G']
-        self.cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
+
+        try:
+            self.test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])
+        except Exception as e:
+            raise CellmapsvnnError(f"Failed to read test data from {test_data}: {e}")
+
+        try:
+            self.predicted_vals = np.loadtxt(predicted_data)
+        except Exception as e:
+            raise CellmapsvnnError(f"Failed to load predicted values from {predicted_data}: {e}")
+
+        try:
+            self.genes = pd.read_csv(gene2idfile, sep='\t', header=None, names=['I', 'G'])['G']
+        except Exception as e:
+            raise CellmapsvnnError(f"Failed to read gene ID file from {gene2idfile}: {e}")
+
+        try:
+            self.cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
+        except Exception as e:
+            raise CellmapsvnnError(f"Failed to read cell ID file from {cell2idfile}: {e}")
+
         self.hidden_dir = hidden_dir
         self.rlipp_file = rlipp_file
         self.gene_rho_file = gene_rho_file
@@ -43,13 +62,6 @@ class RLIPPCalculator:
         self.drugs = list(set(self.test_df['D']))
         if self.drug_count == 0:
             self.drug_count = len(self.drugs)
-    #     self.pool = Pool(cpu_count)
-    #
-    # def __del__(self):
-    #     """
-    #     Ensure Pool is properly closed when the object is deleted
-    #     """
-    #     self.pool.close()
 
     def create_drug_pos_map(self):
         """
@@ -286,20 +298,23 @@ class RLIPPCalculator:
 
             with Parallel(backend="multiprocessing", n_jobs=self.cpu_count) as parallel:
                 for i, drug in enumerate(sorted_drugs):
-                    start = time.time()
+                    try:
+                        start = time.time()
 
-                    # Parallel computation of RLIPP and gene correlation results
-                    rlipp_results = parallel(
-                        delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term], drug_pos_map[drug], term,
-                                                      drug) for term in self.terms)
-                    gene_rho_results = parallel(
-                        delayed(self.calc_gene_rho)(feature_map[gene], drug_pos_map[drug], gene, drug) for gene in
-                        self.genes)
+                        # Parallel computation of RLIPP and gene correlation results
+                        rlipp_results = parallel(
+                            delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term], drug_pos_map[drug], term,
+                                                          drug) for term in self.terms)
+                        gene_rho_results = parallel(
+                            delayed(self.calc_gene_rho)(feature_map[gene], drug_pos_map[drug], gene, drug) for gene in
+                            self.genes)
 
-                    # After collecting all results, write them to files
-                    for result in rlipp_results:
-                        rlipp_file.write(result)
-                    for result in gene_rho_results:
-                        gene_rho_file.write(result)
+                        # After collecting all results, write them to files
+                        for result in rlipp_results:
+                            rlipp_file.write(result)
+                        for result in gene_rho_results:
+                            gene_rho_file.write(result)
 
-                print('Drug {} completed in {:.4f} seconds'.format((i + 1), (time.time() - start)))
+                        print('Drug {} completed in {:.4f} seconds'.format((i + 1), (time.time() - start)))
+                    except Exception as e:
+                        print(f"Error during processing for drug {drug}: {e}")
