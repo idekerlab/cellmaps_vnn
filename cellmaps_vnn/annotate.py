@@ -64,6 +64,7 @@ class VNNAnnotate:
                                               'focused. This allows the annotation process to tailor the results '
                                               'according to the particular disease or cancer type. If not set, '
                                               'prediction scores for all diseases will be aggregated .', type=str)
+        # optional: --upload with --parent_network required if --upload set
 
     def _get_rlipp_out_dest_file(self):
         """
