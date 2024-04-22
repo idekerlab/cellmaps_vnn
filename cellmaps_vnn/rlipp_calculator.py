@@ -273,7 +273,6 @@ class RLIPPCalculator:
         This method runs the calculation in parallel for efficiency.
         """
         print('Starting score calculation')
-
         drug_pos_map = self.create_drug_pos_map()
         sorted_drugs = list(self.create_drug_corr_map_sorted(drug_pos_map).keys())[0:self.drug_count]
 
@@ -281,27 +280,26 @@ class RLIPPCalculator:
         feature_map, child_feature_map = self.load_all_features()
         print('Time taken to load features: {:.4f}'.format(time.time() - start))
 
-        rlipp_file = open(self.rlipp_file, "w")
-        rlipp_file.write('Term\tP_rho\tP_pval\tC_rho\tC_pval\tRLIPP\n')
-        gene_rho_file = open(self.gene_rho_file, "w")
-        gene_rho_file.write('Gene\tRho\tP_val\n')
+        with open(self.rlipp_file, "w") as rlipp_file, open(self.gene_rho_file, "w") as gene_rho_file:
+            rlipp_file.write('Term\tP_rho\tP_pval\tC_rho\tC_pval\tRLIPP\n')
+            gene_rho_file.write('Gene\tRho\tP_val\n')
 
-        with Parallel(backend="multiprocessing", n_jobs=self.cpu_count) as parallel:
-            for i, drug in enumerate(sorted_drugs):
-                start = time.time()
+            with Parallel(backend="multiprocessing", n_jobs=self.cpu_count) as parallel:
+                for i, drug in enumerate(sorted_drugs):
+                    start = time.time()
 
-                rlipp_results = parallel(
-                    delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term], drug_pos_map[drug], term,
-                                                  drug) for term in self.terms)
-                for result in rlipp_results:
-                    rlipp_file.write(result)
+                    # Parallel computation of RLIPP and gene correlation results
+                    rlipp_results = parallel(
+                        delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term], drug_pos_map[drug], term,
+                                                      drug) for term in self.terms)
+                    gene_rho_results = parallel(
+                        delayed(self.calc_gene_rho)(feature_map[gene], drug_pos_map[drug], gene, drug) for gene in
+                        self.genes)
 
-                gene_rho_results = parallel(
-                    delayed(self.calc_gene_rho)(feature_map[gene], drug_pos_map[drug], gene, drug) for gene in
-                    self.genes)
-                for result in gene_rho_results:
-                    gene_rho_file.write(result)
+                    # After collecting all results, write them to files
+                    for result in rlipp_results:
+                        rlipp_file.write(result)
+                    for result in gene_rho_results:
+                        gene_rho_file.write(result)
 
                 print('Drug {} completed in {:.4f} seconds'.format((i + 1), (time.time() - start)))
-        gene_rho_file.close()
-        rlipp_file.close()
