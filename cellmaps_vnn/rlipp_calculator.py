@@ -87,14 +87,20 @@ class RLIPPCalculator:
         :return: A dictionary of drugs sorted by their Spearman correlation values in descending order.
         :rtype: dict
         """
+        test_auc = np.array(self.test_df['AUC'])
         drug_corr_map = {}
-        for d in self.drugs:
-            if len(drug_pos_map[d]) == 0:
-                drug_corr_map[d] = 0.0
+        for drug, positions in drug_pos_map.items():
+            if not positions:
+                drug_corr_map[drug] = 0.0
                 continue
-            test_vals = np.take(np.array(self.test_df['AUC']), drug_pos_map[d])
-            pred_vals = np.take(self.predicted_vals, drug_pos_map[d])
-            drug_corr_map[d] = stats.spearmanr(test_vals, pred_vals)[0]
+
+            try:
+                test_vals = np.take(test_auc, positions)
+                pred_vals = np.take(self.predicted_vals, positions)
+                drug_corr_map[drug] = stats.spearmanr(test_vals, pred_vals)[0]
+            except IndexError:
+                drug_corr_map[drug] = 0.0
+
         return {drug: corr for drug, corr in sorted(drug_corr_map.items(), key=lambda item: item[1], reverse=True)}
 
     def load_feature(self, element, size):
@@ -164,26 +170,23 @@ class RLIPPCalculator:
         """
         feature_map = {}
 
-        # Load term features
+        # Load term and gene features
         with Pool(self.cpu_count) as p:
-            results = p.map(self.load_term_features, self.terms)
+            term_features = p.map(self.load_term_features, self.terms)
+            gene_features = p.map(self.load_gene_features, self.genes)
+
+        # Merge results into the feature map
         for i, term in enumerate(self.terms):
-            feature_map[term] = results[i]
-
-        # Load gene features
-        with Pool(self.cpu_count) as p:
-            results = p.map(self.load_gene_features, self.genes)
+            feature_map[term] = term_features[i]
         for i, gene in enumerate(self.genes):
-            feature_map[gene] = results[i]
+            feature_map[gene] = gene_features[i]
 
-        child_feature_map = {term: [] for term in self.terms}
-
+        # Build child feature map
+        child_feature_map = {}
         for term in self.terms:
             children = [edge_data['t'] for edge_id, edge_data in self._hierarchy.get_edges().items() if
                         edge_data['s'] == term]
-            for child in children:
-                if child in feature_map:
-                    child_feature_map[term].append(feature_map[child])
+            child_feature_map[term] = [feature_map[child] for child in children if child in feature_map]
 
         return feature_map, child_feature_map
 
