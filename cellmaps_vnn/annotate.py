@@ -1,9 +1,10 @@
 import logging
 import os
 from datetime import date
-
+import getpass
 import numpy as np
 import pandas as pd
+from cellmaps_generate_hierarchy.ndexupload import NDExHierarchyUploader
 from cellmaps_utils import constants
 
 import cellmaps_vnn
@@ -64,7 +65,21 @@ class VNNAnnotate:
                                               'focused. This allows the annotation process to tailor the results '
                                               'according to the particular disease or cancer type. If not set, '
                                               'prediction scores for all diseases will be aggregated .', type=str)
-        # optional: --upload with --parent_network required if --upload set
+        parser.add_argument('--upload_to_ndex',
+                            help='If set, annotated hierarchy will be uploaded to NDEx, the server and credentials '
+                                 'are stored in config file.', action='store_true')
+        parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy'
+                                                     'required if uploading HCX to NDEx', type=str)
+        parser.add_argument('--ndexserver', default='ndexbio.org',
+                            help='Server where annotated hierarchy will be uploaded to')
+        parser.add_argument('--ndexuser',
+                            help='NDEx user account. Required if uploading to NDEx.')
+        parser.add_argument('--ndexpassword',
+                            help='NDEx password. Enter "-" to input password interactively, or provide a file '
+                                 'containing the password. Required if uploading to NDEx.')
+        parser.add_argument('--visibility', action='store_true',
+                            help='If set, makes Hierarchy and interactome network loaded onto '
+                                 'NDEx publicly visible')
 
     def _get_rlipp_out_dest_file(self):
         """
@@ -161,12 +176,7 @@ class VNNAnnotate:
             if node_id is not None:
                 hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
 
-        # TODO: apply styles to hierarchy
-        # style_cx2 = factory.get_cx2network(os.path.join(os.path.dirname(cellmaps_vnn.__file__),
-        #                                                 'NeST-VNN_Palbociclib.cx2'))
-        # vis_prop = style_cx2.get_visual_properties()
-        # hierarchy.set_visual_properties(vis_prop)
-
+        # TODO: apply style to the hierarchy
         hierarchy.write_as_raw_cx2(self._get_hierarchy_dest_file())
 
     def run(self):
@@ -180,6 +190,18 @@ class VNNAnnotate:
         else:
             annotation_dict = self._get_scores_for_disease(self._theargs.disease)
         self.annotate(annotation_dict)
+
+        if self._theargs.upload_to_ndex:
+            if not self._theargs.ndexuser or not self._theargs.ndexpassword:
+                raise CellmapsvnnError("To upload hierarchy to NDEx, user name and password are required.")
+            if self._theargs.ndexpassword == '-':
+                self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
+            ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
+                                                  self._theargs.ndexpassword, self._theargs.visibility)
+            cx_factory = RawCX2NetworkFactory()
+            hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
+            parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
+            ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """
@@ -253,5 +275,3 @@ class VNNAnnotate:
                                                        source_file=dest_path,
                                                        data_dict=data_dict)
         return dataset_id
-
-
