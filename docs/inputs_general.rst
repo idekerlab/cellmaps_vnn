@@ -27,3 +27,8 @@ Prediction
 
 - ``model_final.pt``:
     The trained model.
+
+Annotation
+~~~~~~~~~~~
+
+- 1 or more RO-crates with a file with interpretation scores and with the hierarchy to annotate.

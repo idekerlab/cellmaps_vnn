@@ -101,3 +101,21 @@ Prediction
 
 - ``model_final.pt``:
     The trained model.
+
+Annotation
+~~~~~~~~~~~
+
+- ``rlipp.out``:
+    File with interpretation scores of the predictions made by VNN model. Disease column is optional.
+
+    .. code-block::
+
+        Term	P_rho	P_pval	C_rho	C_pval	RLIPP	Disease
+        NEST	9.99800e-01	0.00000e+00	9.33000e-01	4.10702e-147	1.07150e+00	Leukemia
+        NEST:6	7.71750e-01	7.47000e-64	7.58600e-01	1.36101e-61	1.01750e+00	Leukemia
+        NEST:58	6.44850e-01	1.44552e-38	6.62900e-01	1.62600e-40	9.73000e-01	Leukemia
+
+
+- ``hierarchy.cx2``:
+    Hierarchy in HCX format that will be annotated with interpretation results that will help determine importance of
+    the subsystems in the hierarchical network.
