@@ -26,6 +26,22 @@ Prediction
 - ``hidden`` directory:
     Directory with files containing the gradients of the hidden layer outputs.
 
+- ``rlipp.out``:
+    Output file with interpretation of predictions made by VNN.
+
+- ``gene_rho.out``:
+    Output file with Spearman correlation between gene embeddings and predicted AUC.
+
+Annotation
+-----------
+
+- ``hierarchy.cx2``:
+    File with hierarchy in HCX format annotated with interpretation results that will help determine importance of
+    the subsystems in the hierarchical network.
+
+- ``rlipp.out``:
+    Aggregated interpretation scores of each provided RO-crates with prediction and interpretation results.
+
 Logs and Metadata
 -----------------
 
