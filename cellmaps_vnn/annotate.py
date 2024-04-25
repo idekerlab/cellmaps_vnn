@@ -108,14 +108,21 @@ class VNNAnnotate:
 
         for directory in self._theargs.model_predictions:
             filepath = os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)
+            has_disease = False
             with open(filepath, 'r') as file:
                 for line in file:
                     if line.startswith('Term') or not line.strip():
+                        if 'Disease' in line:
+                            has_disease = True
                         continue
 
                     parts = line.strip().split('\t')
-                    key = (parts[0], parts[-1])  # (Term, Disease)
-                    values = np.array([float(v) for v in parts[1:-1]])
+                    if has_disease:
+                        key = (parts[0], parts[-1])  # (Term, Disease)
+                        values = np.array([float(v) for v in parts[1:-1]])
+                    else:
+                        key = (parts[0], 'unspecified')
+                        values = np.array([float(v) for v in parts[1:]])
 
                     if key not in data:
                         data[key] = []
@@ -172,7 +179,9 @@ class VNNAnnotate:
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
         for term, p_rho in annotation_dict.items():
-            node_id = hierarchy.lookup_node_id_by_name(term)
+            node_id = term
+            if not isinstance(term, int):
+                node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
                 hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
 
