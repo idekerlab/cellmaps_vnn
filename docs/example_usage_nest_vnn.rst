@@ -29,7 +29,7 @@ Prediction
 
 The flow of prediction and interpretation process using NeST VNN
 
-.. image:: images/nestvnn_pred.jpeg
+.. image:: images/nestvnn_pred.png
   :alt: Overview of Cell Maps VNN prediction flow for NeST VNN
 
 Example run of NeST VNN prediction and interpretation:
