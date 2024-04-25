@@ -27,12 +27,12 @@ in `examples <https://github.com/idekerlab/cellmaps_vnn/tree/main/examples>`__ d
 Prediction
 ~~~~~~~~~~~
 
-The flow of prediction process using NeST VNN
+The flow of prediction and interpretation process using NeST VNN
 
-.. image:: images/nestvnn_pred.png
+.. image:: images/nestvnn_pred.jpeg
   :alt: Overview of Cell Maps VNN prediction flow for NeST VNN
 
-Example run of NeST VNN prediction:
+Example run of NeST VNN prediction and interpretation:
 
 .. code-block::
 
@@ -41,8 +41,14 @@ Example run of NeST VNN prediction:
         --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt --batchsize 64 \
         --zscore_method auc
 
+Annotation
+~~~~~~~~~~~
 
+The flow of annotation process from  NeST VNN
 
+.. image:: images/nestvnn_annot.jpeg
+  :alt: Overview of Cell Maps VNN annotation flow for NeST VNN
 
+.. code-block::
 
-
+    cellmaps_vnncmd.py annotate ./8.cellmaps_vnn_annotation --model_predictions ./7.cellmaps_vnn_prediction [./7.cellmaps_vnn_prediction_2]
