@@ -62,9 +62,9 @@ class VNNAnnotate:
                                                 'selected from the first RO-Crate passed in --model_predictions '
                                                 'argument', type=str)
         parser.add_argument('--disease', help='Specify the disease or cancer type for which the annotations will be '
-                                              'focused. This allows the annotation process to tailor the results '
+                                              'performed. This allows the annotation process to tailor the results '
                                               'according to the particular disease or cancer type. If not set, '
-                                              'prediction scores for all diseases will be aggregated .', type=str)
+                                              'prediction scores for all diseases will be aggregated.', type=str)
         parser.add_argument('--upload_to_ndex',
                             help='If set, annotated hierarchy will be uploaded to NDEx, the server and credentials '
                                  'are stored in config file.', action='store_true')
