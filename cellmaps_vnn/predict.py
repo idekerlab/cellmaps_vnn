@@ -104,8 +104,8 @@ class VNNPredict:
             # Perform interpretation
             calc = RLIPPCalculator(hierarchy, self._theargs.predict_data, self._get_predict_dest_file(),
                                    self._theargs.gene2id, self._theargs.cell2id, hidden_dir,
-                                   rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.drug_count,
-                                   self._theargs.genotype_hiddens)
+                                   rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.genotype_hiddens,
+                                   self._theargs.drug_count)
             calc.calc_scores()
 
         except Exception as e:
