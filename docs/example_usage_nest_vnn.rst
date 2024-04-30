@@ -29,7 +29,7 @@ Prediction
 
 The flow of prediction and interpretation process using NeST VNN
 
-.. image:: images/nestvnn_pred.png
+.. image:: images/nestvnn_pred_int.png
   :alt: Overview of Cell Maps VNN prediction flow for NeST VNN
 
 Example run of NeST VNN prediction and interpretation:
@@ -46,7 +46,7 @@ Annotation
 
 The flow of annotation process from  NeST VNN
 
-.. image:: images/nestvnn_annot.jpeg
+.. image:: images/nestvnn_annot.png
   :alt: Overview of Cell Maps VNN annotation flow for NeST VNN
 
 .. code-block::
