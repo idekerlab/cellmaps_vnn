@@ -14,14 +14,32 @@ Training
 - ``std.txt``:
     Standard deviation values for a given training data based on the specified z-score method ('zscore' and 'robustz').
 
+    .. code-block::
+
+        GDSC1	0.0	1.0
+        GDSC2	0.0	1.0
+
+
 Prediction
 -----------
 
 - ``predict.txt``:
     File containing prediction results.
 
+    .. code-block::
+
+        8.3823e-01
+        7.6122e-01
+        7.3318e-01
+
 - ``predict_feature_grad_0.txt`` (``predict_feature_grad_1.txt``, ``predict_feature_grad_2.txt``):
     Files containing the gradients for each feature.
+
+    .. code-block::
+
+        -3.5083e-04	-1.5043e-03	1.4109e-02	4.2064e-04	-2.6275e-02 ..
+        7.7715e-03	-2.1520e-02	-5.5406e-03	-1.3177e-03	-4.9724e-05 ..
+        9.3111e-03	-2.0868e-02	3.6902e-05	6.6282e-03	-3.1622e-03 ..
 
 - ``hidden`` directory:
     Directory with files containing the gradients of the hidden layer outputs.
@@ -29,8 +47,24 @@ Prediction
 - ``rlipp.out``:
     Output file with interpretation of predictions made by VNN.
 
+    .. code-block::
+
+        Term	P_rho	P_pval	C_rho	C_pval	RLIPP
+        0	1.000e+00	0.000e+00	9.951e-01	0.000e+00	1.005e+00
+        1	7.716e-01	5.312e-67	3.923e-01	1.064e-13	1.967e+00
+        2	5.519e-01	6.151e-28	4.664e-01	2.182e-19	1.183e+00
+        3	7.867e-01	2.638e-71	7.438e-01	7.026e-60	1.058e+00
+
 - ``gene_rho.out``:
     Output file with Spearman correlation between gene embeddings and predicted AUC.
+
+    .. code-block::
+
+        Gene	Rho	P_val
+        ABCB1	-1.215e-01	2.667e-02
+        ABCC3	-9.125e-03	8.682e-01
+        ABL1	5.741e-02	2.962e-01
+        ABL2	-5.068e-02	3.565e-01
 
 Annotation
 -----------
@@ -41,6 +75,13 @@ Annotation
 
 - ``rlipp.out``:
     Aggregated interpretation scores of each provided RO-crates with prediction and interpretation results.
+
+    .. code-block::
+
+        Term	P_rho	P_pval	C_rho	C_pval	RLIPP	Disease
+        0	1.00000e+00	0.00000e+00	9.95100e-01	0.00000e+00	1.00500e+00	unspecified
+        1	7.71600e-01	5.31200e-67	3.92300e-01	1.06400e-13	1.96700e+00	unspecified
+        2	5.51900e-01	6.15100e-28	4.66400e-01	2.18200e-19	1.18300e+00	unspecified
 
 Logs and Metadata
 -----------------
