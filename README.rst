@@ -27,6 +27,7 @@ Dependencies
 ------------
 
 * `cellmaps_utils <https://pypi.org/project/cellmaps-utils>`__
+* `cellmaps_generate_hierarchy <https://pypi.org/project/cellmaps-generate-hierarchy>`__
 * `ndex2 <https://pypi.org/project/ndex2>`__
 * `optuna <https://pypi.org/project/optuna>`__
 * `scikit-learn <https://pypi.org/project/scikit-learn>`__
