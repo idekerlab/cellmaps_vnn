@@ -6,8 +6,10 @@ from multiprocessing import Pool
 from joblib import Parallel, delayed
 from sklearn.decomposition import PCA
 from sklearn.linear_model import RidgeCV
-
+import logging
 from cellmaps_vnn.exceptions import CellmapsvnnError
+
+logger = logging.getLogger(__name__)
 
 
 class RLIPPCalculator:
@@ -28,6 +30,7 @@ class RLIPPCalculator:
     num_hiddens_genotype (int): Mapping for the number of neurons in each term in genotype parts
     drug_count (int): No of top performing drugs
     """
+
     def __init__(self, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
                  rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count):
         self._hierarchy = hierarchy
@@ -254,6 +257,25 @@ class RLIPPCalculator:
         y = np.take(self.predicted_vals, position_map)
         p_rho, p_pval = self.exec_lm(X_parent, y)
         c_rho, c_pval = self.exec_lm(X_child, y)
+
+        if c_rho == 0:
+            logger.error(f"The model was not sufficiently trained - the system importance scores cannot be "
+                         f"calculated correctly. Reason: Division by zero error: c_rho is zero for "
+                         f"term '{term}' and drug '{drug}'")
+            raise CellmapsvnnError(f"The model was not sufficiently trained - the system importance scores cannot be "
+                                   f"calculated correctly. Reason: Division by zero error: c_rho is zero for "
+                                   f"term '{term}' and drug '{drug}'")
+
+        rlipp = p_rho / c_rho
+
+        if np.isnan(rlipp) or np.isinf(rlipp):
+            logger.error(f"The model was not sufficiently trained - the system importance scores cannot be "
+                         f"calculated correctly. Reason: Invalid RLIPP value: {rlipp} for term '{term}' "
+                         f"and drug '{drug}'")
+            raise CellmapsvnnError(f"The model was not sufficiently trained - the system importance scores cannot be "
+                                   f"calculated correctly. Reason: Invalid RLIPP value: {rlipp} for term '{term}' "
+                                   f"and drug '{drug}'")
+
         rlipp = p_rho / c_rho
         result = '{}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\n'.format(term, p_rho, p_pval, c_rho, c_pval, rlipp)
         return result
@@ -306,7 +328,8 @@ class RLIPPCalculator:
 
                         # Parallel computation of RLIPP and gene correlation results
                         rlipp_results = parallel(
-                            delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term], drug_pos_map[drug], term,
+                            delayed(self.calc_term_rlipp)(feature_map[term], child_feature_map[term],
+                                                          drug_pos_map[drug], term,
                                                           drug) for term in self.terms)
                         gene_rho_results = parallel(
                             delayed(self.calc_gene_rho)(feature_map[gene], drug_pos_map[drug], gene, drug) for gene in
