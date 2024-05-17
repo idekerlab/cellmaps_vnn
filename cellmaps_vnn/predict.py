@@ -156,8 +156,8 @@ class VNNPredict:
             dataset = row['dataset']
             train_entry = train_std_df.query('dataset == @dataset')
             if not train_entry.empty:
-                test_std_df.loc[i, 'center'] = float(train_entry['center'])
-                test_std_df.loc[i, 'scale'] = float(train_entry['scale'])
+                test_std_df.loc[i, 'center'] = float(train_entry['center'].iloc[0])
+                test_std_df.loc[i, 'scale'] = float(train_entry['scale'].iloc[0])
         test_df = util.standardize_data(test_df, test_std_df)
 
         feature = []
