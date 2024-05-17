@@ -198,6 +198,10 @@ class VNNAnnotate:
             annotation_dict = self._aggregate_scores_from_diseases()
         else:
             annotation_dict = self._get_scores_for_disease(self._theargs.disease)
+        if len(annotation_dict) == 0:
+            logger.error("No system importance scores available for annotation.")
+            raise CellmapsvnnError("No system importance scores available for annotation. "
+                                   "Please ensure valid data is provided for the hierarchy annotation.")
         self.annotate(annotation_dict)
 
         if self._theargs.upload_to_ndex:
