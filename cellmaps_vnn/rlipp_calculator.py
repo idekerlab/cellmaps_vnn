@@ -34,14 +34,10 @@ class RLIPPCalculator:
     """
 
     def __init__(self, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
-                 rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count, excluded_terms):
+                 rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count, excluded_terms=[]):
         self._hierarchy = hierarchy
         all_terms = list(hierarchy.get_nodes().keys())
-        print("-----")
-        print(excluded_terms)
-        print("-----")
         self.terms = [term for term in all_terms if term not in list(excluded_terms)]
-        print(self.terms)
 
         try:
             self.test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])

@@ -31,11 +31,11 @@ class VNNPredict:
         self._number_feature_grads = 0
         self.use_cuda = torch.cuda.is_available() and self._theargs.cuda is not None
 
+        self.excluded_terms = []
         excluded_terms_path = os.path.join(theargs.inputdir, 'vnn_excluded_terms.txt')
-        with open(excluded_terms_path, 'r') as file:
-            excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
-        self.excluded_terms = excluded_terms
-        print(excluded_terms)
+        if os.path.exists(excluded_terms_path):
+            with open(excluded_terms_path, 'r') as file:
+                self.excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
 
     @staticmethod
     def add_subparser(subparsers):
