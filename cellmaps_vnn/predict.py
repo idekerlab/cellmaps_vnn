@@ -31,6 +31,12 @@ class VNNPredict:
         self._number_feature_grads = 0
         self.use_cuda = torch.cuda.is_available() and self._theargs.cuda is not None
 
+        excluded_terms_path = os.path.join(theargs.inputdir, 'vnn_excluded_terms.txt')
+        with open(excluded_terms_path, 'r') as file:
+            excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
+        self.excluded_terms = excluded_terms
+        print(excluded_terms)
+
     @staticmethod
     def add_subparser(subparsers):
         """
@@ -105,7 +111,7 @@ class VNNPredict:
             calc = RLIPPCalculator(hierarchy, self._theargs.predict_data, self._get_predict_dest_file(),
                                    self._theargs.gene2id, self._theargs.cell2id, hidden_dir,
                                    rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.genotype_hiddens,
-                                   self._theargs.drug_count)
+                                   self._theargs.drug_count, self.excluded_terms)
             calc.calc_scores()
 
         except Exception as e:
