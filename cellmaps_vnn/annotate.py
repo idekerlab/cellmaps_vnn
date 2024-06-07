@@ -37,6 +37,14 @@ class VNNAnnotate:
                 self.hierarchy = hierarchy_path
             else:
                 raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
+        if theargs.parent_network is not None:
+            self.parent_network = theargs.parent_network
+        else:
+            parent_network_path = os.path.join(theargs.model_predictions[0], 'hierarchy_parent.cx2')
+            if os.path.exists(parent_network_path):
+                self.parent_network = parent_network_path
+            else:
+                self.parent_network = None
 
     @staticmethod
     def add_subparser(subparsers):
@@ -58,16 +66,13 @@ class VNNAnnotate:
                             help='Path to one or multiple RO-Crate with the predictions and interpretations '
                                  'obtained from predict step',
                             type=str)
-        parser.add_argument('--hierarchy', help='Path to hierarchy (optional), if not set the hierarchy will be '
-                                                'selected from the first RO-Crate passed in --model_predictions '
-                                                'argument', type=str)
         parser.add_argument('--disease', help='Specify the disease or cancer type for which the annotations will be '
                                               'performed. This allows the annotation process to tailor the results '
                                               'according to the particular disease or cancer type. If not set, '
                                               'prediction scores for all diseases will be aggregated.', type=str)
-        parser.add_argument('--upload_to_ndex',
-                            help='If set, annotated hierarchy will be uploaded to NDEx, the server and credentials '
-                                 'are stored in config file.', action='store_true')
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional), if not set the hierarchy will be '
+                                                'selected from the first RO-Crate passed in --model_predictions '
+                                                'argument', type=str)
         parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy'
                                                      'required if uploading HCX to NDEx', type=str)
         parser.add_argument('--ndexserver', default='ndexbio.org',
@@ -204,16 +209,17 @@ class VNNAnnotate:
                                    "Please ensure valid data is provided for the hierarchy annotation.")
         self.annotate(annotation_dict)
 
-        if self._theargs.upload_to_ndex:
-            if not self._theargs.ndexuser or not self._theargs.ndexpassword:
-                raise CellmapsvnnError("To upload hierarchy to NDEx, user name and password are required.")
+        if self._theargs.ndexuser and self._theargs.ndexpassword:
             if self._theargs.ndexpassword == '-':
                 self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
             ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
                                                   self._theargs.ndexpassword, self._theargs.visibility)
             cx_factory = RawCX2NetworkFactory()
             hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
+            if self.parent_network is None:
+                raise CellmapsvnnError("Parent network is required to upload to NDEx")
             parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
+
             ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
