@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 from datetime import date
 import getpass
 import numpy as np
@@ -240,7 +241,11 @@ class VNNAnnotate:
         """
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
-        return [hierarchy_id, rlipp_id]
+        return_ids = [hierarchy_id, rlipp_id]
+        hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
+        if hierarchy_parent_id is not None:
+            return_ids.append(hierarchy_parent_id)
+        return return_ids
 
     def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
         """
@@ -264,6 +269,24 @@ class VNNAnnotate:
                      'date-published': date.today().strftime('%m-%d-%Y')}
         dataset_id = provenance_utils.register_dataset(outdir,
                                                        source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
+        if self.parent_network is None:
+            return
+        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        shutil.copy(self.parent_network, hierarchy_parent_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
+                     'description': description + ' Hierarchy parent network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_parent_out_file,
                                                        data_dict=data_dict)
         return dataset_id
 

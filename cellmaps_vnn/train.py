@@ -68,6 +68,8 @@ class VNNTrain:
                             default=0.001)
         parser.add_argument('--min_dropout_layer', help='Start dropout from this Layer number', type=int, default=2)
         parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
+        parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
+                            action='store_true')
         return parser
 
     def run(self):
@@ -113,10 +115,16 @@ class VNNTrain:
 
         :return: A list of dataset IDs for the registered model and standard deviation files.
         """
-        id_model = self._register_model_file(outdir, description, keywords, provenance_utils)
-        id_std = self._register_std_file(outdir, description, keywords, provenance_utils)
-        id_hierarchy = self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils)
-        return [id_model, id_std, id_hierarchy]
+        return_ids = [self._register_model_file(outdir, description, keywords, provenance_utils),
+                      self._register_std_file(outdir, description, keywords, provenance_utils),
+                      self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils)]
+        if not self._theargs.skip_parent_copy:
+            id_hierarchy_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
+                                                                       provenance_utils)
+            if id_hierarchy_parent is not None:
+                return_ids.append(id_hierarchy_parent)
+
+        return return_ids
 
     def _register_model_file(self, outdir, description, keywords, provenance_utils):
         """
@@ -187,5 +195,25 @@ class VNNTrain:
                      'date-published': date.today().strftime('%m-%d-%Y')}
         dataset_id = provenance_utils.register_dataset(outdir,
                                                        source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
+        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, 'hierarchy_parent.cx2')
+        if not os.path.exists(hierarchy_parent_in_file):
+            logger.warning("No hierarchy parent in the input directory. Cannot copy.")
+            return None
+        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        shutil.copy(hierarchy_parent_in_file, hierarchy_parent_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
+                     'description': description + ' Hierarchy parent network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_parent_out_file,
                                                        data_dict=data_dict)
         return dataset_id
