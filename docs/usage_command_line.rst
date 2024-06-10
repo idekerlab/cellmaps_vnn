@@ -136,21 +136,21 @@ Annotation mode
 
 *Optional*
 
-- ``--hierarchy HIERARCHY``:
-    Path to hierarchy file (optional), if not set will look for ``hierarchy.cx2`` file the first RO-Crate passed
-    in --model_predictions argument.
-
 - ``--disease DISEASE``:
     Specify the disease or cancer type for which the annotations will be performed. This allows the annotation process
     to tailor the results according to the particular disease or cancer type. If not set, prediction scores for
     all diseases will be aggregated. Examples: Leukemia, Brain Cancer, Lymphoma, Sarcoma, Pancreatic Cancer etc.
 
-- ``--upload_to_ndex``:
-    Set this flag if you want to upload annotated hierarchy to NDEx. If set, additional arguments are required (below).
+- ``--hierarchy HIERARCHY``:
+    Path to hierarchy file (optional), if not set will look for ``hierarchy.cx2`` file the first RO-Crate passed
+    in --model_predictions argument.
+
+*For upload to NDEx*
 
 - ``--parent_network PARENT_NETWORK``:
-    Path to interactome (parent network) of the annotated hierarchy required if uploading hierarchy in HCX format
-    to NDEx.
+    Path to interactome (parent network) of the annotated hierarchy needed if uploading hierarchy in HCX format
+    to NDEx. If if not set will look for ``hierarchy_parent.cx2`` file the first RO-Crate passed
+    in --model_predictions argument.
 
 - ``--ndexserver NDEXSERVER``:
     Server where the hierarchy can be converted to HCX and saved. Default is ``idekerlab.ndexbio.org``.

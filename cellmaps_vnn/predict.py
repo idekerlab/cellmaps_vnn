@@ -373,6 +373,9 @@ class VNNPredict:
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
         output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))
         output_ids.append(self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils))
+        id_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
+        if id_parent is not None:
+            output_ids.append(id_parent)
         return output_ids
 
     def _register_predict_file(self, outdir, description, keywords, provenance_utils):
@@ -482,6 +485,25 @@ class VNNPredict:
                      'date-published': date.today().strftime('%m-%d-%Y')}
         dataset_id = provenance_utils.register_dataset(outdir,
                                                        source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
+        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, 'hierarchy_parent.cx2')
+        if not os.path.exists(hierarchy_parent_in_file):
+            return None
+        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        shutil.copy(hierarchy_parent_in_file, hierarchy_parent_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
+                     'description': description + ' Hierarchy parent network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_parent_out_file,
                                                        data_dict=data_dict)
         return dataset_id
 
