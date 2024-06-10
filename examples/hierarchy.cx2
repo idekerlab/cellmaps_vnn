@@ -85,7 +85,7 @@
     {
         "networkAttributes": [
             {
-                "name": "Hierarchy",
+                "name": "Hierarchy for NeST VNN",
                 "__CD_OriginalNetwork": 0,
                 "description": "Hierarchy in HCX format",
                 "ndexSchema": "hierarchy_v0.1",
