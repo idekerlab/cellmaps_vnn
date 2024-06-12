@@ -47,6 +47,14 @@ Prediction
 - ``rlipp.out``:
     Output file with interpretation of predictions made by VNN.
 
+    .. warning::
+
+        The P_rho score is correlation coefficient. Generally 1 (positive values) mean positive correlation,
+        0 no correlation, and -1 (negative values) negative correlation. However, uf training was not sufficient,
+        the system's important scores like P_rho can be negative, which not necessarily mean negative correlation, but
+        just the fact that the model has not learned meaningful patters from the data, and the hidden values are mostly
+        random, which can result in arbitrary correlation. Recommended: increase number of epochs for training
+
     .. code-block::
 
         Term	P_rho	P_pval	C_rho	C_pval	RLIPP
