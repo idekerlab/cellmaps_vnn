@@ -309,13 +309,15 @@ class RLIPPCalculator:
 
         This method runs the calculation in parallel for efficiency.
         """
+        logger.info('Starting prediction process')
         print('Starting score calculation')
         drug_pos_map = self.create_drug_pos_map()
         sorted_drugs = list(self.create_drug_corr_map_sorted(drug_pos_map).keys())[0:self.drug_count]
 
         start = time.time()
         feature_map, child_feature_map = self.load_all_features()
-        print('Time taken to load features: {:.4f}'.format(time.time() - start))
+        time_passed = time.time() - start
+        logger.info('Time taken to load features: {:.4f}'.format(time_passed))
 
         with open(self.rlipp_file, "w") as rlipp_file, open(self.gene_rho_file, "w") as gene_rho_file:
             rlipp_file.write('Term\tP_rho\tP_pval\tC_rho\tC_pval\tRLIPP\n')
@@ -341,6 +343,8 @@ class RLIPPCalculator:
                         for result in gene_rho_results:
                             gene_rho_file.write(result)
 
-                        print('Drug {} completed in {:.4f} seconds'.format((i + 1), (time.time() - start)))
+                        time_passed = time.time() - start
+                        logger.info('Drug {} completed in {:.4f} seconds'.format((i + 1), time_passed))
                     except Exception as e:
+                        logger.warning(f"Error during processing for drug {drug}: {e}")
                         print(f"Error during processing for drug {drug}: {e}")

@@ -107,7 +107,8 @@ class VNNPredict:
                                    rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.genotype_hiddens,
                                    self._theargs.drug_count)
             calc.calc_scores()
-
+            logger.info('Prediction and interpretation executed successfully')
+            print('Prediction and interpretation executed successfully')
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
             raise CellmapsvnnError(f"Encountered problem in prediction flow: {e}")
@@ -207,6 +208,8 @@ class VNNPredict:
         :param cell_features: Additional cell features for prediction.
         """
         try:
+            logger.info('Starting prediction process')
+            print('Starting prediction process')
             model = self._load_model(model_file)
             test_loader = self._create_data_loader(predict_data, batch_size)
             test_predict, saved_grads = self._predict(model, test_loader, cell_features, hidden_folder)
@@ -462,7 +465,7 @@ class VNNPredict:
             cntr += 1
             if cntr > 5:
                 # Todo: https://github.com/fairscape/fairscape-cli/issues/9
-                logger.error('FAIRSCAPE cannot handle too many files, skipping rest')
+                logger.warning('FAIRSCAPE cannot handle too many files, skipping rest')
                 break
         return hidden_files_ids
 
