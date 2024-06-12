@@ -24,8 +24,8 @@ the `FAIRSCAPE-cli <https://pypi.org/project/fairscape-cli>`__.
 
 .. warning::
 
-    Interpretation and Visualization are not implemented in the current version. As for today, the tool allows to
-    perform training and predictions using data for `NeST VNN <https://github.com/idekerlab/nest_vnn>`__ project.
+    As for today, the tool allows to erform training and predictions using data
+    for `NeST VNN <https://github.com/idekerlab/nest_vnn>`__ project.
 
 **Overview of Cell Maps VNN Flow**
 
