@@ -221,7 +221,10 @@ class VNNAnnotate:
                 raise CellmapsvnnError("Parent network is required to upload to NDEx")
             parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
 
-            ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
+            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
+            print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
+                  f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
+                  f'{ndex_uploader.get_cytoscape_url(hierarchyurl)}')
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """
