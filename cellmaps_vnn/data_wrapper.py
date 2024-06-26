@@ -3,7 +3,7 @@ import sys
 
 import ndex2
 import networkx as nx
-import numpy as np
+import logging
 import pandas as pd
 import random as rd
 import torch
@@ -12,6 +12,7 @@ from ndex2.cx2 import RawCX2NetworkFactory, CX2NetworkXFactory
 import cellmaps_vnn.util as util
 from cellmaps_vnn.exceptions import CellmapsvnnError
 
+logger = logging.getLogger(__name__)
 
 class TrainingDataWrapper:
 
@@ -182,6 +183,7 @@ class TrainingDataWrapper:
         """
         term_direct_gene_map = self._get_direct_genes(cx2_network)
         term_size_map = {}
+        empty_terms = []
 
         for term in self.digraph.nodes():
             term_gene_set = term_direct_gene_map.get(term, set())
@@ -191,9 +193,20 @@ class TrainingDataWrapper:
                     term_gene_set = term_gene_set | term_direct_gene_map[child]
 
             if len(term_gene_set) == 0:
-                raise CellmapsvnnError(f'There is an empty term, please delete term: {term}')
+                logger.warning("There is an empty term, it will not be part of the VNN.")
+                empty_terms.append(term)
+                if term in term_direct_gene_map:
+                    del term_direct_gene_map[term]
             else:
                 term_size_map[term] = len(term_gene_set)
+
+        if empty_terms:
+            output_path = os.path.join(self.outdir, 'vnn_excluded_terms.txt')
+            with open(output_path, 'w') as file:
+                for term in empty_terms:
+                    file.write(f'{term}\n')
+
+        self.digraph.remove_nodes_from(empty_terms)
 
         self.term_size_map = term_size_map
         self.term_direct_gene_map = term_direct_gene_map

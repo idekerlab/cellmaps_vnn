@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 import time
@@ -32,9 +34,10 @@ class RLIPPCalculator:
     """
 
     def __init__(self, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
-                 rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count):
+                 rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count, excluded_terms=[]):
         self._hierarchy = hierarchy
-        self.terms = list(hierarchy.get_nodes().keys())
+        all_terms = list(hierarchy.get_nodes().keys())
+        self.terms = [term for term in all_terms if term not in list(excluded_terms)]
 
         try:
             self.test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])
