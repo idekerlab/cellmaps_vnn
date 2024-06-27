@@ -40,14 +40,17 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                  args=None,
                  gpu=False,
                  slurm_partition=None,
-                 slurm_account=None
+                 slurm_account=None,
+                 input_data_dict=None
                  ):
         super().__init__(outdir)
+        self._start_time = int(time.time())
         self._command = command
         self._args = args
         self._gpu = gpu
         self._slurm_partition = slurm_partition
         self._slurm_account = slurm_account
+        self._input_data_dict=input_data_dict
 
     def _write_slurm_directives(self, out,
                                 allocated_time='6:00:00',
@@ -83,7 +86,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         out.write('echo $SLURM_JOB_ID\n')
         out.write('echo $HOSTNAME\n')
 
-    def run(self):
+    def _write_job_for_command(self):
         """
         Runs VNN
         :raises NotImplementedError: Always raised cause
@@ -96,12 +99,12 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 f.write(
                     'cellmaps_vnncmd.py train ' + self._outdir +
                     ' --inputdir ' + self._args.inputdir +
-                    ' --gene2id ' + self._args.gene2idfile +
-                    ' --cell2id ' + self._args.cell2idfile +
-                    ' --mutations ' + self._args.mutationfile +
-                    ' --cn_deletions ' + self._args.cn_deletionfile +
-                    ' --cn_amplifications ' + self._args.cn_amplificationfile +
-                    ' --training_data ' + self._args.traindatafile +
+                    ' --gene2id ' + self._args.gene2id +
+                    ' --cell2id ' + self._args.cell2id +
+                    ' --mutations ' + self._args.mutations +
+                    ' --cn_deletions ' + self._args.cn_deletions +
+                    ' --cn_amplifications ' + self._args.cn_amplifications +
+                    ' --training_data ' + self._args.training_data +
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -120,6 +123,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
 
                 if self._args.skip_parent_copy:
                     f.write(' --skip_parent_copy')
+                f.write('\n')
                 f.write('exit $?\n')
 
             os.chmod(os.path.join(self._outdir, filename), 0o755)
@@ -132,12 +136,12 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 f.write(
                     'cellmaps_vnncmd.py predict ' + self._outdir +
                     ' --inputdir ' + self._args.inputdir +
-                    ' --gene2id ' + self._args.gene2idfile +
-                    ' --cell2id ' + self._args.cell2idfile +
-                    ' --mutations ' + self._args.mutationfile +
-                    ' --cn_deletions ' + self._args.cn_deletionfile +
-                    ' --cn_amplifications ' + self._args.cn_amplificationfile +
-                    ' --predict_data ' + self._args.traindatafile +
+                    ' --gene2id ' + self._args.gene2id +
+                    ' --cell2id ' + self._args.cell2id +
+                    ' --mutations ' + self._args.mutations +
+                    ' --cn_deletions ' + self._args.cn_deletions +
+                    ' --cn_amplifications ' + self._args.cn_amplifications +
+                    ' --predict_data ' + self._args.predict_data +
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -145,7 +149,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     ' --cpu_count ' + str(self._args.cpu_count) +
                     ' --drug_count ' + str(self._args.drug_count)
                 )
-
+                f.write('\n')
                 f.write('exit $?\n')
 
             os.chmod(os.path.join(self._outdir, filename), 0o755)
@@ -158,17 +162,22 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 self._write_slurm_directives(out=f, job_name='cellmapvnnannotate')
                 f.write(
                     'cellmaps_vnncmd.py annotate ' + self._outdir +
-                    ' --model_predictions ' + ' '.join(self._args.model_predictions) +
-                    ' --disease ' + self._args.disease +
-                    ' --hierarchy ' + self._args.hierarchy +
-                    ' --parent_network ' + self._args.parent_network +
-                    ' --ndexserver ' + self._args.ndexserver +
-                    ' --ndexuser ' + self._args.ndexuser +
-                    ' --ndexpassword ' + self._args.ndexpassword
-                )
-
+                    ' --model_predictions ' + ' '.join(self._args.model_predictions))
+                if self._args.disease:
+                    f.write(' --disease ' + self._args.disease)
+                if self._args.hierarchy:
+                    f.write(' --hierarchy ' + self._args.hierarchy)
+                if self._args.parent_network:
+                    f.write(' --parent_network ' + self._args.parent_network)
+                if self._args.ndexserver:
+                    f.write(' --ndexserver ' + self._args.ndexserver)
+                if self._args.ndexuser:
+                    f.write(' --ndexuser ' + self._args.ndexuser)
+                if self._args.ndexpassword:
+                    f.write(' --ndexpassword ' + self._args.ndexpassword)
                 if self._args.visibility:
                     f.write(' --visibility')
+                f.write('\n')
                 f.write('exit $?\n')
 
             os.chmod(os.path.join(self._outdir, filename), 0o755)
@@ -176,6 +185,37 @@ class SLURMCellmapsvnnRunner(VnnRunner):
 
         else:
             raise CellmapsvnnError("Command not recognized")
+
+    def run(self):
+        """
+        Runs CM4AI Pipeline
+
+
+        :return:
+        """
+        logger.debug('In run method')
+
+        if os.path.isdir(self._outdir):
+            raise CellmapsvnnError(self._outdir + ' already exists')
+
+        if not os.path.isdir(self._outdir):
+            os.makedirs(self._outdir, mode=0o755)
+
+        logutils.write_task_start_json(outdir=self._outdir,
+                                       start_time=self._start_time,
+                                       data={
+                                           'commandlineargs': self._input_data_dict},
+                                       version=cellmaps_vnn.__version__)
+
+        exitcode = 99
+        try:
+            self._write_job_for_command()
+            exitcode = 0
+        finally:
+            logutils.write_task_finish_json(outdir=self._outdir,
+                                            start_time=self._start_time,
+                                            status=exitcode)
+        return exitcode
 
 
 class CellmapsvnnRunner(VnnRunner):

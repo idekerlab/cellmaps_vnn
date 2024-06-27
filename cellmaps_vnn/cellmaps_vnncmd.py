@@ -99,7 +99,7 @@ def main(args):
             raise Exception('Invalid command: ' + str(theargs.command))
 
         if theargs.slurm:
-            use_gpu = True if (theargs.command != VNNAnnotate.COMMAND and theargs.use_gpu is not None) else False
+            use_gpu = True if (theargs.command != VNNAnnotate.COMMAND and theargs.use_gpu) else False
             slurm_partition = 'nrnb-gpu' if (theargs.slurm_partition is None and use_gpu) else theargs.slurm_partition
             slurm_account = 'nrnb-gpu' if (theargs.slurm_account is None and use_gpu) else theargs.slurm_account
 
@@ -108,7 +108,8 @@ def main(args):
                                             args=theargs,
                                             gpu=use_gpu,
                                             slurm_partition=slurm_partition,
-                                            slurm_account=slurm_account
+                                            slurm_account=slurm_account,
+                                            input_data_dict=theargs.__dict__
                                             )
         else:
             runner = CellmapsvnnRunner(outdir=theargs.outdir,
