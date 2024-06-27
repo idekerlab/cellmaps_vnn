@@ -70,6 +70,12 @@ class VNNTrain:
         parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
+        parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
+                            action='store_true')
+        parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
+                            action='store_true')
+        parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
+        parser.add_argument('--slurm_account', help='Slurm account', type=str)
         return parser
 
     def run(self):
@@ -217,3 +223,7 @@ class VNNTrain:
                                                        source_file=hierarchy_parent_out_file,
                                                        data_dict=data_dict)
         return dataset_id
+
+    @property
+    def theargs(self):
+        return self._theargs

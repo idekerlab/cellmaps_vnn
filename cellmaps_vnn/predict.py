@@ -72,6 +72,12 @@ class VNNPredict:
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts', type=int,
                             default=4)
+        parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
+                            action='store_true')
+        parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
+                            action='store_true')
+        parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
+        parser.add_argument('--slurm_account', help='Slurm account', type=str)
         return parser
 
     def run(self):

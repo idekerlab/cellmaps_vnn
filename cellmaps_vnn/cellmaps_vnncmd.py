@@ -9,7 +9,7 @@ from cellmaps_utils import constants
 import cellmaps_vnn
 from cellmaps_vnn.annotate import VNNAnnotate
 from cellmaps_vnn.predict import VNNPredict
-from cellmaps_vnn.runner import CellmapsvnnRunner
+from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
 
 logger = logging.getLogger(__name__)
@@ -98,12 +98,25 @@ def main(args):
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
 
-        runner = CellmapsvnnRunner(outdir=theargs.outdir,
-                                   command=cmd,
-                                   inputdir=theargs.inputdir,
-                                   exitcode=theargs.exitcode,
-                                   skip_logging=theargs.skip_logging,
-                                   input_data_dict=theargs.__dict__)
+        if theargs.slurm:
+            use_gpu = True if theargs.use_gpu is not None else False
+            slurm_partition = 'nrnb-gpu' if (theargs.slurm_partition is None and use_gpu) else theargs.slurm_partition
+            slurm_account = 'nrnb-gpu' if (theargs.slurm_account is None and use_gpu) else theargs.slurm_account
+
+            runner = SLURMCellmapsvnnRunner(outdir=theargs.outdir,
+                                            command=cmd,
+                                            args=theargs,
+                                            gpu=use_gpu,
+                                            slurm_partition=slurm_partition,
+                                            slurm_account=slurm_account
+                                            )
+        else:
+            runner = CellmapsvnnRunner(outdir=theargs.outdir,
+                                       command=cmd,
+                                       inputdir=theargs.inputdir,
+                                       exitcode=theargs.exitcode,
+                                       skip_logging=theargs.skip_logging,
+                                       input_data_dict=theargs.__dict__)
 
         return runner.run()
     except Exception as e:

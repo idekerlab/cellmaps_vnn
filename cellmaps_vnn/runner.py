@@ -5,6 +5,11 @@ import time
 import logging
 from cellmaps_utils import logutils, constants
 from cellmaps_utils.provenance import ProvenanceUtil
+from cellmaps_vnn.annotate import VNNAnnotate
+
+from cellmaps_vnn.predict import VNNPredict
+
+from cellmaps_vnn.train import VNNTrain
 
 import cellmaps_vnn
 from cellmaps_vnn.exceptions import CellmapsvnnError
@@ -12,7 +17,147 @@ from cellmaps_vnn.exceptions import CellmapsvnnError
 logger = logging.getLogger(__name__)
 
 
-class CellmapsvnnRunner(object):
+class VnnRunner(object):
+
+    def __init__(self, outdir):
+        if outdir is None:
+            raise CellmapsvnnError('outdir is None')
+
+        self._outdir = os.path.abspath(outdir)
+
+    def run(self):
+        """
+        Runs VNN
+        :raises NotImplementedError: Always raised cause
+                                     subclasses need to implement
+        """
+        raise NotImplementedError('subclasses need to implement')
+
+
+class SLURMCellmapsvnnRunner(VnnRunner):
+    def __init__(self, outdir=None,
+                 command=None,
+                 args=None,
+                 gpu=False,
+                 slurm_partition=None,
+                 slurm_account=None
+                 ):
+        super().__init__(outdir)
+        self._command = command
+        self._args = args
+        self._gpu = gpu
+        self._slurm_partition = slurm_partition
+        self._slurm_account = slurm_account
+
+    def _write_slurm_directives(self, out,
+                                allocated_time='6:00:00',
+                                mem='32G', cpus_per_task='4',
+                                job_name='cellmaps_vnn'):
+        """
+        Writes slurm directives
+
+        :param allocated_time:
+        :param mem:
+        :param cpus_per_task:
+        :param job_name:
+        :return:
+        """
+        out.write('#!/bin/bash\n\n')
+        out.write('#SBATCH --job-name=' + str(job_name) + '\n')
+        out.write('#SBATCH --chdir=' + self._outdir + '\n')
+
+        out.write('#SBATCH --output=%x.%j.out\n')
+        if self._slurm_partition is not None:
+            out.write('#SBATCH --partition=' + self._slurm_partition + '\n')
+        if self._slurm_account is not None:
+            out.write('#SBATCH --account=' + self._slurm_account + '\n')
+        if self._gpu:
+            out.write('#SBATCH --gres=gpu:1\n')
+            out.write('#SBATCH --dependency=singleton\n')
+        else:
+            out.write('#SBATCH --ntasks=1\n')
+            out.write('#SBATCH --cpus-per-task=' + str(cpus_per_task) + '\n')
+        out.write('#SBATCH --mem=' + str(mem) + '\n')
+        out.write('#SBATCH --time=' + str(allocated_time) + '\n\n')
+
+        out.write('echo $SLURM_JOB_ID\n')
+        out.write('echo $HOSTNAME\n')
+
+    def run(self):
+        """
+        Runs VNN
+        :raises NotImplementedError: Always raised cause
+                                     subclasses need to implement
+        """
+        if isinstance(self._command, VNNTrain):
+            filename = 'cellmapvnntrainjob.sh'
+            with open(os.path.join(self._outdir, filename), 'w') as f:
+                self._write_slurm_directives(out=f, job_name='cellmapvnntrain')
+                f.write(
+                    'cellmaps_vnncmd.py train ' + self._outdir +
+                    ' --inputdir ' + self._args.inputdir +
+                    ' --gene2id ' + self._args.gene2idfile +
+                    ' --cell2id ' + self._args.cell2idfile +
+                    ' --mutations ' + self._args.mutationfile +
+                    ' --cn_deletions ' + self._args.cn_deletionfile +
+                    ' --cn_amplifications ' + self._args.cn_amplificationfile +
+                    ' --training_data ' + self._args.traindatafile +
+                    ' --batchsize ' + str(self._args.batchsize) +
+                    ' --cuda ' + str(self._args.cuda) +
+                    ' --zscore_method ' + self._args.zscore_method +
+                    ' --std ' + self._args.std +
+                    ' --epoch ' + str(self._args.epoch) +
+                    ' --lr ' + str(self._args.lr) +
+                    ' --wd ' + str(self._args.wd) +
+                    ' --alpha ' + str(self._args.alpha) +
+                    ' --genotype_hiddens ' + str(self._args.genotype_hiddens) +
+                    ' --optimize ' + str(self._args.optimize) +
+                    ' --patience ' + str(self._args.patience) +
+                    ' --delta ' + str(self._args.delta) +
+                    ' --min_dropout_layer ' + str(self._args.min_dropout_layer) +
+                    ' --dropout_fraction ' + str(self._args.dropout_fraction)
+                )
+
+                if self._args.skip_parent_copy:
+                    f.write(' --skip_parent_copy')
+                f.write('exit $?\n')
+
+            os.chmod(os.path.join(self._outdir, filename), 0o755)
+            return filename
+
+        elif isinstance(self._command, VNNPredict):
+            filename = 'cellmapvnnpredictjob.sh'
+            with open(os.path.join(self._outdir, filename), 'w') as f:
+                self._write_slurm_directives(out=f, job_name='cellmapvnnpredict')
+                f.write(
+                    'cellmaps_vnncmd.py predict ' + self._outdir +
+                    ' --inputdir ' + self._args.inputdir +
+                    ' --gene2id ' + self._args.gene2idfile +
+                    ' --cell2id ' + self._args.cell2idfile +
+                    ' --mutations ' + self._args.mutationfile +
+                    ' --cn_deletions ' + self._args.cn_deletionfile +
+                    ' --cn_amplifications ' + self._args.cn_amplificationfile +
+                    ' --predict_data ' + self._args.traindatafile +
+                    ' --batchsize ' + str(self._args.batchsize) +
+                    ' --cuda ' + str(self._args.cuda) +
+                    ' --zscore_method ' + self._args.zscore_method +
+                    ' --genotype_hiddens ' + str(self._args.genotype_hiddens) +
+                    ' --cpu_count ' + str(self._args.cpu_count) +
+                    ' --drug_count ' + str(self._args.drug_count)
+                )
+
+                f.write('exit $?\n')
+
+            os.chmod(os.path.join(self._outdir, filename), 0o755)
+            return filename
+
+        elif isinstance(self._command, VNNAnnotate):
+            pass
+        else:
+            raise CellmapsvnnError("Command not recognized")
+
+
+class CellmapsvnnRunner(VnnRunner):
     """
     Class to run algorithm
     """
@@ -43,10 +188,7 @@ class CellmapsvnnRunner(object):
                                  `RO-Crate <https://www.researchobject.org/ro-crate>`__ creation and population
         :type provenance_utils: :py:class:`~cellmaps_utils.provenance.ProvenanceUtil`
         """
-        if outdir is None:
-            raise CellmapsvnnError('outdir is None')
-
-        self._outdir = os.path.abspath(outdir)
+        super().__init__(outdir)
         self._command = command
         self._inputdir = inputdir
         self._name = name
