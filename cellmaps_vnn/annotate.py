@@ -86,6 +86,10 @@ class VNNAnnotate:
         parser.add_argument('--visibility', action='store_true',
                             help='If set, makes Hierarchy and interactome network loaded onto '
                                  'NDEx publicly visible')
+        parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
+                            action='store_true')
+        parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
+        parser.add_argument('--slurm_account', help='Slurm account', type=str)
 
     def _get_rlipp_out_dest_file(self):
         """

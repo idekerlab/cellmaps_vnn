@@ -152,7 +152,28 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             return filename
 
         elif isinstance(self._command, VNNAnnotate):
-            pass
+            self._gpu = False
+            filename = 'cellmapvnnannotatejob.sh'
+            with open(os.path.join(self._outdir, filename), 'w') as f:
+                self._write_slurm_directives(out=f, job_name='cellmapvnnannotate')
+                f.write(
+                    'cellmaps_vnncmd.py annotate ' + self._outdir +
+                    ' --model_predictions ' + ' '.join(self._args.model_predictions) +
+                    ' --disease ' + self._args.disease +
+                    ' --hierarchy ' + self._args.hierarchy +
+                    ' --parent_network ' + self._args.parent_network +
+                    ' --ndexserver ' + self._args.ndexserver +
+                    ' --ndexuser ' + self._args.ndexuser +
+                    ' --ndexpassword ' + self._args.ndexpassword
+                )
+
+                if self._args.visibility:
+                    f.write(' --visibility')
+                f.write('exit $?\n')
+
+            os.chmod(os.path.join(self._outdir, filename), 0o755)
+            return filename
+
         else:
             raise CellmapsvnnError("Command not recognized")
 

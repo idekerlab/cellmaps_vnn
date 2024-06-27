@@ -99,7 +99,7 @@ def main(args):
             raise Exception('Invalid command: ' + str(theargs.command))
 
         if theargs.slurm:
-            use_gpu = True if theargs.use_gpu is not None else False
+            use_gpu = True if (theargs.command != VNNAnnotate.COMMAND and theargs.use_gpu is not None) else False
             slurm_partition = 'nrnb-gpu' if (theargs.slurm_partition is None and use_gpu) else theargs.slurm_partition
             slurm_account = 'nrnb-gpu' if (theargs.slurm_account is None and use_gpu) else theargs.slurm_account
 
