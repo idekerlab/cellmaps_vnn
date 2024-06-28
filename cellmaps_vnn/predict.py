@@ -482,11 +482,27 @@ class VNNPredict:
         return hidden_files_ids
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
-        hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
-        shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
+        hierarchy_out_file = os.path.join(outdir, 'original_hierarchy.cx2')
+        shutil.copy(os.path.join(self._theargs.inputdir, 'original_hierarchy.cx2'), hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _copy_and_register_pruned_hierarchy(self, outdir, description, keywords, provenance_utils):
+        hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
+        shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
+                     'description': description + ' Hierarchy network file used to build VNN',
                      'keywords': keywords,
                      'data-format': 'CX2',
                      'author': cellmaps_vnn.__name__,

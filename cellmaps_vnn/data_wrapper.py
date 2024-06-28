@@ -1,3 +1,4 @@
+import copy
 import os.path
 import sys
 
@@ -184,6 +185,7 @@ class TrainingDataWrapper:
         term_direct_gene_map = self._get_direct_genes(cx2_network)
         term_size_map = {}
         empty_terms = []
+        pruned_hierarchy = copy.deepcopy(cx2_network)
 
         for term in self.digraph.nodes():
             term_gene_set = term_direct_gene_map.get(term, set())
@@ -195,6 +197,7 @@ class TrainingDataWrapper:
             if len(term_gene_set) == 0:
                 logger.warning("There is an empty term, it will not be part of the VNN.")
                 empty_terms.append(term)
+                pruned_hierarchy.remove_node(term)
                 if term in term_direct_gene_map:
                     del term_direct_gene_map[term]
             else:
@@ -205,6 +208,8 @@ class TrainingDataWrapper:
             with open(output_path, 'w') as file:
                 for term in empty_terms:
                     file.write(f'{term}\n')
+
+        pruned_hierarchy.write_as_raw_cx2(os.path.join(self.outdir, 'hierarchy.cx2'))
 
         self.digraph.remove_nodes_from(empty_terms)
 
