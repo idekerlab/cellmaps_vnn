@@ -197,7 +197,7 @@ class TrainingDataWrapper:
             if len(term_gene_set) == 0:
                 logger.warning("There is an empty term, it will not be part of the VNN.")
                 empty_terms.append(term)
-                pruned_hierarchy.remove_node(term)
+                pruned_hierarchy.remove_node(int(term))
                 if term in term_direct_gene_map:
                     del term_direct_gene_map[term]
             else:
