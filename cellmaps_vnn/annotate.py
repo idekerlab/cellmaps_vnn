@@ -30,6 +30,7 @@ class VNNAnnotate:
         :raises CellmapsvnnError: If no hierarchy path is specified or found.
         """
         self._theargs = theargs
+        self.original_hierarchy = None
         if theargs.hierarchy is not None:
             self.hierarchy = theargs.hierarchy
         else:
@@ -38,6 +39,9 @@ class VNNAnnotate:
                 self.hierarchy = hierarchy_path
             else:
                 raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
+            original_hierarchy_path = os.path.join(theargs.model_predictions[0], 'original_hierarchy.cx2')
+            if os.path.exists(original_hierarchy_path):
+                self.original_hierarchy = original_hierarchy_path
         if theargs.parent_network is not None:
             self.parent_network = theargs.parent_network
         else:
@@ -108,6 +112,15 @@ class VNNAnnotate:
         :rtype: str
         """
         return os.path.join(self._theargs.outdir, 'hierarchy.cx2')
+
+    def _get_original_hierarchy_dest_file(self):
+        """
+        Constructs the file path for the hierarchy output file within the specified output directory.
+
+        :return: The file path for the hierarchy output file.
+        :rtype: str
+        """
+        return os.path.join(self._theargs.outdir, 'original_hierarchy.cx2')
 
     def _aggregate_prediction_scores_from_models(self):
         """
@@ -188,15 +201,23 @@ class VNNAnnotate:
         """
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
+        original_hierarchy = None
+        if self.original_hierarchy is not None:
+            original_hierarchy = factory.get_cx2network(self.original_hierarchy)
+
         for term, p_rho in annotation_dict.items():
             node_id = term
             if not isinstance(term, int):
                 node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
                 hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
+                if original_hierarchy is not None:
+                    original_hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
 
         # TODO: apply style to the hierarchy
         hierarchy.write_as_raw_cx2(self._get_hierarchy_dest_file())
+        if original_hierarchy is not None:
+            original_hierarchy.write_as_raw_cx2(self._get_original_hierarchy_dest_file())
 
     def run(self):
         """
@@ -249,12 +270,41 @@ class VNNAnnotate:
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
         return_ids = [hierarchy_id, rlipp_id]
+        if self.original_hierarchy is not None:
+            original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
+            return_ids.append(original_hierarchy_id)
         hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
         if hierarchy_parent_id is not None:
             return_ids.append(hierarchy_parent_id)
         return return_ids
 
     def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
+        """
+        Register annotated hierarchy file with the FAIRSCAPE service for data provenance.
+
+        :param outdir: The output directory where the outputs are stored.
+        :param description: Description of the file for provenance registration.
+        :param keywords: List of keywords associated with the file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered file.
+        """
+        hierarchy_out_file = self._get_original_hierarchy_dest_file()
+
+        data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Annotated hierarchy file that was used to build '
+                                                                    'VNN',
+                     'description': description + ' Annotated hierarchy file that was used to build VNN',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_original_hierarchy(self, outdir, description, keywords, provenance_utils):
         """
         Register annotated hierarchy file with the FAIRSCAPE service for data provenance.
 

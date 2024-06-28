@@ -381,6 +381,9 @@ class VNNPredict:
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
         output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))
+        orginal_hierarchy_id = self._copy_and_register_original_hierarchy(outdir, description, keywords, provenance_utils)
+        if orginal_hierarchy_id is not None:
+            output_ids.append(orginal_hierarchy_id)
         output_ids.append(self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils))
         id_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
         if id_parent is not None:
@@ -481,9 +484,12 @@ class VNNPredict:
                 break
         return hidden_files_ids
 
-    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
+    def _copy_and_register_original_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, 'original_hierarchy.cx2')
-        shutil.copy(os.path.join(self._theargs.inputdir, 'original_hierarchy.cx2'), hierarchy_out_file)
+        hierarchy_in_file = os.path.join(self._theargs.inputdir, 'original_hierarchy.cx2')
+        if not os.path.exists(hierarchy_in_file):
+            return None
+        shutil.copy(hierarchy_in_file, hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
@@ -497,7 +503,7 @@ class VNNPredict:
                                                        data_dict=data_dict)
         return dataset_id
 
-    def _copy_and_register_pruned_hierarchy(self, outdir, description, keywords, provenance_utils):
+    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
         shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
 
