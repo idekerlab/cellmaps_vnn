@@ -191,6 +191,25 @@ class VNNAnnotate:
 
         return scores
 
+    def _upload_to_ndex_if_credentials_provided(self):
+        if self._theargs.ndexserver and self._theargs.ndexuser and self._theargs.ndexpassword:
+            if self.parent_network is None:
+                raise CellmapsvnnError("Parent network is required to upload hierarchy to NDEx")
+
+            if self._theargs.ndexpassword == '-':
+                self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
+
+            ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
+                                                  self._theargs.ndexpassword, self._theargs.visibility)
+            cx_factory = RawCX2NetworkFactory()
+            hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
+            parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
+
+            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
+            print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
+                  f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
+                  f'{ndex_uploader.get_cytoscape_url(hierarchyurl)}')
+
     def annotate(self, annotation_dict):
         """
         Annotates the hierarchy with P_rho scores from the given annotation dictionary,
@@ -234,22 +253,7 @@ class VNNAnnotate:
             raise CellmapsvnnError("No system importance scores available for annotation. "
                                    "Please ensure valid data is provided for the hierarchy annotation.")
         self.annotate(annotation_dict)
-
-        if self._theargs.ndexuser and self._theargs.ndexpassword:
-            if self._theargs.ndexpassword == '-':
-                self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
-            ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
-                                                  self._theargs.ndexpassword, self._theargs.visibility)
-            cx_factory = RawCX2NetworkFactory()
-            hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
-            if self.parent_network is None:
-                raise CellmapsvnnError("Parent network is required to upload to NDEx")
-            parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
-
-            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
-            print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
-                  f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
-                  f'{ndex_uploader.get_cytoscape_url(hierarchyurl)}')
+        self._upload_to_ndex_if_credentials_provided()
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """
