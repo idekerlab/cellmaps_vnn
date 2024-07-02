@@ -5,7 +5,7 @@ from datetime import date
 import getpass
 import numpy as np
 import pandas as pd
-from cellmaps_generate_hierarchy.ndexupload import NDExHierarchyUploader
+from cellmaps_utils.ndexupload import NDExHierarchyUploader
 from cellmaps_utils import constants
 
 import cellmaps_vnn
@@ -192,6 +192,14 @@ class VNNAnnotate:
         return scores
 
     def _upload_to_ndex_if_credentials_provided(self):
+        """
+        Uploads hierarchy and parent network to NDEx if credentials are provided.
+
+        This method checks if the NDEx server, user, and password credentials are provided.
+        If they are, it uploads the hierarchy and parent network to NDEx. If the parent
+        network is not specified, it raises an error. If the password is specified as '-',
+        it prompts the user to enter the password interactively.
+        """
         if self._theargs.ndexserver and self._theargs.ndexuser and self._theargs.ndexpassword:
             if self.parent_network is None:
                 raise CellmapsvnnError("Parent network is required to upload hierarchy to NDEx")
@@ -201,11 +209,9 @@ class VNNAnnotate:
 
             ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
                                                   self._theargs.ndexpassword, self._theargs.visibility)
-            cx_factory = RawCX2NetworkFactory()
-            hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
-            parent_network = cx_factory.get_cx2network(self._theargs.parent_network)
+            _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
+                hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self._theargs.parent_network)
 
-            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network, parent_network)
             print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
                   f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
                   f'{ndex_uploader.get_cytoscape_url(hierarchyurl)}')
