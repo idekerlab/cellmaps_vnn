@@ -202,7 +202,9 @@ class VNNAnnotate:
         """
         if self._theargs.ndexserver and self._theargs.ndexuser and self._theargs.ndexpassword:
             if self.parent_network is None:
-                raise CellmapsvnnError("Parent network is required to upload hierarchy to NDEx")
+                logger.error("Parent network is required to upload hierarchy to NDEx. Skipping upload to NDEx.")
+                print("Parent network is required to upload hierarchy to NDEx. Skipping upload to NDEx.")
+                return
 
             if self._theargs.ndexpassword == '-':
                 self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
@@ -210,7 +212,7 @@ class VNNAnnotate:
             ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
                                                   self._theargs.ndexpassword, self._theargs.visibility)
             _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
-                hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self._theargs.parent_network)
+                hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
 
             print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
                   f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
@@ -283,8 +285,8 @@ class VNNAnnotate:
         if self.original_hierarchy is not None:
             original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
             return_ids.append(original_hierarchy_id)
-        hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
-        if hierarchy_parent_id is not None:
+        if self.parent_network is not None:
+            hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
             return_ids.append(hierarchy_parent_id)
         return return_ids
 
@@ -340,8 +342,6 @@ class VNNAnnotate:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        if self.parent_network is None:
-            return
         hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
         shutil.copy(self.parent_network, hierarchy_parent_out_file)
 
