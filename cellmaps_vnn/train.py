@@ -22,6 +22,7 @@ class VNNTrain:
         Constructor for training Visual Neural Network.
         """
         self._theargs = theargs
+        self._outdir = os.path.abspath(theargs.outdir)
         self._theargs.modelfile = self._get_model_dest_file()
         self._theargs.stdfile = self._get_std_dest_file()
 
@@ -99,7 +100,7 @@ class VNNTrain:
 
         :return: The file path for the model file.
         """
-        return os.path.join(self._theargs.outdir, 'model_final.pt')
+        return os.path.join(self._outdir, 'model_final.pt')
 
     def _get_std_dest_file(self):
         """
@@ -107,7 +108,7 @@ class VNNTrain:
 
         :return: The file path for the standard deviation file.
         """
-        return os.path.join(self._theargs.outdir, self._theargs.std)
+        return os.path.join(self._outdir, self._theargs.std)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """

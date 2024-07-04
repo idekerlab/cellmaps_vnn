@@ -28,6 +28,7 @@ class VNNPredict:
         Constructor for predicting with a trained model.
         """
         self._theargs = theargs
+        self._outdir = os.path.abspath(theargs.outdir)
         self._number_feature_grads = 0
         self.use_cuda = torch.cuda.is_available() and self._theargs.cuda is not None
 
@@ -111,8 +112,8 @@ class VNNPredict:
             hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
             factory = RawCX2NetworkFactory()
             hierarchy = factory.get_cx2network(hierarchy_file)
-            rlipp_file = os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
-            gene_rho_file = os.path.join(self._theargs.outdir, 'gene_rho.out')
+            rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
+            gene_rho_file = os.path.join(self._outdir, 'gene_rho.out')
             # Perform interpretation
             calc = RLIPPCalculator(hierarchy, self._theargs.predict_data, self._get_predict_dest_file(),
                                    self._theargs.gene2id, self._theargs.cell2id, hidden_dir,
@@ -186,7 +187,7 @@ class VNNPredict:
 
         :return: The file path to the prediction results file.
         """
-        return os.path.join(self._theargs.outdir, 'predict.txt')
+        return os.path.join(self._outdir, 'predict.txt')
 
     def _get_feature_grad_dest_file(self, grad):
         """
@@ -194,7 +195,7 @@ class VNNPredict:
 
         :return: The file path to the prediction feature grad file.
         """
-        return os.path.join(self._theargs.outdir, f'predict_feature_grad_{grad}.txt')
+        return os.path.join(self._outdir, f'predict_feature_grad_{grad}.txt')
 
     def _get_hidden_dir_path(self):
         """
@@ -202,7 +203,7 @@ class VNNPredict:
 
         :return: The file path to the hidden directory.
         """
-        return os.path.join(self._theargs.outdir, 'hidden/')
+        return os.path.join(self._outdir, 'hidden/')
 
     def _to_device(self, tensor):
         if self.use_cuda:

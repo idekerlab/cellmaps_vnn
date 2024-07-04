@@ -30,6 +30,7 @@ class VNNAnnotate:
         :raises CellmapsvnnError: If no hierarchy path is specified or found.
         """
         self._theargs = theargs
+        self._outdir = os.path.abspath(theargs.outdir)
         self.original_hierarchy = None
         if theargs.hierarchy is not None:
             self.hierarchy = theargs.hierarchy
@@ -102,7 +103,7 @@ class VNNAnnotate:
         :return: The file path for the RLIPP output file.
         :rtype: str
         """
-        return os.path.join(self._theargs.outdir, vnnconstants.RLIPP_OUTPUT_FILE)
+        return os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
 
     def _get_hierarchy_dest_file(self):
         """
@@ -111,7 +112,7 @@ class VNNAnnotate:
         :return: The file path for the hierarchy output file.
         :rtype: str
         """
-        return os.path.join(self._theargs.outdir, 'hierarchy.cx2')
+        return os.path.join(self._outdir, 'hierarchy.cx2')
 
     def _get_original_hierarchy_dest_file(self):
         """
@@ -120,7 +121,7 @@ class VNNAnnotate:
         :return: The file path for the hierarchy output file.
         :rtype: str
         """
-        return os.path.join(self._theargs.outdir, 'original_hierarchy.cx2')
+        return os.path.join(self._outdir, 'original_hierarchy.cx2')
 
     def _aggregate_prediction_scores_from_models(self):
         """
