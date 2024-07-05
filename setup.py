@@ -58,6 +58,7 @@ setup(
     name='cellmaps_vnn',
     packages=find_packages(include=['cellmaps_vnn']),
     package_dir={'cellmaps_vnn': 'cellmaps_vnn'},
+    package_data={'cellmaps_vnn': ['nest_style.cx2']},
     scripts=[ 'cellmaps_vnn/cellmaps_vnncmd.py'],
     setup_requires=setup_requirements,
     test_suite='tests',

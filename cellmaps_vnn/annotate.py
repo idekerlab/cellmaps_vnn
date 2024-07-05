@@ -251,8 +251,13 @@ class VNNAnnotate:
                     original_hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
 
         # TODO: apply style to the hierarchy
+        path_to_style_network = os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'nest_style.cx2')
+        style_network = factory.get_cx2network(path_to_style_network)
+        vis_prop = style_network.get_visual_properties()
+        hierarchy.set_visual_properties(vis_prop)
         hierarchy.write_as_raw_cx2(self._get_hierarchy_dest_file())
         if original_hierarchy is not None:
+            original_hierarchy.set_visual_properties(vis_prop)
             original_hierarchy.write_as_raw_cx2(self._get_original_hierarchy_dest_file())
 
     def run(self):
