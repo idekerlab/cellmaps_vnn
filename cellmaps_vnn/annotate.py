@@ -79,8 +79,9 @@ class VNNAnnotate:
         parser.add_argument('--hierarchy', help='Path to hierarchy (optional), if not set the hierarchy will be '
                                                 'selected from the first RO-Crate passed in --model_predictions '
                                                 'argument', type=str)
-        parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy'
-                                                     'required if uploading HCX to NDEx', type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy '
+                                                     'or NDEx UUID of parent network (required if uploading '
+                                                     'HCX to NDEx)', type=str)
         parser.add_argument('--ndexserver', default='ndexbio.org',
                             help='Server where annotated hierarchy will be uploaded to')
         parser.add_argument('--ndexuser',
@@ -212,8 +213,14 @@ class VNNAnnotate:
 
             ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
                                                   self._theargs.ndexpassword, self._theargs.visibility)
-            _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
-                hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
+            if os.path.isfile(self.parent_network):
+                _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
+                    hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
+            else:
+                cx_factory = RawCX2NetworkFactory()
+                hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
+                _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network,
+                                                                                        self.parent_network)
 
             print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
                   f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
@@ -286,8 +293,9 @@ class VNNAnnotate:
         if self.original_hierarchy is not None:
             original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
             return_ids.append(original_hierarchy_id)
-        if self.parent_network is not None:
-            hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords, provenance_utils)
+        if self.parent_network is not None and os.path.isfile(self.parent_network):
+            hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
+                                                                           provenance_utils)
             return_ids.append(hierarchy_parent_id)
         return return_ids
 
