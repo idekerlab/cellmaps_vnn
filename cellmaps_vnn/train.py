@@ -10,6 +10,7 @@ import cellmaps_vnn
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
 from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
+from cellmaps_vnn.util import copy_and_register_gene2id_file
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,9 @@ class VNNTrain:
         return_ids = [self._register_model_file(outdir, description, keywords, provenance_utils),
                       self._register_std_file(outdir, description, keywords, provenance_utils),
                       self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils),
-                      self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils)]
+                      self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
+                      copy_and_register_gene2id_file(self._theargs.gene2id, outdir, description, keywords,
+                                                     provenance_utils)]
         if not self._theargs.skip_parent_copy:
             id_hierarchy_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
                                                                            provenance_utils)

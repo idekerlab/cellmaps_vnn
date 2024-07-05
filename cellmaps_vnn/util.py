@@ -1,6 +1,10 @@
 import math
 import os
 import logging
+import shutil
+from datetime import date
+
+import cellmaps_vnn
 import numpy as np
 import pandas as pd
 import torch
@@ -247,3 +251,20 @@ def pearson_corr(x, y):
     yy = y - torch.mean(y)
 
     return torch.sum(xx * yy) / (torch.norm(xx, 2) * torch.norm(yy, 2))
+
+
+def copy_and_register_gene2id_file(genet2id_in_file, outdir, description, keywords, provenance_utils):
+    gene2id_out_file = os.path.join(outdir, 'gene2ind.txt')
+    shutil.copy(genet2id_in_file, gene2id_out_file)
+
+    data_dict = {'name': os.path.basename(gene2id_out_file) + ' gene to index mapping file',
+                 'description': description + ' gene to index mapping file',
+                 'keywords': keywords,
+                 'data-format': 'txt',
+                 'author': cellmaps_vnn.__name__,
+                 'version': cellmaps_vnn.__version__,
+                 'date-published': date.today().strftime('%m-%d-%Y')}
+    dataset_id = provenance_utils.register_dataset(outdir,
+                                                   source_file=gene2id_out_file,
+                                                   data_dict=data_dict)
+    return dataset_id

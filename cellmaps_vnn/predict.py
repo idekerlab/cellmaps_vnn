@@ -2,6 +2,8 @@ import os
 import logging
 import shutil
 from datetime import date
+
+from cellmaps_vnn.util import copy_and_register_gene2id_file
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -377,8 +379,9 @@ class VNNPredict:
 
         :return: A list of dataset IDs for the registered files.
         """
-        output_ids = list()
-        output_ids.append(self._register_predict_file(outdir, description, keywords, provenance_utils))
+        output_ids = [copy_and_register_gene2id_file(self._theargs.gene2id, outdir, description, keywords,
+                                                     provenance_utils),
+                      self._register_predict_file(outdir, description, keywords, provenance_utils)]
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
         output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))

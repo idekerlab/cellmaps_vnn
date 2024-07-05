@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from cellmaps_utils.ndexupload import NDExHierarchyUploader
 from cellmaps_utils import constants
+from cellmaps_vnn.util import copy_and_register_gene2id_file
 
 import cellmaps_vnn
 import cellmaps_vnn.constants as vnnconstants
@@ -290,6 +291,11 @@ class VNNAnnotate:
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
         return_ids = [hierarchy_id, rlipp_id]
+        gene2ind_path = os.path.join(self._theargs.model_predictions[0], 'gene2ind.txt')
+        if os.path.exists(gene2ind_path):
+            gene2ind_id = copy_and_register_gene2id_file(gene2ind_path, outdir, description, keywords,
+                                                         provenance_utils)
+            return_ids.append(gene2ind_id)
         if self.original_hierarchy is not None:
             original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
             return_ids.append(original_hierarchy_id)
