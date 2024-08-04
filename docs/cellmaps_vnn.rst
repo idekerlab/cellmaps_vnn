@@ -4,6 +4,14 @@ cellmaps\_vnn package
 Submodules
 ----------
 
+cellmaps\_vnn.annotate module
+-----------------------------
+
+.. automodule:: cellmaps_vnn.annotate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cellmaps\_vnn.ccc\_loss module
 ------------------------------
 
@@ -16,6 +24,14 @@ cellmaps\_vnn.cellmaps\_vnncmd module
 -------------------------------------
 
 .. automodule:: cellmaps_vnn.cellmaps_vnncmd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cellmaps\_vnn.constants module
+------------------------------
+
+.. automodule:: cellmaps_vnn.constants
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,6 +56,14 @@ cellmaps\_vnn.predict module
 ----------------------------
 
 .. automodule:: cellmaps_vnn.predict
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cellmaps\_vnn.rlipp\_calculator module
+--------------------------------------
+
+.. automodule:: cellmaps_vnn.rlipp_calculator
    :members:
    :undoc-members:
    :show-inheritance:
