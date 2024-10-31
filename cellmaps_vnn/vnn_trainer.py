@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class VNNTrainer:
+    TRAINING_PROGRESS_FILE = 'training_progress.tsv'
 
     def __init__(self, data_wrapper):
         """
@@ -63,24 +64,25 @@ class VNNTrainer:
 
         optimizer = self._configure_optimizer()
 
-        logger.info("epoch\ttrain_corr\ttrain_loss\ttrue_auc\tpred_auc\tval_corr\tval_loss\tgrad_norm\telapsed_time")
-        min_loss = None
+        with open(os.path.join(self.data_wrapper.outdir, VNNTrainer.TRAINING_PROGRESS_FILE), "w") as f:
+            f.write("epoch\ttrain_corr\ttrain_loss\ttrue_auc\tpred_auc\tval_corr\tval_loss\tgrad_norm\telapsed_time\n")
+            min_loss = None
 
-        for epoch in range(self.data_wrapper.epochs):
-            epoch_start_time = time.time()
-            train_predict, total_loss, gradnorms, train_label_gpu = self._train_epoch(train_loader, optimizer,
-                                                                                      term_mask_map)
-            val_predict, val_loss, val_label_gpu = self._validate_epoch(val_loader)
+            for epoch in range(self.data_wrapper.epochs):
+                epoch_start_time = time.time()
+                train_predict, total_loss, gradnorms, train_label_gpu = self._train_epoch(train_loader, optimizer,
+                                                                                          term_mask_map)
+                val_predict, val_loss, val_label_gpu = self._validate_epoch(val_loader)
 
-            train_corr, val_corr, true_auc, pred_auc = self._calculate_metrics(train_predict, train_label_gpu,
-                                                                               val_predict, val_label_gpu)
-            epoch_end_time = time.time()
+                train_corr, val_corr, true_auc, pred_auc = self._calculate_metrics(train_predict, train_label_gpu,
+                                                                                   val_predict, val_label_gpu)
+                epoch_end_time = time.time()
 
-            elapsed_time = epoch_end_time - epoch_start_time
-            logger.info(f"{epoch}\t{train_corr:.4f}\t{total_loss:.4f}\t{true_auc:.4f}\t{pred_auc:.4f}\t"
-                        f"{val_corr:.4f}\t{val_loss:.4f}\t{gradnorms:.4f}\t{elapsed_time:.4f}")
+                elapsed_time = epoch_end_time - epoch_start_time
+                f.write(f"{epoch}\t{train_corr:.4f}\t{total_loss:.4f}\t{true_auc:.4f}\t{pred_auc:.4f}\t"
+                            f"{val_corr:.4f}\t{val_loss:.4f}\t{gradnorms:.4f}\t{elapsed_time:.4f}\n")
 
-            min_loss = self._save_model_if_improved(min_loss, val_loss, epoch)
+                min_loss = self._save_model_if_improved(min_loss, val_loss, epoch)
 
         return min_loss
 

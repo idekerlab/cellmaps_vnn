@@ -28,8 +28,7 @@ class VnnRunner(object):
     def run(self):
         """
         Runs VNN
-        :raises NotImplementedError: Always raised cause
-                                     subclasses need to implement
+        :raises NotImplementedError: Always raised cause subclasses need to implement
         """
         raise NotImplementedError('subclasses need to implement')
 
