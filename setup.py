@@ -33,8 +33,6 @@ requirements = ['cellmaps_utils==0.4.0',
 
 setup_requirements = []
 
-test_requirements = []
-
 setup(
     author="Christopher Churas",
     author_email='tools@cm4ai.org',
@@ -61,8 +59,6 @@ setup(
     package_data={'cellmaps_vnn': ['nest_style.cx2']},
     scripts=[ 'cellmaps_vnn/cellmaps_vnncmd.py'],
     setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
     url='https://github.com/idekerlab/cellmaps_vnn',
     version=version,
     zip_safe=False)
