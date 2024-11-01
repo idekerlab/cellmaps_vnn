@@ -4,10 +4,13 @@ import argparse
 import sys
 import logging
 import logging.config
+
+import yaml
 from cellmaps_utils import logutils
 from cellmaps_utils import constants
 import cellmaps_vnn
 from cellmaps_vnn.annotate import VNNAnnotate
+from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
@@ -84,6 +87,25 @@ def main(args):
     theargs = _parse_arguments(desc, args[1:])
     theargs.program = args[0]
     theargs.version = cellmaps_vnn.__version__
+
+    if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
+        if theargs.config_file is not None:
+            with open(theargs.config_file, "r") as file:
+                config = yaml.safe_load(file)
+
+                for key, value in config.items():
+                    if hasattr(theargs, key):
+                        setattr(theargs, key, value)
+
+        required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
+        if theargs.command == VNNTrain.COMMAND:
+            required_args.append('gene2id')
+            required_args.append('training_data')
+        else:
+            required_args.append('predict_data')
+        for arg in required_args:
+            if getattr(theargs, arg) is None:
+                raise CellmapsvnnError(f"The argument --{arg} is required either in command line or config file.")
 
     try:
         logutils.setup_cmd_logging(theargs)

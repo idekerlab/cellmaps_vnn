@@ -46,17 +46,17 @@ class VNNTrain:
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
         parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.')
-        parser.add_argument('--training_data', required=True, help='Training data')
-        parser.add_argument('--gene2id', required=True, help='Gene to ID mapping file', type=str)
-        parser.add_argument('--cell2id', required=True, help='Cell to ID mapping file', type=str)
-        parser.add_argument('--mutations', required=True, help='Mutation information for cell lines', type=str)
-        parser.add_argument('--cn_deletions', required=True, help='Copy number deletions for cell lines', type=str)
-        parser.add_argument('--cn_amplifications', required=True, help='Copy number amplifications for cell lines',
+        parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
+                                                  'If a given argument is set, it will override the default value.')
+        parser.add_argument('--training_data', help='Training data')
+        parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
+        parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
+        parser.add_argument('--mutations', help='Mutation information for cell lines', type=str)
+        parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
+        parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
                             type=str)
         parser.add_argument('--batchsize', help='Batchsize', type=int, default=64)
-        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
         parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
-        parser.add_argument('--std', help='Standardization File name', type=str, default='std.txt')
         parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
         parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
         parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
@@ -64,12 +64,14 @@ class VNNTrain:
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts',
                             type=int, default=4)
-        parser.add_argument('--optimize', help='Hyper-parameter optimization', type=int, default=1)
         parser.add_argument('--patience', help='Early stopping epoch limit', type=int, default=30)
         parser.add_argument('--delta', help='Minimum change in loss to be considered an improvement', type=float,
                             default=0.001)
         parser.add_argument('--min_dropout_layer', help='Start dropout from this Layer number', type=int, default=2)
         parser.add_argument('--dropout_fraction', help='Dropout Fraction', type=float, default=0.3)
+        parser.add_argument('--optimize', help='Hyper-parameter optimization', type=int, default=1)
+        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
+        parser.add_argument('--std', help='Standardization File name', type=str, default='std.txt')
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
