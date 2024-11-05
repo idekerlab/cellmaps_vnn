@@ -29,6 +29,8 @@ class VNNPredict:
         """
         Constructor for predicting with a trained model.
         """
+        if not os.path.exists(os.path.join(theargs.inputdir, 'model_final.pt')):
+            theargs.inputdir = os.path.join(theargs.inputdir, 'out_train')
         self._theargs = theargs
         self._outdir = os.path.abspath(theargs.outdir)
         self._number_feature_grads = 0
@@ -81,8 +83,10 @@ class VNNPredict:
                             action='store_true')
         parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
                             action='store_true')
-        parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
-        parser.add_argument('--slurm_account', help='Slurm account', type=str)
+        parser.add_argument('--slurm_partition', help='Slurm partition. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
+        parser.add_argument('--slurm_account', help='Slurm account. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
         return parser
 
     def run(self):
@@ -113,7 +117,7 @@ class VNNPredict:
             self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
                          cell_features)
 
-            hierarchy_file = os.path.join(self._theargs.inputdir, 'hierarchy.cx2')
+            hierarchy_file = os.path.join(self._theargs.inputdir, vnnconstants.HIERARCHY_FILENAME)
             factory = RawCX2NetworkFactory()
             hierarchy = factory.get_cx2network(hierarchy_file)
             rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
@@ -491,8 +495,8 @@ class VNNPredict:
         return hidden_files_ids
 
     def _copy_and_register_original_hierarchy(self, outdir, description, keywords, provenance_utils):
-        hierarchy_out_file = os.path.join(outdir, 'original_hierarchy.cx2')
-        hierarchy_in_file = os.path.join(self._theargs.inputdir, 'original_hierarchy.cx2')
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
+        hierarchy_in_file = os.path.join(self._theargs.inputdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
         if not os.path.exists(hierarchy_in_file):
             return None
         shutil.copy(hierarchy_in_file, hierarchy_out_file)
@@ -510,8 +514,8 @@ class VNNPredict:
         return dataset_id
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
-        hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
-        shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
+        shutil.copy(os.path.join(self._theargs.inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
                      'description': description + ' Hierarchy network file used to build VNN',
@@ -526,10 +530,10 @@ class VNNPredict:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, 'hierarchy_parent.cx2')
+        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, vnnconstants.PARENT_NETWORK_NAME)
         if not os.path.exists(hierarchy_parent_in_file):
             return None
-        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
         shutil.copy(hierarchy_parent_in_file, hierarchy_parent_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',

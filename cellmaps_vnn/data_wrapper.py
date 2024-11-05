@@ -9,6 +9,7 @@ import pandas as pd
 import random as rd
 import torch
 from ndex2.cx2 import RawCX2NetworkFactory, CX2NetworkXFactory
+import cellmaps_vnn.constants as constants
 
 import cellmaps_vnn.util as util
 from cellmaps_vnn.exceptions import CellmapsvnnError
@@ -42,8 +43,7 @@ class TrainingDataWrapper:
         self.min_dropout_layer = theargs.min_dropout_layer
         self.dropout_fraction = theargs.dropout_fraction
 
-        self._hierarchy = os.path.join(theargs.inputdir, 'hierarchy.cx2')
-        self._hierarchy_parent = os.path.join(theargs.inputdir, 'hierarchy_parent.cx2')  # not sure if needed
+        self._hierarchy = os.path.join(theargs.inputdir, constants.HIERARCHY_FILENAME)
         self._training_data = theargs.training_data
         self.cell_id_mapping = util.load_mapping(theargs.cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(theargs.gene2id, 'genes')

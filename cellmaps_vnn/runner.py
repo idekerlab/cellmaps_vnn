@@ -46,13 +46,19 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         self._start_time = int(time.time())
         self._command = command
         self._args = args
+        self._inputdir = os.path.abspath(self._args.inputdir)
+        self._gene2id = os.path.abspath(self._args.gene2id)
+        self._cell2id = os.path.abspath(self._args.cell2id)
+        self._mutations = os.path.abspath(self._args.mutations)
+        self._cn_deletions = os.path.abspath(self._args.cn_deletions)
+        self._cn_amplifications = os.path.abspath(self._args.cn_amplifications)
         self._gpu = gpu
         self._slurm_partition = slurm_partition
         self._slurm_account = slurm_account
-        self._input_data_dict=input_data_dict
+        self._input_data_dict = input_data_dict
 
     def _write_slurm_directives(self, out,
-                                allocated_time='6:00:00',
+                                allocated_time='96:00:00',
                                 mem='32G', cpus_per_task='4',
                                 job_name='cellmaps_vnn'):
         """
@@ -96,14 +102,14 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnntrain')
                 f.write(
-                    'cellmaps_vnncmd.py train ' + self._outdir +
-                    ' --inputdir ' + self._args.inputdir +
-                    ' --gene2id ' + self._args.gene2id +
-                    ' --cell2id ' + self._args.cell2id +
-                    ' --mutations ' + self._args.mutations +
-                    ' --cn_deletions ' + self._args.cn_deletions +
-                    ' --cn_amplifications ' + self._args.cn_amplifications +
-                    ' --training_data ' + self._args.training_data +
+                    'cellmaps_vnncmd.py train ' + os.path.join(self._outdir, 'out_train') +
+                    ' --inputdir ' + self._inputdir +
+                    ' --gene2id ' + self._gene2id +
+                    ' --cell2id ' + self._cell2id +
+                    ' --mutations ' + self._mutations +
+                    ' --cn_deletions ' + self._cn_deletions +
+                    ' --cn_amplifications ' + self._cn_amplifications +
+                    ' --training_data ' + os.path.abspath(self._args.training_data) +
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -133,14 +139,14 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnnpredict')
                 f.write(
-                    'cellmaps_vnncmd.py predict ' + self._outdir +
-                    ' --inputdir ' + self._args.inputdir +
-                    ' --gene2id ' + self._args.gene2id +
-                    ' --cell2id ' + self._args.cell2id +
+                    'cellmaps_vnncmd.py predict ' + os.path.join(self._outdir, 'out_predict') +
+                    ' --inputdir ' + self._inputdir +
+                    ' --gene2id ' + self._gene2id +
+                    ' --cell2id ' + self._cell2id +
                     ' --mutations ' + self._args.mutations +
-                    ' --cn_deletions ' + self._args.cn_deletions +
-                    ' --cn_amplifications ' + self._args.cn_amplifications +
-                    ' --predict_data ' + self._args.predict_data +
+                    ' --cn_deletions ' + self._cn_deletions +
+                    ' --cn_amplifications ' + self._cn_amplifications +
+                    ' --predict_data ' + os.path.abspath(self._args.predict_data) +
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -160,7 +166,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnnannotate')
                 f.write(
-                    'cellmaps_vnncmd.py annotate ' + self._outdir +
+                    'cellmaps_vnncmd.py annotate ' + os.path.join(self._outdir, 'out_annotate') +
                     ' --model_predictions ' + ' '.join(self._args.model_predictions))
                 if self._args.disease:
                     f.write(' --disease ' + self._args.disease)
@@ -193,9 +199,6 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         :return:
         """
         logger.debug('In run method')
-
-        if os.path.isdir(self._outdir):
-            raise CellmapsvnnError(self._outdir + ' already exists')
 
         if not os.path.isdir(self._outdir):
             os.makedirs(self._outdir, mode=0o755)

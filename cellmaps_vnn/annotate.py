@@ -33,25 +33,30 @@ class VNNAnnotate:
         self._theargs = theargs
         self._outdir = os.path.abspath(theargs.outdir)
         self.original_hierarchy = None
+        if not os.path.exists(os.path.join(theargs.model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
+            theargs.model_predictions[0] = os.path.join(theargs.model_predictions[0], 'out_predict')
         if theargs.hierarchy is not None:
             self.hierarchy = theargs.hierarchy
         else:
-            hierarchy_path = os.path.join(theargs.model_predictions[0], 'hierarchy.cx2')
+            hierarchy_path = os.path.join(theargs.model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
             if os.path.exists(hierarchy_path):
                 self.hierarchy = hierarchy_path
             else:
                 raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
-            original_hierarchy_path = os.path.join(theargs.model_predictions[0], 'original_hierarchy.cx2')
+            original_hierarchy_path = os.path.join(theargs.model_predictions[0],
+                                                   vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
             if os.path.exists(original_hierarchy_path):
                 self.original_hierarchy = original_hierarchy_path
         if theargs.parent_network is not None:
             self.parent_network = theargs.parent_network
         else:
-            parent_network_path = os.path.join(theargs.model_predictions[0], 'hierarchy_parent.cx2')
+            parent_network_path = os.path.join(theargs.model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
             if os.path.exists(parent_network_path):
                 self.parent_network = parent_network_path
             else:
                 self.parent_network = None
+        if self.parent_network is not None and os.path.isfile(self.parent_network):
+            self.parent_network = os.path.abspath(self.parent_network)
 
     @staticmethod
     def add_subparser(subparsers):
@@ -114,7 +119,7 @@ class VNNAnnotate:
         :return: The file path for the hierarchy output file.
         :rtype: str
         """
-        return os.path.join(self._outdir, 'hierarchy.cx2')
+        return os.path.join(self._outdir, vnnconstants.HIERARCHY_FILENAME)
 
     def _get_original_hierarchy_dest_file(self):
         """
@@ -123,7 +128,7 @@ class VNNAnnotate:
         :return: The file path for the hierarchy output file.
         :rtype: str
         """
-        return os.path.join(self._outdir, 'original_hierarchy.cx2')
+        return os.path.join(self._outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
 
     def _aggregate_prediction_scores_from_models(self):
         """
@@ -133,6 +138,8 @@ class VNNAnnotate:
         data = {}
 
         for directory in self._theargs.model_predictions:
+            if not os.path.exists(os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)):
+                directory = os.path.join(directory, 'out_predict')
             filepath = os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)
             has_disease = False
             with open(filepath, 'r') as file:

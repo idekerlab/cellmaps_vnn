@@ -3,7 +3,8 @@ import os
 import shutil
 from datetime import date
 
-from cellmaps_utils import constants
+from cellmaps_utils import constants as constants
+import cellmaps_vnn.constants as vnnconstants
 import logging
 
 import cellmaps_vnn
@@ -45,7 +46,9 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.')
+        parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.'
+                                                              'Note that the name of the hierarchy should be '
+                                                              'hierarchy.cx2.')
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--training_data', help='Training data')
@@ -78,8 +81,10 @@ class VNNTrain:
                             action='store_true')
         parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
                             action='store_true')
-        parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
-        parser.add_argument('--slurm_account', help='Slurm account', type=str)
+        parser.add_argument('--slurm_partition', help='Slurm partition. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
+        parser.add_argument('--slurm_account', help='Slurm account. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
         return parser
 
     def run(self):
@@ -196,8 +201,8 @@ class VNNTrain:
         return dataset_id
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
-        hierarchy_out_file = os.path.join(outdir, 'original_hierarchy.cx2')
-        shutil.copy(os.path.join(self._theargs.inputdir, 'hierarchy.cx2'), hierarchy_out_file)
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
+        shutil.copy(os.path.join(self._theargs.inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
@@ -212,7 +217,7 @@ class VNNTrain:
         return dataset_id
 
     def _register_pruned_hierarchy(self, outdir, description, keywords, provenance_utils):
-        hierarchy_out_file = os.path.join(outdir, 'hierarchy.cx2')
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
                      'description': description + ' Hierarchy network file used to build VNN',
@@ -227,11 +232,11 @@ class VNNTrain:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, 'hierarchy_parent.cx2')
+        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, vnnconstants.PARENT_NETWORK_NAME)
         if not os.path.exists(hierarchy_parent_in_file):
             logger.warning("No hierarchy parent in the input directory. Cannot copy.")
             return None
-        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
         shutil.copy(hierarchy_parent_in_file, hierarchy_parent_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
