@@ -49,6 +49,10 @@ class VNNTrain:
         parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.'
                                                               'Note that the name of the hierarchy should be '
                                                               'hierarchy.cx2.')
+        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy '
+                                                          'with list of genes/ proteins of this node. '
+                                                          'Default: CD_MemberList.', type=str,
+                            default=vnnconstants.GENE_SET_COLUMN_NAME)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--training_data', help='Training data')

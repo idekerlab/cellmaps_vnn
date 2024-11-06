@@ -1,4 +1,5 @@
 import copy
+import json
 import os.path
 import sys
 
@@ -42,6 +43,7 @@ class TrainingDataWrapper:
         self.delta = theargs.delta
         self.min_dropout_layer = theargs.min_dropout_layer
         self.dropout_fraction = theargs.dropout_fraction
+        self.gene_attribute_name = theargs.gene_attribute_name
 
         self._hierarchy = os.path.join(theargs.inputdir, constants.HIERARCHY_FILENAME)
         self._training_data = theargs.training_data
@@ -209,7 +211,15 @@ class TrainingDataWrapper:
                 for term in empty_terms:
                     file.write(f'{term}\n')
 
-        pruned_hierarchy.write_as_raw_cx2(os.path.join(self.outdir, 'hierarchy.cx2'))
+        hierarchy_json = pruned_hierarchy.to_cx2()
+        for item in hierarchy_json:
+            if 'nodeBypasses' in item:
+                item['nodeBypasses'] = []
+            if 'edgeBypasses' in item:
+                item['edgeBypasses'] = []
+
+        with open(os.path.join(self.outdir, constants.HIERARCHY_FILENAME), 'w') as output_file:
+            json.dump(hierarchy_json, output_file, indent=4)
 
         self.digraph.remove_nodes_from(empty_terms)
 
@@ -263,8 +273,8 @@ class TrainingDataWrapper:
         genes = set()
         node_data = cx2_network.get_node(node_id)
 
-        if node_data and 'CD_MemberList' in node_data[ndex2.constants.ASPECT_VALUES]:
-            for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES]['CD_MemberList'].split():
+        if node_data and self.gene_attribute_name in node_data[ndex2.constants.ASPECT_VALUES]:
+            for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES][self.gene_attribute_name].split():
                 if gene_identifier in self.gene_id_mapping:
                     genes.add(self.gene_id_mapping[gene_identifier])
 

@@ -26,3 +26,8 @@ PARENT_NETWORK_NAME = 'hierarchy_parent.cx2'
 """
 Parent network of hierarchy filename.
 """
+
+GENE_SET_COLUMN_NAME = 'CD_MemberList'
+"""
+Name of the node attribute of the hierarchy with list of genes/ proteins of this node.
+"""
