@@ -211,24 +211,27 @@ class VNNAnnotate:
         it prompts the user to enter the password interactively.
         """
         if self._theargs.ndexserver and self._theargs.ndexuser and self._theargs.ndexpassword:
-            if self.parent_network is None:
-                logger.error("Parent network is required to upload hierarchy to NDEx. Skipping upload to NDEx.")
-                print("Parent network is required to upload hierarchy to NDEx. Skipping upload to NDEx.")
-                return
 
             if self._theargs.ndexpassword == '-':
                 self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
 
             ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
                                                   self._theargs.ndexpassword, self._theargs.visibility)
-            if os.path.isfile(self.parent_network):
-                _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
-                    hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
-            else:
+
+            if self.parent_network is None:
+                logger.warning("Parent network was not specified. Hierarchy will not be in cell view.")
                 cx_factory = RawCX2NetworkFactory()
                 hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
-                _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network,
-                                                                                        self.parent_network)
+                _, hierarchyurl = ndex_uploader._save_network(hierarchy_network)
+            else:
+                if os.path.isfile(self.parent_network):
+                    _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
+                        hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
+                else:
+                    cx_factory = RawCX2NetworkFactory()
+                    hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
+                    _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(hierarchy_network,
+                                                                                            self.parent_network)
 
             print(f'Hierarchy uploaded. To view hierarchy on NDEx please paste this URL in your '
                   f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
