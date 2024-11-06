@@ -41,6 +41,7 @@ class MockArgs:
         self.mutations = os.path.join(examples_dir, 'cell2mutation.txt')
         self.cn_deletions = os.path.join(examples_dir, 'cell2cndeletion.txt')
         self.cn_amplifications = os.path.join(examples_dir, 'cell2cnamplification.txt')
+        self.gene_attribute_name = 'CD_MemberList'
 
 
 class TestTrainingDataWrapper(unittest.TestCase):
