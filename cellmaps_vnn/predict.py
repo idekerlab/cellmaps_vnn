@@ -172,7 +172,8 @@ class VNNPredict:
         :rtype: List, List
         """
         train_std_df = pd.read_csv(train_std_file, sep='\t', header=None, names=['dataset', 'center', 'scale'])
-        test_df = pd.read_csv(test_file, sep='\t', header=None, names=['cell_line', 'smiles', 'auc', 'dataset'])
+        all_df = pd.read_csv(test_file, sep='\t', header=None, names=['cell_line', 'smiles', 'auc', 'dataset'])
+        test_df = all_df[all_df['cell_line'].isin(cell2id.keys())]
         test_std_df = util.calc_std_vals(test_df, zscore_method)
         for i, row in test_std_df.iterrows():
             dataset = row['dataset']

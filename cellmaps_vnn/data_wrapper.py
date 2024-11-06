@@ -74,7 +74,8 @@ class TrainingDataWrapper:
         """
         all_df = pd.read_csv(self._training_data, sep='\t', header=None,
                              names=['cell_line', 'smiles', 'auc', 'dataset'])
-        train_df, val_df = self._split_train_val_data(all_df)
+        filtered_df = all_df[all_df['cell_line'].isin(self.cell_id_mapping.keys())]
+        train_df, val_df = self._split_train_val_data(filtered_df)
         std_df = util.calc_std_vals(train_df, self.zscore_method)
         std_df.to_csv(self.std, sep='\t', header=False, index=False)
         train_df = util.standardize_data(train_df, std_df)
