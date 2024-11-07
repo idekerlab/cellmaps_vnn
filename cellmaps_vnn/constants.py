@@ -7,6 +7,26 @@ PRHO_SCORE = 'P_rho'
 P rho score
 """
 
+P_PVAL_SCORE = 'P_pval'
+"""
+P pval score
+"""
+
+CRHO_SCORE = 'C_rho'
+"""
+C rho score
+"""
+
+C_PVAL_SCORE = 'C_pval'
+"""
+C pval score
+"""
+
+RLIPP_SCORE = 'RLIPP'
+"""
+RLIPP score
+"""
+
 RLIPP_OUTPUT_FILE = 'rlipp.out'
 """
 Output file from rlipp algorithm

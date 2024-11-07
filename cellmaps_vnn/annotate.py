@@ -168,21 +168,32 @@ class VNNAnnotate:
             for (term, disease), values in averaged_data.items():
                 outfile.write(f"{term}\t" + "\t".join([f"{v:.5e}" for v in values]) + f"\t{disease}\n")
 
-    def _aggregate_scores_from_diseases(self):
+    @staticmethod
+    def _aggregate_scores_from_diseases(data):
         """
         Aggregates the prediction scores for all diseases by averaging P_rho score.
 
         :return: A dictionary mapping each term to its averaged P_rho score across all diseases.
         :rtype: dict
         """
-        filepath = self._get_rlipp_out_dest_file()
-        data = pd.read_csv(filepath, sep='\t')
-        average_p_rho = data.groupby('Term')[vnnconstants.PRHO_SCORE].mean()
-        average_p_rho_dict = average_p_rho.to_dict()
+        aggregated_data = data.groupby('Term').agg({
+            vnnconstants.PRHO_SCORE: 'mean',
+            vnnconstants.P_PVAL_SCORE: 'mean',
+            vnnconstants.CRHO_SCORE: 'mean',
+            vnnconstants.C_PVAL_SCORE: 'mean',
+            vnnconstants.RLIPP_SCORE: 'mean'
+        })
 
-        return average_p_rho_dict
+        aggregated_dict = {
+            term: [row[vnnconstants.PRHO_SCORE], row[vnnconstants.P_PVAL_SCORE],
+                   row[vnnconstants.CRHO_SCORE], row[vnnconstants.C_PVAL_SCORE], row[vnnconstants.RLIPP_SCORE]]
+            for term, row in aggregated_data.iterrows()
+        }
 
-    def _get_scores_for_disease(self, disease):
+        return aggregated_dict
+
+    @staticmethod
+    def _get_scores_for_disease(disease, data):
         """
         Retrieves prediction scores for a specific disease, returning a dictionary mapping
         each term to its P_rho score for the given disease.
@@ -192,12 +203,15 @@ class VNNAnnotate:
         :return: A dictionary with Term as keys and P_rho scores as values for the specified disease.
         :rtype: dict
         """
-        filepath = self._get_rlipp_out_dest_file()
-        data = pd.read_csv(filepath, sep='\t')
         filtered_data = data[data['Disease'] == disease]
         if filtered_data.empty:
             return {}
-        scores = filtered_data.set_index('Term')[vnnconstants.PRHO_SCORE].to_dict()
+
+        scores = {
+            term: [row[vnnconstants.PRHO_SCORE], row[vnnconstants.P_PVAL_SCORE],
+                   row[vnnconstants.CRHO_SCORE], row[vnnconstants.C_PVAL_SCORE], row[vnnconstants.RLIPP_SCORE]]
+            for term, row in filtered_data.set_index('Term').iterrows()
+        }
 
         return scores
 
@@ -237,6 +251,12 @@ class VNNAnnotate:
                   f'browser {hierarchyurl}. To view Hierarchy on new experimental Cytoscape on the Web, go to '
                   f'{ndex_uploader.get_cytoscape_url(hierarchyurl)}')
 
+    @staticmethod
+    def _annotate_with_score(hierarchy, original_hierarchy, node_id, score_name, score):
+        hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
+        if original_hierarchy is not None:
+            original_hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
+
     def annotate(self, annotation_dict):
         """
         Annotates the hierarchy with P_rho scores from the given annotation dictionary,
@@ -251,14 +271,16 @@ class VNNAnnotate:
         if self.original_hierarchy is not None:
             original_hierarchy = factory.get_cx2network(self.original_hierarchy)
 
-        for term, p_rho in annotation_dict.items():
+        for term, score in annotation_dict.items():
             node_id = term
             if not isinstance(term, int):
                 node_id = hierarchy.lookup_node_id_by_name(term)
             if node_id is not None:
-                hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
-                if original_hierarchy is not None:
-                    original_hierarchy.add_node_attribute(node_id, vnnconstants.PRHO_SCORE, p_rho, datatype='double')
+                self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.PRHO_SCORE, score[0])
+                self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.P_PVAL_SCORE, score[1])
+                self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.CRHO_SCORE, score[2])
+                self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.C_PVAL_SCORE, score[3])
+                self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.RLIPP_SCORE, score[4])
 
         # TODO: apply style to the hierarchy
         path_to_style_network = os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'nest_style.cx2')
@@ -276,10 +298,12 @@ class VNNAnnotate:
         from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
         """
         self._aggregate_prediction_scores_from_models()
+        filepath = self._get_rlipp_out_dest_file()
+        data = pd.read_csv(filepath, sep='\t')
         if self._theargs.disease is None:
-            annotation_dict = self._aggregate_scores_from_diseases()
+            annotation_dict = self._aggregate_scores_from_diseases(data)
         else:
-            annotation_dict = self._get_scores_for_disease(self._theargs.disease)
+            annotation_dict = self._get_scores_for_disease(self._theargs.disease, data)
         if len(annotation_dict) == 0:
             logger.error("No system importance scores available for annotation.")
             raise CellmapsvnnError("No system importance scores available for annotation. "
