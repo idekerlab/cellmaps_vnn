@@ -21,7 +21,7 @@ class RLIPPCalculator:
     Parameters:
     outdir (str): Output directory for the RLIPP scores and gene correlations.
     hierarchy (CX2Network): A hierarchy in HCX format.
-    test_data (str): Path to the CSV file containing test data.
+    test_data (str):
     predicted_data (str): Path to the file containing predicted values.
     gene2idfile (str): Path to the file mapping genes to IDs.
     cell2idfile (str): Path to the file mapping cells to IDs.
@@ -40,7 +40,7 @@ class RLIPPCalculator:
         self.terms = [term for term in all_terms if term not in list(excluded_terms)]
 
         try:
-            self.test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])
+            test_df = pd.read_csv(test_data, sep='\t', header=None, names=['C', 'D', 'AUC', 'DS'])
         except Exception as e:
             raise CellmapsvnnError(f"Failed to read test data from {test_data}: {e}")
 
@@ -55,9 +55,11 @@ class RLIPPCalculator:
             raise CellmapsvnnError(f"Failed to read gene ID file from {gene2idfile}: {e}")
 
         try:
-            self.cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
+            cell_index = pd.read_csv(cell2idfile, sep="\t", header=None, names=['I', 'C'])
         except Exception as e:
             raise CellmapsvnnError(f"Failed to read cell ID file from {cell2idfile}: {e}")
+
+        self.test_df = test_df[test_df['C'].isin(list(cell_index['C']))]
 
         self.hidden_dir = hidden_dir
         self.rlipp_file = rlipp_file
