@@ -21,14 +21,14 @@ class TestVNNAnnotate(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    @patch('pandas.read_csv')
-    def test_get_scores_for_disease(self, mock_read_csv):
-        data = {'Term': ['Term1', 'Term2'], 'P_rho': [0.5, 0.7], 'Disease': ['Cancer', 'Other']}
+    def test_get_scores_for_disease(self):
+        data = {'Term': ['Term1', 'Term2'], 'P_rho': [0.5, 0.7],
+                'P_pval': [0.5, 0.7], 'C_rho': [0.5, 0.7], 'C_pval': [0.5, 0.7],
+                'RLIPP': [0.5, 0.7],'Disease': ['Cancer', 'Other']}
         test_df = pd.DataFrame(data)
-        mock_read_csv.return_value = test_df
         annotator = VNNAnnotate(self.mock_args)
-        result = annotator._get_scores_for_disease('Cancer')
-        self.assertEqual(result, {'Term1': 0.5})
+        result = annotator._get_scores_for_disease('Cancer', test_df)
+        self.assertEqual(result, {'Term1': [0.5, 0.5, 0.5, 0.5, 0.5]})
 
 
 if __name__ == '__main__':
