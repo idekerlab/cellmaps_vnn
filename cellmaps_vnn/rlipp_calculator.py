@@ -59,7 +59,7 @@ class RLIPPCalculator:
         except Exception as e:
             raise CellmapsvnnError(f"Failed to read cell ID file from {cell2idfile}: {e}")
 
-        self.test_df = test_df[test_df['C'].isin(list(cell_index['C']))]
+        self.test_df = test_df[test_df['C'].isin(list(cell_index['C']))].reset_index(drop=True)
 
         self.hidden_dir = hidden_dir
         self.rlipp_file = rlipp_file
