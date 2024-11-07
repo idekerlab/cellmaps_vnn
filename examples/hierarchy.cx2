@@ -20,14 +20,6 @@
             {
                 "elementCount": 150,
                 "name": "edges"
-            },
-            {
-                "elementCount": 1,
-                "name": "visualProperties"
-            },
-            {
-                "elementCount": 1,
-                "name": "visualEditorProperties"
             }
         ]
     },
@@ -71,6 +63,12 @@
                     },
                     "HCX::members": {
                         "d": "list_of_long"
+                    },
+                    "CD_MemberList_Size": {
+                        "d": "integer"
+                    },
+                    "CD_MemberList_LogSize": {
+                        "d": "double"
                     }
                 },
                 "edges": {
@@ -98,6 +96,8 @@
         "nodes": [
             {
                 "id": 0,
+                "x": -298.2215162689099,
+                "y": 2421.4344790891046,
                 "v": {
                     "CD_MemberList": "ABCB1 ABCC3 ABL1 ABL2 ACTA2 ACVR1B ADGRA2 AJUBA AKT1 AKT2 AKT3 ALK ALOX12B AMER1 ANKRD11 APC APOB AR ARAF ARFRP1 ARHGAP26 ARHGAP35 ARID1A ARID1B ARID2 ARID5B ASNS ASXL1 ASXL2 ATIC ATM ATP7B ATR ATRX AURKA AURKB AXIN1 AXIN2 AXL B2M BAP1 BARD1 BCAR1 BCL10 BCL11B BCL2 BCL2L1 BCL2L11 BCL2L12 BCL2L2 BCL6 BCL7A BCLAF1 BCOR BCORL1 BCR BIRC3 BLM BMPR1A BRAF BRCA1 BRCA2 BRD4 BRIP1 BTG1 BTK BUB1B C11orf65 C3orf70 C8orf34 CADM2 CALR CARD11 CASP8 CASR CBFB CBL CBLB CBLC CBR3 CCDC6 CCND1 CCND2 CCND3 CCNE1 CCNE2 CD19 CD22 CD274 CD276 CD40 CD70 CD79A CD79B CDC25A CDC73 CDH1 CDH2 CDK12 CDK4 CDK5 CDK6 CDK8 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CEBPA CEP57 CFTR CHD2 CHD4 CHEK1 CHEK2 CIC CIITA CKS1B CREBBP CRKL CRLF2 CSF1R CSF3R CTC1 CTCF CTLA4 CTNNA1 CTNNB1 CTRC CUL3 CUX1 CXCR4 CYLD CYP1B1 CYP2D6 CYP3A5 DAXX DDB2 DDR2 DDX3X DICER1 DIS3 DIS3L2 DKC1 DMD DNM2 DNMT1 DNMT3A DNMT3B DOT1L DPYD DYNC2H1 E2F1 E2F2 E2F3 E2F4 E2F5 E2F6 EBF1 ECT2L EED EGF EGFL7 EGFR EGLN1 ELF3 ELOC EMSY ENG EP300 EPCAM EPHA2 EPHA3 EPHA5 EPHA7 EPHB1 EPHB2 EPOR ERBB2 ERBB3 ERBB4 ERCC1 ERCC2 ERCC3 ERCC4 ERCC5 ERCC6 ERG ERRFI1 ESR1 ESR2 ETS1 ETS2 ETV1 ETV4 ETV5 ETV6 EWSR1 EXT2 EZH2 FAM46C FANCA FANCB FANCC FANCD2 FANCE FANCF FANCG FANCI FANCL FANCM FAS FAT1 FBXO11 FBXW7 FCGR2A FCGR3A FDPS FGF1 FGF10 FGF14 FGF19 FGF2 FGF23 FGF3 FGF4 FGF5 FGF6 FGF7 FGF8 FGF9 FGFR1 FGFR2 FGFR3 FGFR4 FH FHIT FLCN FLG FLT1 FLT3 FLT4 FNTB FOXA1 FOXL2 FOXO1 FOXO3 FOXP1 FOXQ1 FRS2 FUBP1 FUS FYN G6PD GABRA6 GALNT12 GATA1 GATA2 GATA3 GATA4 GATA6 GEN1 GID4 GLI1 GLI2 GLI3 GNA11 GNA13 GNAQ GNAS GPC3 GPER1 GPS2 GREM1 GRIN2A GRM3 GSK3B GSTP1 H3F3A H3F3C HAS3 HAVCR2 HDAC1 HDAC2 HDAC3 HDAC4 HDAC5 HGF HIF1A HIST1H1C HIST1H1E HIST1H2BD HIST1H3F HIST1H4E HIST3H3 HLA-A HLA-B HLA-C HLA-DMA HLA-DMB HLA-DOA HLA-DOB HLA-DPA1 HLA-DPB1 HLA-DQA1 HLA-DQA2 HLA-DQB1 HLA-DQB2 HLA-DRA HLA-DRB1 HLA-DRB5 HLA-E HLA-F HLA-G HNF1A HNF1B HOXB13 HRAS HSD3B1 HSP90AA1 HSPH1 IDH1 IDH2 IDO1 IFIT1 IFIT2 IFIT3 IFNAR1 IFNAR2 IFNGR1 IFNGR2 IFNL3 IGF1 IGF1R IGF2 IKBKE IKZF1 IKZF3 IL10RA IL15 IL2RA IL6R IL7R ING1 INHBA INPP4A INPP4B INPPL1 INSR IRF1 IRF2 IRF4 IRS1 IRS2 ITPKB JAK1 JAK2 JAK3 JUN KAT6A KDM5A KDM5C KDM6A KDM6B KDR KEAP1 KEL KIF1B KIT KLF4 KLHL6 KLLN KMT2A KMT2B KMT2C KMT2D KRAS LAG3 LATS1 LATS2 LDLR LEF1 LMNA LMO1 LRP1B LYN LZTR1 MAD2L2 MAF MAFB MAGI2 MALT1 MAP2K1 MAP2K2 MAP2K4 MAP3K1 MAP3K7 MAPK1 MAX MC1R MCL1 MDC1 MDM2 MDM4 MECOM MED1 MED12 MEF2B MEN1 MET MGA MGMT MIB1 MITF MKI67 MLH1 MLH3 MLLT3 MPL MRE11 MS4A1 MSH2 MSH3 MSH6 MST1 MST1R MTA1 MTAP MTHFR MTOR MTRR MUTYH MYB MYC MYCL MYCN MYD88 MYH11 MYOD1 NBN NCOA3 NCOR1 NCOR2 NEGR1 NF1 NF2 NFE2L2 NFKBIA NHP2 NKX2-1 NKX3-1 NOTCH1 NOTCH2 NOTCH3 NOTCH4 NPM1 NQO1 NRAS NRG1 NRIP1 NSD1 NSD2 NT5C2 NTHL1 NTRK1 NTRK2 NTRK3 NUDT15 NUP93 NUP98 P2RY8 PA2G4 PAK1 PAK3 PAK5 PALB2 PALLD PARK2 PARP1 PAX5 PAX7 PAX8 PBRM1 PCBP1 PDCD1 PDCD1LG2 PDGFRA PDGFRB PDK1 PDPK1 PELP1 PGR PHB2 PHF6 PHOX2B PIAS4 PIK3C2B PIK3C2G PIK3C3 PIK3CA PIK3CB PIK3CD PIK3CG PIK3R1 PIK3R2 PIK3R3 PIM1 PLCG2 PLK2 PML PMS1 PMS2 PNRC1 POLD1 POLE POLH POT1 POU2F2 PPP1CA PPP1CB PPP1CC PPP1R15A PPP2CA PPP2CB PPP2R1A PPP2R1B PPP2R2A PPP6C PRAME PRCC PRDM1 PREX2 PRF1 PRKAR1A PRKCI PRKCZ PRKDC PRPF40B PRSS1 PRSS2 PRSS8 PTCH1 PTCH2 PTEN PTK2 PTPN11 PTPN13 PTPN22 PTPRD QKI RAB35 RAC1 RAD21 RAD50 RAD51 RAD51B RAD51C RAD51D RAD52 RAD54L RAF1 RANBP2 RARA RASA1 RB1 RBL1 RBL2 RBM10 RECQL4 REL RET RHOA RHPN2 RICTOR RINT1 RIT1 RNF139 RNF43 ROS1 RPL5 RPS15 RPS6KA4 RPS6KB1 RPS6KB2 RPTOR RSF1 RUNX1 RUNX1T1 RXRA SCG5 SDHA SDHAF2 SDHB SDHC SDHD SEC23B SEMA3C SETBP1 SETD2 SF1 SF3B1 SGK1 SH2B3 SH2D1A SHQ1 SKP1 SLC26A3 SLC47A2 SLIT2 SLX4 SMAD2 SMAD3 SMAD4 SMARCA1 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SMO SNCAIP SOCS1 SOD2 SOX10 SOX17 SOX2 SOX9 SPEN SPINK1 SPOP SPRED1 SPTA1 SQSTM1 SRC SRSF2 STAG1 STAG2 STAT3 STAT4 STAT5A STAT5B STAT6 STK11 SUFU SUZ12 SYK TAF1 TANC1 TAP1 TAP2 TBC1D12 TBL1XR1 TBX3 TCF3 TCF7L2 TCL1A TERT TET1 TET2 TFDP1 TFF1 TGFBR1 TGFBR2 TIGIT TLR4 TMEM127 TMEM173 TMPRSS2 TNF TNFAIP3 TNFRSF14 TNFRSF17 TNFRSF9 TOP1 TOP2A TP53 TP63 TPM1 TPMT TPRX1 TRAF2 TRAF3 TRAF7 TSC1 TSC2 TSHR TUSC3 TYMS U2AF1 UBE2T UMPS UPF1 VEGFA VHL VSIR WEE1 WISP3 WNT7A WRN WT1 XPA XPC XPO1 XRCC1 XRCC2 XRCC3 YAP1 YEATS4 ZBTB2 ZFHX3 ZNF217 ZNF471 ZNF620 ZNF703 ZNF750 ZNRF3 ZRSR2",
                     "HCX::isRoot": true,
@@ -816,12 +816,16 @@
                         15819,
                         5205
                     ],
-                    "n": "NEST",
+                    "CD_MemberList_Size": 718,
+                    "CD_MemberList_LogSize": 2.8561244442423,
+                    "n": "NeST",
                     "r": "NEST"
                 }
             },
             {
                 "id": 1,
+                "x": 1067.6456687824393,
+                "y": 2185.264559103467,
                 "v": {
                     "CD_MemberList": "ABL1 ACVR1B AKT1 AKT2 AKT3 ALK ALOX12B AMER1 ANKRD11 APC ARAF ARFRP1 AURKB AXIN1 AXIN2 BARD1 BCAR1 BCL2 BCL2L1 BCL2L11 BCL2L2 BCL6 BCLAF1 BCR BIRC3 BMPR1A BRAF BRCA1 BTK CALR CASP8 CBL CBLB CCND1 CD40 CDC25A CDH1 CDH2 CDKN1B CEBPA CFTR CHEK2 CREBBP CRKL CSF3R CTC1 CTNNA1 CTNNB1 CTRC CUL3 DAXX DDB2 EBF1 EGF EGFR EGLN1 ELOC EP300 EPCAM EPHB2 ERBB2 ERBB3 ERBB4 ESR2 ETV4 ETV5 FAS FBXO11 FBXW7 FGF1 FGF2 FGF5 FGF7 FGFR1 FGFR2 FGFR3 FGFR4 FH FLG FOXO1 FOXO3 FRS2 FYN GPS2 GSK3B HDAC1 HDAC2 HDAC3 HDAC4 HDAC5 HLA-A HRAS HSP90AA1 IFNAR1 IFNAR2 IFNGR1 IGF1 IGF1R IGF2 INPPL1 INSR IRS1 IRS2 ITPKB JAK1 JAK2 KDM5C KEAP1 KLF4 KRAS LDLR MAP2K1 MAP2K2 MAP2K4 MAP3K1 MAP3K7 MAPK1 MCL1 MDM2 MDM4 MET MIB1 MS4A1 MTOR MYC NCOA3 NCOR1 NCOR2 NF2 NFE2L2 NOTCH1 NOTCH2 NRAS NRIP1 PARK2 PARP1 PDGFRA PDPK1 PGR PIAS4 PIK3C3 PIK3CA PIK3CB PIK3CD PIK3R1 PIK3R2 PIK3R3 PLCG2 PPP1CA PPP2R2A PRAME PREX2 PRKAR1A PRKCI PRKCZ PRKDC PRSS1 PRSS8 PTEN PTK2 PTPN11 PTPN13 RAB35 RAC1 RAF1 RARA RASA1 RB1 RET RHOA RICTOR RINT1 RIT1 RPS6KB1 RPTOR RUNX1T1 RXRA SDHA SDHB SEC23B SKP1 SMAD2 SMAD3 SMAD4 SOCS1 SOD2 SOX2 SQSTM1 SRC STAT3 STAT5A STAT5B STAT6 STK11 SYK TBC1D12 TBL1XR1 TBX3 TCF3 TCF7L2 TET2 TGFBR1 TGFBR2 TNF TNFAIP3 TNFRSF9 TP53 TRAF2 TRAF3 TSC1 TSC2 TUSC3 VHL YAP1 ZNF471 ZNF750",
                     "HCX::isRoot": false,
@@ -1043,12 +1047,16 @@
                         12379,
                         10689
                     ],
-                    "n": "NEST:1",
+                    "CD_MemberList_Size": 216,
+                    "CD_MemberList_LogSize": 2.3344537511509307,
+                    "n": "Other signaling processes",
                     "r": "NEST:1"
                 }
             },
             {
                 "id": 2,
+                "x": -1464.2934405587148,
+                "y": 2185.264559103467,
                 "v": {
                     "CD_MemberList": "ABCC3 ABL1 ABL2 ACTA2 ADGRA2 AKT1 APOB ARHGAP26 ARID5B ATP7B AXL B2M BCAR1 BCL2L12 BIRC3 BTK C8orf34 CARD11 CASR CBL CBLB CBR3 CCND1 CD19 CD22 CD274 CD276 CD40 CD70 CD79A CD79B CDH1 CHEK2 CIITA CRKL CSF1R CSF3R CTLA4 CUL3 CXCR4 CYLD CYP1B1 CYP2D6 CYP3A5 DMD DNM2 DPYD EBF1 EGF EGFL7 EGFR ENG EPCAM EPHA2 EPHA3 EPHA5 EPHA7 EPHB1 EPHB2 EPOR ERBB2 ERBB4 ERG ERRFI1 ESR1 ETS1 EXT2 FAM46C FANCC FAS FBXO11 FCGR2A FCGR3A FGF10 FGF19 FGF23 FGFR3 FLT1 FLT3 FLT4 FOXA1 FOXP1 FRS2 FYN GALNT12 GATA1 GATA3 GNA11 GNA13 GNAQ GNAS GPC3 GREM1 GRIN2A HAVCR2 HGF HLA-A HLA-B HLA-C HLA-DMA HLA-DMB HLA-DOA HLA-DOB HLA-DPA1 HLA-DPB1 HLA-DQA1 HLA-DQA2 HLA-DQB1 HLA-DQB2 HLA-DRA HLA-DRB1 HLA-DRB5 HLA-E HLA-F HLA-G HNF1A HNF1B HRAS HSP90AA1 IDH1 IDO1 IFIT1 IFIT2 IFIT3 IFNAR1 IFNAR2 IFNGR1 IFNGR2 IGF1 IKBKE IKZF1 IKZF3 IL10RA IL15 IL2RA IL6R IL7R INHBA IRF1 IRF2 IRF4 IRS1 IRS2 JAK1 JAK2 JAK3 KDR KIF1B KIT KLHL6 LAG3 LATS1 LMNA LYN MAFB MAP2K1 MAPK1 MC1R MPL MS4A1 MST1 MYD88 MYH11 MYOD1 NEGR1 NF2 NFE2L2 NFKBIA NKX2-1 NOTCH4 NTRK3 P2RY8 PAK1 PAK3 PAK5 PALLD PCBP1 PDCD1 PDCD1LG2 PDGFRA PDGFRB PHOX2B PIK3CA PIK3CD PIK3CG PIK3R1 PIK3R2 PIK3R3 PLCG2 PLK2 PML POU2F2 PPP1CB PRDM1 PREX2 PRF1 PTK2 PTPN11 PTPN22 PTPRD QKI RAC1 RASA1 RET RHOA RHPN2 SETBP1 SH2B3 SH2D1A SLIT2 SMAD3 SOCS1 SOD2 SOX17 SPRED1 SPTA1 SRC STAT3 STAT4 STAT5A STAT5B STAT6 SYK TAP1 TAP2 TIGIT TLR4 TMEM127 TMEM173 TNF TNFAIP3 TNFRSF14 TNFRSF17 TNFRSF9 TPM1 TPMT VEGFA VSIR",
                     "HCX::isRoot": false,
@@ -1292,12 +1300,16 @@
                         16068,
                         3420
                     ],
-                    "n": "NEST:2",
+                    "CD_MemberList_Size": 238,
+                    "CD_MemberList_LogSize": 2.376576957056512,
+                    "n": "Cytoplasm and extracellular space",
                     "r": "NEST:2"
                 }
             },
             {
                 "id": 3,
+                "x": -298.2215162689099,
+                "y": 2185.264559103467,
                 "v": {
                     "CD_MemberList": "ABL1 ACVR1B AKT1 AMER1 ANKRD11 AR ARAF ARID1A ARID1B ARID2 ASNS ASXL1 ASXL2 ATIC ATM ATR ATRX AURKA AURKB AXIN2 BAP1 BARD1 BCL11B BCL2L12 BCL6 BCL7A BCLAF1 BCOR BCORL1 BLM BRAF BRCA1 BRCA2 BRD4 BRIP1 BTG1 BUB1B CASP8 CCDC6 CCND1 CCND2 CCND3 CCNE1 CCNE2 CDC25A CDC73 CDK12 CDK4 CDK5 CDK6 CDK8 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CEP57 CHD2 CHD4 CHEK1 CHEK2 CIC CKS1B CREBBP CRKL CTC1 CTCF CTNNB1 CUL3 CUX1 DAXX DDB2 DDX3X DICER1 DIS3 DKC1 DNMT1 DNMT3A DNMT3B DOT1L E2F1 E2F2 E2F3 E2F4 E2F5 E2F6 EED EGLN1 ELOC EMSY EP300 ERCC1 ERCC2 ERCC3 ERCC4 ERCC5 ERCC6 ESR1 EWSR1 EZH2 FANCA FANCB FANCC FANCD2 FANCE FANCF FANCG FANCI FANCL FANCM FBXW7 FOXL2 FOXO3 FRS2 FUBP1 FUS GATA1 GATA3 GEN1 GID4 GPS2 GSTP1 H3F3A H3F3C HDAC1 HDAC2 HDAC3 HDAC4 HDAC5 HIF1A HIST1H1C HIST1H1E HIST1H2BD HIST1H3F HIST1H4E HIST3H3 HLA-A HRAS HSP90AA1 HSPH1 IKZF1 ING1 INHBA IRF2 JUN KAT6A KDM5A KDM5C KDM6A KMT2A KMT2B KMT2C KMT2D KRAS LATS1 LEF1 LMNA MAD2L2 MAGI2 MAP3K7 MAX MDC1 MDM2 MDM4 MECOM MED1 MED12 MEN1 MGA MGMT MIB1 MKI67 MLH1 MLH3 MLLT3 MRE11 MSH2 MSH3 MSH6 MTA1 MTOR MUTYH MYB MYC MYCL MYCN NBN NCOA3 NCOR1 NCOR2 NF1 NF2 NHP2 NKX3-1 NPM1 NSD1 NSD2 NUP93 NUP98 PA2G4 PALB2 PARK2 PARP1 PBRM1 PCBP1 PELP1 PHB2 PHF6 PIAS4 PIK3C3 PML PMS1 PMS2 PNRC1 POLD1 POLE POLH POT1 PPP1CA PPP1CB PPP1CC PPP1R15A PPP2CA PPP2CB PPP2R1A PPP2R1B PPP2R2A PPP6C PRCC PRDM1 PRKCZ PRKDC PRPF40B PTPN11 RAB35 RAD21 RAD50 RAD51 RAD51B RAD51C RAD51D RAD52 RAD54L RAF1 RANBP2 RARA RB1 RBL1 RBL2 RBM10 RECQL4 REL RHOA RICTOR RINT1 RPL5 RPS15 RPS6KB1 RPTOR RSF1 RUNX1 RUNX1T1 RXRA SETD2 SF1 SF3B1 SHQ1 SKP1 SLX4 SMAD2 SMAD3 SMAD4 SMARCA1 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SOCS1 SOX2 SPEN SRSF2 STAG1 STAG2 STAT3 STK11 SUZ12 TAF1 TAP2 TBL1XR1 TCF3 TERT TET2 TFDP1 TGFBR1 TNF TOP1 TOP2A TP53 TP63 TRAF7 TSC1 TSC2 TYMS U2AF1 UBE2T UMPS UPF1 VHL WEE1 WRN WT1 XPA XPC XPO1 XRCC1 XRCC2 XRCC3 YEATS4 ZBTB2 ZNF217 ZRSR2",
                     "HCX::isRoot": false,
@@ -1626,12 +1638,16 @@
                         15819,
                         5205
                     ],
-                    "n": "NEST:3",
+                    "CD_MemberList_Size": 323,
+                    "CD_MemberList_LogSize": 2.509202522331103,
+                    "n": "Nucleus and ribosome",
                     "r": "NEST:3"
                 }
             },
             {
                 "id": 4,
+                "x": -298.2215162689099,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ANKRD11 AR ARID1A ARID1B ARID2 ASXL1 ASXL2 ATM ATR ATRX BAP1 BARD1 BCL11B BCL6 BCL7A BCLAF1 BCOR BCORL1 BRD4 CASP8 CDC73 CDK12 CDK8 CHD2 CHD4 CREBBP CTCF CTNNB1 CUX1 DAXX DDX3X DKC1 DNMT1 DNMT3A DNMT3B DOT1L E2F1 E2F6 EED EMSY EP300 ERCC2 ERCC3 ERCC5 ERCC6 ESR1 EWSR1 EZH2 FANCD2 FBXW7 FUBP1 FUS GATA1 GATA3 HDAC1 HDAC2 HDAC3 HDAC5 HIST1H1E HIST3H3 ING1 IRF2 KAT6A KDM5A KDM6A KMT2A KMT2B KMT2C KMT2D LATS1 MAGI2 MAP3K7 MAX MDM2 MED1 MED12 MEN1 MGA MLLT3 MSH3 MTA1 MYB MYC MYCL MYCN NCOR1 NF1 NPM1 NSD1 NUP98 PALB2 PARP1 PBRM1 PHF6 PML PPP1CA PPP1CC PPP2R1A PRCC PRDM1 PRKDC PRPF40B PTPN11 RAD21 RANBP2 RARA RB1 RBL1 RBM10 REL RSF1 RUNX1 SETD2 SF1 SF3B1 SMAD2 SMARCA1 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SOX2 SPEN SRSF2 STAG1 STAG2 TAF1 TBL1XR1 TERT TFDP1 TNF TOP1 TOP2A TP53 U2AF1 UPF1 WRN WT1 XPA XPO1 XRCC1 YEATS4 ZBTB2 ZNF217 ZRSR2",
                     "HCX::isRoot": false,
@@ -1783,12 +1799,16 @@
                         5205,
                         8182
                     ],
-                    "n": "NEST:6",
+                    "CD_MemberList_Size": 146,
+                    "CD_MemberList_LogSize": 2.164352855784437,
+                    "n": "Reg. of transcription",
                     "r": "NEST:6"
                 }
             },
             {
                 "id": 5,
+                "x": -141.42992932876223,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ARID1A ARID1B ARID2 ATRX BARD1 BCL11B BCL7A BCLAF1 BRD4 CASP8 CDC73 CDK12 CHD2 CHD4 CREBBP CTCF CTNNB1 DDX3X DNMT1 DNMT3A DNMT3B E2F1 EMSY EP300 EWSR1 EZH2 FUBP1 FUS GATA3 HDAC1 HDAC2 HDAC3 HIST1H1E HIST3H3 ING1 IRF2 KDM5A KDM6A KMT2A KMT2B KMT2C KMT2D MAGI2 MDM2 MEN1 MTA1 MYC PALB2 PARP1 PBRM1 PHF6 PPP1CC PRCC PRDM1 PRKDC PRPF40B PTPN11 RAD21 RANBP2 RB1 RBM10 RSF1 RUNX1 SF1 SF3B1 SMARCA1 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SOX2 SPEN SRSF2 STAG1 STAG2 TAF1 TERT TNF TOP1 TOP2A TP53 U2AF1 UPF1 WRN XPO1 XRCC1 YEATS4 ZBTB2 ZNF217 ZRSR2",
                     "HCX::isRoot": false,
@@ -1885,12 +1905,16 @@
                         2104,
                         8182
                     ],
-                    "n": "NEST:10",
+                    "CD_MemberList_Size": 91,
+                    "CD_MemberList_LogSize": 1.9590413923210936,
+                    "n": "mRNA processing",
                     "r": "NEST:10"
                 }
             },
             {
                 "id": 6,
+                "x": -472.58198665306554,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "AR CHD4 CREBBP CTNNB1 DAXX EP300 HDAC1 HDAC2 MYB PML RB1 RBL1 REL SMAD2",
                     "HCX::isRoot": false,
@@ -1910,12 +1934,16 @@
                         12062,
                         2300
                     ],
-                    "n": "NEST:112",
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
+                    "n": "AR signaling",
                     "r": "NEST:112"
                 }
             },
             {
                 "id": 7,
+                "x": -271.4127852189704,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "CREBBP DAXX EP300 HDAC1 NPM1 PARP1 PML RB1 TERT",
                     "HCX::isRoot": false,
@@ -1930,12 +1958,16 @@
                         13659,
                         2300
                     ],
-                    "n": "NEST:123",
+                    "CD_MemberList_Size": 9,
+                    "CD_MemberList_LogSize": 0.9542425094393249,
+                    "n": "PML body",
                     "r": "NEST:123"
                 }
             },
             {
                 "id": 8,
+                "x": -458.2245398835221,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "E2F1 HIST3H3 MED1 TAF1 TP53",
                     "HCX::isRoot": false,
@@ -1946,12 +1978,16 @@
                         1271,
                         9160
                     ],
-                    "n": "NEST:165",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Transcription coactivator activity",
                     "r": "NEST:165"
                 }
             },
             {
                 "id": 9,
+                "x": -520.4951247716381,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "DKC1 HDAC1 HDAC2 KAT6A KDM5A MAX MYC MYCL MYCN PALB2 TERT TNF UPF1 YEATS4",
                     "HCX::isRoot": false,
@@ -1971,12 +2007,16 @@
                         15456,
                         16546
                     ],
-                    "n": "NEST:57",
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
+                    "n": "Histone acetyltransferase complex",
                     "r": "NEST:57"
                 }
             },
             {
                 "id": 10,
+                "x": -395.953954995377,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "BCOR BCORL1 CHD2 E2F6 EED EZH2 MGA TFDP1 TNF",
                     "HCX::isRoot": false,
@@ -1991,12 +2031,16 @@
                         7674,
                         8831
                     ],
-                    "n": "NEST:66",
+                    "CD_MemberList_Size": 9,
+                    "CD_MemberList_LogSize": 0.9542425094393249,
+                    "n": "PcG protein complex",
                     "r": "NEST:66"
                 }
             },
             {
                 "id": 11,
+                "x": -209.1422003308835,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ASXL2 ATRX CDK12 GATA1 MGA NF1 NSD1 RSF1 SETD2 SPEN",
                     "HCX::isRoot": false,
@@ -2012,12 +2056,16 @@
                         8019,
                         10923
                     ],
+                    "CD_MemberList_Size": 10,
+                    "CD_MemberList_LogSize": 1.0,
                     "n": "NEST:78",
                     "r": "NEST:78"
                 }
             },
             {
                 "id": 12,
+                "x": -333.6833701071446,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "AR BCL6 CREBBP EP300 HDAC1 HDAC2 KAT6A MYC PML RUNX1 TBL1XR1 TERT TNF TP53 YEATS4",
                     "HCX::isRoot": false,
@@ -2038,12 +2086,16 @@
                         2300,
                         4483
                     ],
+                    "CD_MemberList_Size": 15,
+                    "CD_MemberList_LogSize": 1.1760912590556813,
                     "n": "NEST:85",
                     "r": "NEST:85"
                 }
             },
             {
                 "id": 13,
+                "x": -1040.970777075243,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CDK8 ESR1 FBXW7 MED1 MED12 RARA",
                     "HCX::isRoot": false,
@@ -2055,12 +2107,16 @@
                         4982,
                         2355
                     ],
-                    "n": "NEST:90",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Mediator complex",
                     "r": "NEST:90"
                 }
             },
             {
                 "id": 14,
+                "x": -1199.735976166441,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "CCND1 CCND2 CCND3 CCNE1 CCNE2 CDK4 CDK5 CDK6 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CKS1B E2F1 E2F2 E2F3 E2F4 E2F5 HLA-A MDM2 RB1 RBL1 RBL2 TFDP1 TP53",
                     "HCX::isRoot": false,
@@ -2093,12 +2149,16 @@
                         10366,
                         9747
                     ],
-                    "n": "NEST:58",
+                    "CD_MemberList_Size": 27,
+                    "CD_MemberList_LogSize": 1.4313637641589874,
+                    "n": "Cyclin D associated events in G1",
                     "r": "NEST:58"
                 }
             },
             {
                 "id": 15,
+                "x": -1178.3386717613612,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CCND1 CCND2 CCND3 CCNE1 CCNE2 CDK4 CDK5 CDK6 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CKS1B HLA-A TP53",
                     "HCX::isRoot": false,
@@ -2121,12 +2181,16 @@
                         5299,
                         4495
                     ],
-                    "n": "NEST:102",
+                    "CD_MemberList_Size": 17,
+                    "CD_MemberList_LogSize": 1.2304489213782739,
+                    "n": "CDK holoenzyme complex II",
                     "r": "NEST:102"
                 }
             },
             {
                 "id": 16,
+                "x": -1245.9786189827428,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "E2F1 E2F2 E2F3 E2F4 E2F5 MDM2 RB1 RBL1 RBL2 TFDP1 TP53",
                     "HCX::isRoot": false,
@@ -2143,12 +2207,16 @@
                         13659,
                         8392
                     ],
-                    "n": "NEST:119",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "Reg. of E2F transcr. via DREAM",
                     "r": "NEST:119"
                 }
             },
             {
                 "id": 17,
+                "x": 1008.408378871769,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ABL1 AKT1 ARAF BRAF CBL CDC25A CDKN1B EGFR HDAC4 HDAC5 HRAS KRAS MAP2K1 MAP2K2 MAPK1 MDM4 MYC RAF1 STAT3 STAT5A TNF TSC1 TSC2",
                     "HCX::isRoot": false,
@@ -2177,12 +2245,16 @@
                         16068,
                         561
                     ],
-                    "n": "NEST:73",
+                    "CD_MemberList_Size": 23,
+                    "CD_MemberList_LogSize": 1.3617278360175928,
+                    "n": "MAPK signaling",
                     "r": "NEST:73"
                 }
             },
             {
                 "id": 18,
+                "x": 1008.408378871769,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ARAF BRAF CDC25A HDAC4 HDAC5 HRAS KRAS MAP2K1 MAP2K2 MAPK1 MYC RAF1 STAT3 STAT5A",
                     "HCX::isRoot": false,
@@ -2202,12 +2274,16 @@
                         561,
                         5785
                     ],
-                    "n": "NEST:104",
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
+                    "n": "MAPK and MAP2K activation",
                     "r": "NEST:104"
                 }
             },
             {
                 "id": 19,
+                "x": 653.7240371372609,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CUL3 ELOC FBXW7 HSP90AA1 MDM2 SKP1 STK11 TNF VHL",
                     "HCX::isRoot": false,
@@ -2222,12 +2298,16 @@
                         2355,
                         2477
                     ],
-                    "n": "NEST:105",
+                    "CD_MemberList_Size": 9,
+                    "CD_MemberList_LogSize": 0.9542425094393249,
+                    "n": "Protein neddylation",
                     "r": "NEST:105"
                 }
             },
             {
                 "id": 20,
+                "x": -16.33719625553931,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ERCC1 ERCC4 MLH1 MLH3 MSH2 MSH3 MSH6 PMS1 PMS2 SLX4",
                     "HCX::isRoot": false,
@@ -2243,12 +2323,16 @@
                         4178,
                         4056
                     ],
-                    "n": "NEST:125",
+                    "CD_MemberList_Size": 10,
+                    "CD_MemberList_LogSize": 1.0,
+                    "n": "Extended mismatch repair complex",
                     "r": "NEST:125"
                 }
             },
             {
                 "id": 21,
+                "x": 179.01385346840834,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ATM ATR BLM BRCA1 XPA XPC",
                     "HCX::isRoot": false,
@@ -2260,12 +2344,16 @@
                         1700,
                         16554
                     ],
-                    "n": "NEST:134",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "RPA complex associated proteins",
                     "r": "NEST:134"
                 }
             },
             {
                 "id": 22,
+                "x": 48.77982031911961,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "CREBBP HDAC1 SMAD2 SMAD3 SMAD4 TGFBR1",
                     "HCX::isRoot": false,
@@ -2277,12 +2365,16 @@
                         12062,
                         2341
                     ],
-                    "n": "NEST:146",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "SMAD-TGFbeta signaling",
                     "r": "NEST:146"
                 }
             },
             {
                 "id": 23,
+                "x": -624.3386758967536,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AR ARID1A ATM ATR AURKA AURKB BARD1 BCL11B BLM BRCA1 BRCA2 BRD4 BRIP1 BUB1B CCND1 CCND2 CCND3 CCNE1 CCNE2 CDC25A CDC73 CDK4 CDK5 CDK6 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CHD4 CHEK1 CHEK2 CKS1B CREBBP CTNNB1 DAXX DNMT1 DNMT3A DNMT3B E2F1 E2F2 E2F4 E2F5 EED EMSY EP300 EZH2 FANCA FANCC FANCD2 FANCE FANCG FANCI FANCL FANCM H3F3A HDAC1 HDAC2 HDAC3 HIF1A HIST3H3 HLA-A IKZF1 ING1 IRF2 JUN KDM5A MDC1 MDM2 MDM4 MKI67 MLH1 MLH3 MRE11 MSH2 MSH3 MSH6 MTA1 MYB MYC NBN NPM1 PALB2 PARP1 PML PMS1 PMS2 POLD1 POLE POLH PPP1CA PPP1CC PRKDC RAD50 RAD51 RAD51B RAD51C RAD51D RAD54L RB1 RBL1 RBL2 REL RUNX1 SMAD2 SMARCA4 SMARCB1 SMARCE1 SMC3 SOX2 STAT3 TAF1 TERT TFDP1 TNF TOP2A TP53 TP63 TYMS UBE2T WRN XPC XRCC1 XRCC2 XRCC3 YEATS4 ZBTB2",
                     "HCX::isRoot": false,
@@ -2416,12 +2508,16 @@
                         3420,
                         5205
                     ],
-                    "n": "NEST:15",
+                    "CD_MemberList_Size": 128,
+                    "CD_MemberList_LogSize": 2.1072099696478683,
+                    "n": "Cell cycle",
                     "r": "NEST:15"
                 }
             },
             {
                 "id": 24,
+                "x": 113.89683689383673,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 AR CDKN1B CREBBP EP300 FOXO3 RARA SMAD4 SMARCB1 VHL",
                     "HCX::isRoot": false,
@@ -2437,12 +2533,16 @@
                         2341,
                         4495
                     ],
-                    "n": "NEST:168",
+                    "CD_MemberList_Size": 10,
+                    "CD_MemberList_LogSize": 1.0,
+                    "n": "CBP and p300 binds NF-kB complex",
                     "r": "NEST:168"
                 }
             },
             {
                 "id": 25,
+                "x": -298.2215162689099,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ANKRD11 AR ARID1A ARID1B ARID2 ASNS ASXL1 ASXL2 ATIC ATM ATR ATRX BAP1 BARD1 BCL11B BCL6 BCL7A BCLAF1 BCOR BCORL1 BRD4 CASP8 CCDC6 CDC73 CDK12 CDK8 CDKN1A CHD2 CHD4 CHEK2 CREBBP CTCF CTNNB1 CUL3 CUX1 DAXX DDX3X DIS3 DKC1 DNMT1 DNMT3A DNMT3B DOT1L E2F1 E2F6 EED ELOC EMSY EP300 ERCC2 ERCC3 ERCC5 ERCC6 ESR1 EWSR1 EZH2 FANCD2 FBXW7 FOXL2 FUBP1 FUS GATA1 GATA3 GPS2 GSTP1 H3F3A H3F3C HDAC1 HDAC2 HDAC3 HDAC4 HDAC5 HIST1H1C HIST1H1E HIST3H3 HRAS HSP90AA1 ING1 IRF2 KAT6A KDM5A KDM6A KMT2A KMT2B KMT2C KMT2D LATS1 MAGI2 MAP3K7 MAX MDM2 MDM4 MED1 MED12 MEN1 MGA MLLT3 MSH3 MTA1 MYB MYC MYCL MYCN NCOA3 NCOR1 NCOR2 NF1 NHP2 NPM1 NSD1 NSD2 NUP93 NUP98 PA2G4 PALB2 PARP1 PBRM1 PCBP1 PELP1 PHB2 PHF6 PIAS4 PML PNRC1 POT1 PPP1CA PPP1CC PPP2CA PPP2CB PPP2R1A PPP2R2A PRCC PRDM1 PRKCZ PRKDC PRPF40B PTPN11 RAD21 RAD50 RAF1 RANBP2 RARA RB1 RBL1 RBM10 REL RHOA RPL5 RPS15 RSF1 RUNX1 RUNX1T1 RXRA SETD2 SF1 SF3B1 SHQ1 SKP1 SLX4 SMAD2 SMARCA1 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SOX2 SPEN SRSF2 STAG1 STAG2 TAF1 TBL1XR1 TCF3 TERT TFDP1 TNF TOP1 TOP2A TP53 U2AF1 UMPS UPF1 VHL WRN WT1 XPA XPC XPO1 XRCC1 YEATS4 ZBTB2 ZNF217 ZRSR2",
                     "HCX::isRoot": false,
@@ -2642,12 +2742,16 @@
                         5205,
                         8182
                     ],
-                    "n": "NEST:4",
+                    "CD_MemberList_Size": 194,
+                    "CD_MemberList_LogSize": 2.287801729930226,
+                    "n": "Regulation of biogenesis",
                     "r": "NEST:4"
                 }
             },
             {
                 "id": 26,
+                "x": -1040.970777075243,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "BTG1 CDK8 DICER1 ESR1 FBXW7 MED1 MED12 PNRC1 RARA",
                     "HCX::isRoot": false,
@@ -2662,12 +2766,16 @@
                         15732,
                         2355
                     ],
-                    "n": "NEST:45",
+                    "CD_MemberList_Size": 9,
+                    "CD_MemberList_LogSize": 0.9542425094393249,
+                    "n": "Mediator/CCR-NOT complex",
                     "r": "NEST:45"
                 }
             },
             {
                 "id": 27,
+                "x": -1114.4129342346278,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 ARAF BRAF CCDC6 MYC PPP2CA PPP2CB PPP2R1A PPP2R1B PPP2R2A PPP6C RAF1",
                     "HCX::isRoot": false,
@@ -2685,12 +2793,16 @@
                         2720,
                         8693
                     ],
-                    "n": "NEST:53",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "Integrator-PP2A complex",
                     "r": "NEST:53"
                 }
             },
             {
                 "id": 28,
+                "x": 588.9609397180029,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CUL3 DDB2 ELOC MDM2 NF2 STK11 TET2 VHL",
                     "HCX::isRoot": false,
@@ -2704,12 +2816,16 @@
                         5635,
                         9067
                     ],
-                    "n": "NEST:61",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "COP9 signalosome/ Cul4-RING ubiquitin E3 ligase complex",
                     "r": "NEST:61"
                 }
             },
             {
                 "id": 29,
+                "x": 718.4871345563733,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CUL3 ELOC FBXW7 HSP90AA1 PARK2 SKP1 STK11 VHL",
                     "HCX::isRoot": false,
@@ -2723,12 +2839,16 @@
                         2355,
                         2477
                     ],
-                    "n": "NEST:77",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "COP9 signalosome/ SCF ubiquitin E3 ligase complex",
                     "r": "NEST:77"
                 }
             },
             {
                 "id": 30,
+                "x": 656.207958587649,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AURKB CCND1 CUL3 DDB2 ELOC ETV4 ETV5 FBXO11 FBXW7 HSP90AA1 MDM2 NF2 PARK2 PRAME RIT1 SKP1 STK11 TET2 TNF TP53 VHL",
                     "HCX::isRoot": false,
@@ -2755,12 +2875,16 @@
                         8918,
                         11451
                     ],
-                    "n": "NEST:32",
+                    "CD_MemberList_Size": 21,
+                    "CD_MemberList_LogSize": 1.3222192947339193,
+                    "n": "Ubiquitination and neddylation",
                     "r": "NEST:32"
                 }
             },
             {
                 "id": 31,
+                "x": 183.47865214536432,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ANKRD11 AR BCL6 CREBBP GPS2 HDAC1 HDAC2 HDAC3 HDAC4 HDAC5 NCOA3 NCOR1 NCOR2 PML RUNX1T1 TBL1XR1",
                     "HCX::isRoot": false,
@@ -2782,12 +2906,16 @@
                         9226,
                         14576
                     ],
-                    "n": "NEST:107",
+                    "CD_MemberList_Size": 16,
+                    "CD_MemberList_LogSize": 1.2041199826559248,
+                    "n": "Histone deacetylation",
                     "r": "NEST:107"
                 }
             },
             {
                 "id": 32,
+                "x": -134.20716689739493,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CHEK2 CREBBP CTNNB1 EP300 HDAC2 HDAC3 KAT6A KMT2A TCF3 TP53",
                     "HCX::isRoot": false,
@@ -2803,12 +2931,16 @@
                         16749,
                         2300
                     ],
+                    "CD_MemberList_Size": 10,
+                    "CD_MemberList_LogSize": 1.0,
                     "n": "NEST:126",
                     "r": "NEST:126"
                 }
             },
             {
                 "id": 33,
+                "x": -54.785712136741495,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CASP8 CTCF HIST1H1C HIST1H1E PARP1 XPC",
                     "HCX::isRoot": false,
@@ -2820,12 +2952,16 @@
                         14240,
                         2465
                     ],
-                    "n": "NEST:158",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Histone modifications in DNA damage response",
                     "r": "NEST:158"
                 }
             },
             {
                 "id": 34,
+                "x": 105.48465455815312,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "BCLAF1 CASP8 CDC73 CHEK2 CREBBP CTCF DDX3X DKC1 EP300 EWSR1 FUS HRAS MDM2 NHP2 NPM1 PA2G4 PRPF40B RBM10 RPL5 RPS15 SF1 SF3B1 SRSF2 TERT TNF TP53 U2AF1 UPF1 XPC ZRSR2",
                     "HCX::isRoot": false,
@@ -2861,12 +2997,16 @@
                         561,
                         15610
                     ],
-                    "n": "NEST:17",
+                    "CD_MemberList_Size": 30,
+                    "CD_MemberList_LogSize": 1.4771212547196624,
+                    "n": "Ribo- nucleoprotein complexes II",
                     "r": "NEST:17"
                 }
             },
             {
                 "id": 35,
+                "x": -596.7179780428123,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "CDKN1A CREBBP EP300 RBL1 TP53",
                     "HCX::isRoot": false,
@@ -2877,12 +3017,16 @@
                         1807,
                         2300
                     ],
-                    "n": "NEST:177",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "TP53-regulated transcr. of cell cycle genes",
                     "r": "NEST:177"
                 }
             },
             {
                 "id": 36,
+                "x": -859.9619274493598,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ATM ATR CDKN1A CHEK2 MDM2 MDM4 RB1 TP53",
                     "HCX::isRoot": false,
@@ -2896,12 +3040,16 @@
                         2061,
                         16554
                     ],
-                    "n": "NEST:186",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "MDM2-p53 pathway",
                     "r": "NEST:186"
                 }
             },
             {
                 "id": 37,
+                "x": -213.62862165813567,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "CDC73 CHD2 DNMT3A KMT2A PPP1CC PTPN11 SETD2 TERT",
                     "HCX::isRoot": false,
@@ -2915,12 +3063,16 @@
                         11151,
                         10676
                     ],
-                    "n": "NEST:42",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Transcription elongation",
                     "r": "NEST:42"
                 }
             },
             {
                 "id": 38,
+                "x": 255.39909606584115,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "DAXX GATA3 NUP93 NUP98 RANBP2 TERT XPO1",
                     "HCX::isRoot": false,
@@ -2933,12 +3085,16 @@
                         4710,
                         9072
                     ],
-                    "n": "NEST:44",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Nuclear transport",
                     "r": "NEST:44"
                 }
             },
             {
                 "id": 39,
+                "x": 23.208285450469702,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ASNS ATIC CDC73 CDK8 CHEK2 CTCF DDX3X DIS3 DKC1 FOXL2 FUS GSTP1 HDAC1 HRAS NHP2 NPM1 NSD2 PA2G4 PELP1 PHB2 PPP2CA PPP2CB RHOA RPL5 RPS15 SF3B1 SHQ1 TERT TNF TOP2A UMPS UPF1 VHL XPC",
                     "HCX::isRoot": false,
@@ -2978,12 +3134,16 @@
                         11385,
                         561
                     ],
-                    "n": "NEST:9",
+                    "CD_MemberList_Size": 34,
+                    "CD_MemberList_LogSize": 1.5314789170422551,
+                    "n": "Ribo- nucleoprotein complexes",
                     "r": "NEST:9"
                 }
             },
             {
                 "id": 40,
+                "x": 878.2706806013302,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "APC CBL CDH1 CDH2 CTNNA1 CTNNB1 EGF EGFR ERBB2 FYN HDAC1 HDAC2 SOX2 TCF7L2",
                     "HCX::isRoot": false,
@@ -3003,12 +3163,16 @@
                         16068,
                         5603
                     ],
-                    "n": "NEST:108",
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
+                    "n": "Adherens junction",
                     "r": "NEST:108"
                 }
             },
             {
                 "id": 41,
+                "x": 1285.815241102624,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ARFRP1 CALR CFTR EGFR KRAS NRAS PIK3C3 PREX2 RAB35 RAC1 RINT1 SEC23B TNF TRAF3 TUSC3",
                     "HCX::isRoot": false,
@@ -3029,12 +3193,16 @@
                         9334,
                         12379
                     ],
-                    "n": "NEST:12",
+                    "CD_MemberList_Size": 15,
+                    "CD_MemberList_LogSize": 1.1760912590556813,
+                    "n": "Membrane trafficking",
                     "r": "NEST:12"
                 }
             },
             {
                 "id": 42,
+                "x": 734.4240600561607,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "CASP8 DAXX FAS MAP2K4 MAPK1 PARP1 TP53",
                     "HCX::isRoot": false,
@@ -3047,12 +3215,16 @@
                         2465,
                         6307
                     ],
-                    "n": "NEST:127",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Intrinsic apoptosis",
                     "r": "NEST:127"
                 }
             },
             {
                 "id": 43,
+                "x": 1767.735104797699,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "EGF EGFR ERBB3 ERBB4 FGF1 FGF2 FGF5 FGF7 FRS2 IGF1 IGF2 MYC RB1 TP53",
                     "HCX::isRoot": false,
@@ -3072,12 +3244,16 @@
                         15456,
                         16735
                     ],
-                    "n": "NEST:132",
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
+                    "n": "EGF/FGF stim. of cell proliferation",
                     "r": "NEST:132"
                 }
             },
             {
                 "id": 44,
+                "x": 589.1127684921375,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 MAPK1 MTOR PPP2R2A RICTOR RPS6KB1 RPTOR SQSTM1",
                     "HCX::isRoot": false,
@@ -3091,12 +3267,16 @@
                         7332,
                         16076
                     ],
-                    "n": "NEST:137",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "AKT/MTOR pathway II",
                     "r": "NEST:137"
                 }
             },
             {
                 "id": 45,
+                "x": 1424.9357992266014,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 AKT2 AKT3 FOXO3 HSP90AA1 PDPK1 PIK3CB PIK3CD PRKCZ PRKDC PTEN",
                     "HCX::isRoot": false,
@@ -3113,12 +3293,16 @@
                         13512,
                         3087
                     ],
-                    "n": "NEST:138",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "PIK3/AKT/PTEN signaling",
                     "r": "NEST:138"
                 }
             },
             {
                 "id": 46,
+                "x": 1150.4714119825803,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 MTOR RICTOR RPS6KB1 RPTOR",
                     "HCX::isRoot": false,
@@ -3129,12 +3313,16 @@
                         10874,
                         16076
                     ],
-                    "n": "NEST:145",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "AKT/MTOR pathway I",
                     "r": "NEST:145"
                 }
             },
             {
                 "id": 47,
+                "x": 1836.2949659120059,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ABL1 CBL CRKL CTNNB1 EGF EGFR ERBB2 MET PIK3R1 PIK3R2 SOCS1",
                     "HCX::isRoot": false,
@@ -3151,12 +3339,16 @@
                         11694,
                         16068
                     ],
-                    "n": "NEST:153",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "PIK3-EGFR signaling",
                     "r": "NEST:153"
                 }
             },
             {
                 "id": 48,
+                "x": 1630.61538256926,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 CTNNB1 EGF EGFR NF2 PTEN",
                     "HCX::isRoot": false,
@@ -3168,12 +3360,16 @@
                         4783,
                         16068
                     ],
-                    "n": "NEST:169",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "AKT1 activation",
                     "r": "NEST:169"
                 }
             },
             {
                 "id": 49,
+                "x": 947.9519024481124,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AKT1 APC AXIN1 AXIN2 CTNNB1 GSK3B HLA-A PPP1CA",
                     "HCX::isRoot": false,
@@ -3187,12 +3383,16 @@
                         10689,
                         9906
                     ],
-                    "n": "NEST:174",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Extended beta-catenin destruction complex",
                     "r": "NEST:174"
                 }
             },
             {
                 "id": 50,
+                "x": 1699.1752436835668,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AMER1 AXIN1 CTNNB1 DAXX MYC",
                     "HCX::isRoot": false,
@@ -3203,12 +3403,16 @@
                         4783,
                         15456
                     ],
-                    "n": "NEST:221",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Non-canonical Wnt signaling pathway",
                     "r": "NEST:221"
                 }
             },
             {
                 "id": 51,
+                "x": 1356.3759381124692,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ALOX12B CDH1 CDH2 EPCAM FLG KLF4 PRSS8 ZNF750",
                     "HCX::isRoot": false,
@@ -3222,12 +3426,16 @@
                         10912,
                         3105
                     ],
-                    "n": "NEST:24",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Keratinization",
                     "r": "NEST:24"
                 }
             },
             {
                 "id": 52,
+                "x": 451.9930462637858,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "EGFR IGF1R INSR IRS1 PDPK1 PTEN",
                     "HCX::isRoot": false,
@@ -3239,12 +3447,16 @@
                         9528,
                         5882
                     ],
-                    "n": "NEST:254",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "EGFR-insulin receptor cross-talk",
                     "r": "NEST:254"
                 }
             },
             {
                 "id": 53,
+                "x": 805.0036957392003,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ERBB2 ERBB4 FGFR2 FGFR4 HRAS KRAS",
                     "HCX::isRoot": false,
@@ -3256,12 +3468,16 @@
                         561,
                         16735
                     ],
-                    "n": "NEST:256",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "FGFR-ERBB-RAS signaling",
                     "r": "NEST:256"
                 }
             },
             {
                 "id": 54,
+                "x": 1086.1590161174827,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ABL1 AKT1 ARAF BCAR1 BCR BRAF BTK CBL CBLB CDKN1B CRKL CSF3R EGF EGFR EPHB2 ERBB2 ERBB3 ERBB4 FGFR1 FRS2 FYN GSK3B HLA-A HRAS IFNAR1 IFNAR2 IFNGR1 INPPL1 IRS1 JAK1 JAK2 KRAS MAP2K1 MAP2K2 MAPK1 NRAS PDGFRA PIK3R1 PLCG2 PTK2 PTPN11 RAF1 RASA1 RET SRC STAT3 STAT5A STAT5B STAT6 SYK TNF TP53 TSC2",
                     "HCX::isRoot": false,
@@ -3320,12 +3536,16 @@
                         561,
                         7800
                     ],
-                    "n": "NEST:38",
+                    "CD_MemberList_Size": 53,
+                    "CD_MemberList_LogSize": 1.724275869600789,
+                    "n": "Transmembrane RTK signaling",
                     "r": "NEST:38"
                 }
             },
             {
                 "id": 55,
+                "x": 1493.4956603409082,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "BCL2 BCL2L1 BCL2L11 BCL2L2 CASP8 FAS IFNGR1 MCL1 MS4A1 PARP1 PTPN13 TBX3 TP53",
                     "HCX::isRoot": false,
@@ -3344,12 +3564,16 @@
                         8363,
                         4344
                     ],
-                    "n": "NEST:47",
+                    "CD_MemberList_Size": 13,
+                    "CD_MemberList_LogSize": 1.1139433523068367,
+                    "n": "Apoptosis",
                     "r": "NEST:47"
                 }
             },
             {
                 "id": 56,
+                "x": 520.5529073779471,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ACVR1B AKT2 AKT3 ALK BMPR1A CCND1 EBF1 EGLN1 FOXO1 FOXO3 IGF1R INSR IRS2 PIK3CA PIK3CB PIK3CD PIK3R1 PIK3R2 PIK3R3 PTEN RARA SMAD4 SOD2 TGFBR1 TGFBR2",
                     "HCX::isRoot": false,
@@ -3380,12 +3604,16 @@
                         8014,
                         13254
                     ],
-                    "n": "NEST:52",
+                    "CD_MemberList_Size": 25,
+                    "CD_MemberList_LogSize": 1.3979400086720377,
+                    "n": "AKT/activin signaling",
                     "r": "NEST:52"
                 }
             },
             {
                 "id": 57,
+                "x": 1219.256215884001,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ANKRD11 BCL6 CEBPA CREBBP ESR2 GPS2 HDAC3 HDAC5 NCOA3 NCOR1 NCOR2 NRIP1 PGR RARA RUNX1T1 RXRA TBL1XR1",
                     "HCX::isRoot": false,
@@ -3408,12 +3636,16 @@
                         9226,
                         14576
                     ],
-                    "n": "NEST:60",
+                    "CD_MemberList_Size": 17,
+                    "CD_MemberList_LogSize": 1.2304489213782739,
+                    "n": "Nuclear receptor transcription",
                     "r": "NEST:60"
                 }
             },
             {
                 "id": 58,
+                "x": 314.87332403546316,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "BARD1 BIRC3 BRCA1 CBL CHEK2 EGFR MDM2 MDM4 MIB1 TNF TP53",
                     "HCX::isRoot": false,
@@ -3430,12 +3662,16 @@
                         10581,
                         1830
                     ],
-                    "n": "NEST:70",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "BRCA1 mediated protein ubiquitination",
                     "r": "NEST:70"
                 }
             },
             {
                 "id": 59,
+                "x": 383.43318514953717,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "PIAS4 PTEN SMAD2 SMAD3 SMAD4 TGFBR1 TGFBR2",
                     "HCX::isRoot": false,
@@ -3448,12 +3684,16 @@
                         14658,
                         2341
                     ],
-                    "n": "NEST:81",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "TGF-beta pathway/SMAD protein complex",
                     "r": "NEST:81"
                 }
             },
             {
                 "id": 60,
+                "x": 1562.0555214550986,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "BIRC3 CASP8 CD40 FAS MAP3K7 PARP1 TNF TNFAIP3 TNFRSF9 TP53 TRAF2 TRAF3",
                     "HCX::isRoot": false,
@@ -3471,12 +3711,16 @@
                         134,
                         1640
                     ],
-                    "n": "NEST:83",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "TNF signaling",
                     "r": "NEST:83"
                 }
             },
             {
                 "id": 61,
+                "x": -1464.2934405587148,
+                "y": 1949.4303668813664,
                 "v": {
                     "CD_MemberList": "ABCC3 APOB ATP7B CD276 CYP1B1 CYP2D6 CYP3A5 FGF19 FGF23 GATA1 GPC3 HGF HNF1A HNF1B IDH1 MST1 SPTA1 TPMT",
                     "HCX::isRoot": false,
@@ -3500,12 +3744,16 @@
                         8156,
                         13416
                     ],
-                    "n": "NEST:7",
+                    "CD_MemberList_Size": 18,
+                    "CD_MemberList_LogSize": 1.255272505103306,
+                    "n": "Metabolism",
                     "r": "NEST:7"
                 }
             },
             {
                 "id": 62,
+                "x": -1464.2934405587148,
+                "y": 1717.9740055779694,
                 "v": {
                     "CD_MemberList": "APOB ATP7B CD276 CYP1B1 CYP2D6 CYP3A5 GPC3 HNF1A HNF1B IDH1 MST1 TPMT",
                     "HCX::isRoot": false,
@@ -3523,12 +3771,16 @@
                         5372,
                         8156
                     ],
-                    "n": "NEST:11",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "Metabolic pathways",
                     "r": "NEST:11"
                 }
             },
             {
                 "id": 63,
+                "x": -624.3386758967536,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "BARD1 BLM BRCA1 BRCA2 BUB1B CCND1 CCND2 CCND3 CCNE1 CCNE2 CDK4 CDK5 CDK6 CDKN1A CDKN1B CDKN1C CDKN2A CDKN2B CDKN2C CHEK1 CKS1B CREBBP CTNNB1 E2F1 E2F4 EP300 FANCD2 HDAC1 HLA-A MSH2 MSH6 MYC RAD51 RAD51C RB1 RBL1 RBL2 TERT TOP2A TP53 WRN",
                     "HCX::isRoot": false,
@@ -3575,12 +3827,16 @@
                         9747,
                         5205
                     ],
-                    "n": "NEST:50",
+                    "CD_MemberList_Size": 41,
+                    "CD_MemberList_LogSize": 1.6127838567197355,
+                    "n": "Regulation of CDK activity I",
                     "r": "NEST:50"
                 }
             },
             {
                 "id": 64,
+                "x": -654.9857802200422,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "CCND1 CCND2 CCND3 CCNE1 CCNE2 CDK4 CDK6 CDKN1A CDKN1B CDKN2A CDKN2B CDKN2C CKS1B RB1 TP53",
                     "HCX::isRoot": false,
@@ -3601,12 +3857,16 @@
                         5299,
                         4495
                     ],
-                    "n": "NEST:110",
+                    "CD_MemberList_Size": 15,
+                    "CD_MemberList_LogSize": 1.1760912590556813,
+                    "n": "CDK holoenzyme complex I",
                     "r": "NEST:110"
                 }
             },
             {
                 "id": 65,
+                "x": -925.0622935645224,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "BARD1 BLM BRCA1 BRCA2 BUB1B CHEK1 FANCD2 RAD51 RAD51C TOP2A TP53 WRN",
                     "HCX::isRoot": false,
@@ -3624,12 +3884,16 @@
                         1830,
                         14001
                     ],
-                    "n": "NEST:130",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "Homologous recombination",
                     "r": "NEST:130"
                 }
             },
             {
                 "id": 66,
+                "x": -1274.6698568790453,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "E2F1 E2F4 RBL1 RBL2 TP53",
                     "HCX::isRoot": false,
@@ -3640,12 +3904,16 @@
                         2741,
                         3935
                     ],
-                    "n": "NEST:293",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "RBL-TP53 complex",
                     "r": "NEST:293"
                 }
             },
             {
                 "id": 67,
+                "x": -596.7179780428123,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "BRCA1 BUB1B CCND1 CCNE1 CDKN1A CDKN1B CDKN2A CKS1B CREBBP CTNNB1 E2F1 EP300 HDAC1 HLA-A MYC RB1 RBL1 TOP2A TP53",
                     "HCX::isRoot": false,
@@ -3670,12 +3938,16 @@
                         1807,
                         3420
                     ],
-                    "n": "NEST:91",
+                    "CD_MemberList_Size": 19,
+                    "CD_MemberList_LogSize": 1.2787536009528289,
+                    "n": "Reg. of CDK activity II",
                     "r": "NEST:91"
                 }
             },
             {
                 "id": 68,
+                "x": -547.9953711382113,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "BRCA1 CHEK1 EP300 HDAC1 IKZF1 JUN MDM2 PARP1 PML SMARCA4 TP53",
                     "HCX::isRoot": false,
@@ -3692,12 +3964,16 @@
                         13040,
                         14001
                     ],
-                    "n": "NEST:117",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "Regulation of TP53",
                     "r": "NEST:117"
                 }
             },
             {
                 "id": 69,
+                "x": -774.2355245940562,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "AURKA AURKB BARD1 BLM BRCA1 BRCA2 BRIP1 BUB1B CCNE1 CDKN1A CDKN1B CHEK1 CKS1B FANCD2 MKI67 MLH1 MLH3 MSH2 MSH3 MSH6 PMS1 PMS2 POLD1 POLE RAD51 RAD51C RB1 TERT TOP2A TP53 WRN XRCC2",
                     "HCX::isRoot": false,
@@ -3735,12 +4011,16 @@
                         5205,
                         16651
                     ],
-                    "n": "NEST:30",
+                    "CD_MemberList_Size": 32,
+                    "CD_MemberList_LogSize": 1.505149978319906,
+                    "n": "DNA metabolic process",
                     "r": "NEST:30"
                 }
             },
             {
                 "id": 70,
+                "x": 100.67098737106426,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "BCL11B CHD4 CREBBP DNMT1 E2F1 EZH2 HDAC1 HDAC2 ING1 IRF2 MTA1 PALB2 PARP1 RUNX1 TP53 ZBTB2",
                     "HCX::isRoot": false,
@@ -3762,12 +4042,16 @@
                         4483,
                         16546
                     ],
-                    "n": "NEST:55",
+                    "CD_MemberList_Size": 16,
+                    "CD_MemberList_LogSize": 1.2041199826559248,
+                    "n": "Nucleosome remodeling",
                     "r": "NEST:55"
                 }
             },
             {
                 "id": 71,
+                "x": -859.9619274493598,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ATM ATR BRCA1 BUB1B CCND1 CCNE1 CDKN1A CDKN1B CDKN2A CHEK2 CKS1B CREBBP E2F1 E2F2 E2F4 E2F5 EP300 HDAC1 MDM2 MDM4 MYC NPM1 PARP1 RB1 RBL1 RBL2 TFDP1 TP53 TP63",
                     "HCX::isRoot": false,
@@ -3802,12 +4086,16 @@
                         1807,
                         2061
                     ],
-                    "n": "NEST:65",
+                    "CD_MemberList_Size": 29,
+                    "CD_MemberList_LogSize": 1.462397997898956,
+                    "n": "Cell cycle arrest",
                     "r": "NEST:65"
                 }
             },
             {
                 "id": 72,
+                "x": -925.0622935645224,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ATM AURKA BARD1 BLM BRCA1 BRCA2 BRIP1 BUB1B CDC73 CHEK1 FANCA FANCD2 MDC1 MDM2 MRE11 MSH6 NBN PALB2 POLH RAD50 RAD51 RAD51B RAD51C RAD51D TOP2A TP53 WRN XRCC2 XRCC3",
                     "HCX::isRoot": false,
@@ -3842,12 +4130,16 @@
                         5205,
                         4106
                     ],
-                    "n": "NEST:79",
+                    "CD_MemberList_Size": 29,
+                    "CD_MemberList_LogSize": 1.462397997898956,
+                    "n": "Recombinational repair",
                     "r": "NEST:79"
                 }
             },
             {
                 "id": 73,
+                "x": -698.8221401087649,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "AURKB BRCA1 CHD4 H3F3A HDAC1 HDAC2 HIST3H3 MTA1 SMARCA4 TAF1 TP53",
                     "HCX::isRoot": false,
@@ -3864,12 +4156,16 @@
                         1271,
                         9160
                     ],
-                    "n": "NEST:94",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "DNA replication dependent nucleosome assembly",
                     "r": "NEST:94"
                 }
             },
             {
                 "id": 74,
+                "x": -141.42992932876223,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "RAD21 SMARCA4 SMC1A SMC3 STAG1 STAG2",
                     "HCX::isRoot": false,
@@ -3881,12 +4177,16 @@
                         6099,
                         16267
                     ],
-                    "n": "NEST:121",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Extended cohesin complex",
                     "r": "NEST:121"
                 }
             },
             {
                 "id": 75,
+                "x": 32.69715110794641,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "CTNNB1 EP300 EZH2 HIST3H3 TP53",
                     "HCX::isRoot": false,
@@ -3897,12 +4197,16 @@
                         2300,
                         9160
                     ],
-                    "n": "NEST:155",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "H3-ac. & H3K4-me crosstalk",
                     "r": "NEST:155"
                 }
             },
             {
                 "id": 76,
+                "x": -38.65684755062102,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "BCLAF1 BRD4 CASP8 CDC73 CREBBP DDX3X EWSR1 FUBP1 FUS GATA3 PRCC PRKDC PRPF40B RBM10 SF1 SF3B1 SPEN SRSF2 TNF U2AF1 UPF1 ZRSR2",
                     "HCX::isRoot": false,
@@ -3930,12 +4234,16 @@
                         11385,
                         15610
                     ],
-                    "n": "NEST:19",
+                    "CD_MemberList_Size": 22,
+                    "CD_MemberList_LogSize": 1.3424226808222062,
+                    "n": "mRNA splicing",
                     "r": "NEST:19"
                 }
             },
             {
                 "id": 77,
+                "x": 104.05114976680488,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "BARD1 BCL11B BRD4 CHD4 CREBBP DNMT1 DNMT3A DNMT3B E2F1 EMSY EZH2 HDAC1 HDAC2 HDAC3 HIST3H3 ING1 IRF2 KDM5A MTA1 PALB2 PARP1 PHF6 PRDM1 RB1 RUNX1 SMARCA1 TERT TP53 ZBTB2 ZNF217",
                     "HCX::isRoot": false,
@@ -3971,12 +4279,16 @@
                         4483,
                         8182
                     ],
-                    "n": "NEST:34",
+                    "CD_MemberList_Size": 30,
+                    "CD_MemberList_LogSize": 1.4771212547196624,
+                    "n": "Histone modification",
                     "r": "NEST:34"
                 }
             },
             {
                 "id": 78,
+                "x": -207.34224187367363,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "ARID1A ARID1B ARID2 BCL7A CHD4 HDAC2 MYC PBRM1 SMARCA4 SMARCB1 SMARCE1 SOX2",
                     "HCX::isRoot": false,
@@ -3994,12 +4306,16 @@
                         2214,
                         15456
                     ],
-                    "n": "NEST:92",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "Polybromo/BAF complex",
                     "r": "NEST:92"
                 }
             },
             {
                 "id": 79,
+                "x": -278.6962405324157,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "CTNNB1 EP300 HIST3H3 KDM6A KMT2A KMT2B KMT2C KMT2D MAGI2 MEN1 TNF",
                     "HCX::isRoot": false,
@@ -4016,12 +4332,16 @@
                         15641,
                         9160
                     ],
-                    "n": "NEST:98",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "Histone methyltransferase complex",
                     "r": "NEST:98"
                 }
             },
             {
                 "id": 80,
+                "x": -207.06454639069852,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "ARID1A ARID1B ARID2 PBRM1 SMARCA4 SMARCB1 SMARCE1 SOX2",
                     "HCX::isRoot": false,
@@ -4035,12 +4355,16 @@
                         5603,
                         2214
                     ],
-                    "n": "NEST:129",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "BAF (SWI/SNF) complex",
                     "r": "NEST:129"
                 }
             },
             {
                 "id": 81,
+                "x": 58.94248197140405,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ASNS CHEK2 CTCF DDX3X DIS3 DKC1 FOXL2 HRAS NHP2 NPM1 NSD2 PA2G4 PELP1 PHB2 RPL5 RPS15 SHQ1 XPC",
                     "HCX::isRoot": false,
@@ -4064,12 +4388,16 @@
                         1702,
                         489
                     ],
-                    "n": "NEST:13",
+                    "CD_MemberList_Size": 18,
+                    "CD_MemberList_LogSize": 1.255272505103306,
+                    "n": "Ribosome biogenesis",
                     "r": "NEST:13"
                 }
             },
             {
                 "id": 82,
+                "x": -14.03445235270192,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "CDC73 CHEK2 DKC1 FUS HRAS NPM1 RHOA RPL5 SF3B1 TERT TNF XPC",
                     "HCX::isRoot": false,
@@ -4087,12 +4415,16 @@
                         10676,
                         561
                     ],
-                    "n": "NEST:33",
+                    "CD_MemberList_Size": 12,
+                    "CD_MemberList_LogSize": 1.0791812460476249,
+                    "n": "Ribosome abundance control",
                     "r": "NEST:33"
                 }
             },
             {
                 "id": 83,
+                "x": -815.4875980739016,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "MLH1 MSH2 MSH3 MSH6 PMS2",
                     "HCX::isRoot": false,
@@ -4103,12 +4435,16 @@
                         14184,
                         4178
                     ],
-                    "n": "NEST:231",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "MutS homologs",
                     "r": "NEST:231"
                 }
             },
             {
                 "id": 84,
+                "x": -705.9129025832517,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "BRCA1 BRIP1 MLH1 PMS1 PMS2",
                     "HCX::isRoot": false,
@@ -4119,12 +4455,16 @@
                         14459,
                         4178
                     ],
-                    "n": "NEST:277",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "MutL alpha/beta complex",
                     "r": "NEST:277"
                 }
             },
             {
                 "id": 85,
+                "x": -760.7002503286349,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "AURKA AURKB BUB1B CHEK1 MKI67 RAD51 TOP2A",
                     "HCX::isRoot": false,
@@ -4137,12 +4477,16 @@
                         14001,
                         13650
                     ],
-                    "n": "NEST:59",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Chromosome centrometric region",
                     "r": "NEST:59"
                 }
             },
             {
                 "id": 86,
+                "x": -278.6962405324157,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "EP300 KDM6A KMT2A KMT2B KMT2D MEN1",
                     "HCX::isRoot": false,
@@ -4154,12 +4498,16 @@
                         2300,
                         15641
                     ],
-                    "n": "NEST:133",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Histone methyltransferase subcomplex",
                     "r": "NEST:133"
                 }
             },
             {
                 "id": 87,
+                "x": -1723.9102108099905,
+                "y": 1949.4147969809908,
                 "v": {
                     "CD_MemberList": "ABL1 ABL2 ACTA2 ADGRA2 ARHGAP26 ARID5B BCL2L12 CASR CBL CBLB CBR3 CD276 CDH1 CHEK2 CSF1R CUL3 DMD DNM2 DPYD EBF1 EGF EGFR ENG EPCAM ERG ERRFI1 ESR1 EXT2 FANCC FCGR2A FGF10 FGF19 FGF23 FLT1 FLT4 FOXA1 FOXP1 GNA11 GNA13 GNAQ GNAS GPC3 GREM1 HSP90AA1 IL2RA INHBA KDR LATS1 LMNA MAPK1 MYH11 NEGR1 NF2 NFE2L2 NOTCH4 PAK1 PAK3 PAK5 PALLD PDGFRA PDGFRB PIK3CA PIK3R1 PLK2 PPP1CB PREX2 QKI RAC1 RET RHOA RHPN2 SETBP1 SH2B3 SLIT2 SOX17 SPRED1 TNF TPM1 VEGFA VSIR",
                     "HCX::isRoot": false,
@@ -4245,12 +4593,16 @@
                         7674,
                         16068
                     ],
-                    "n": "NEST:5",
+                    "CD_MemberList_Size": 80,
+                    "CD_MemberList_LogSize": 1.9030899869919435,
+                    "n": "Cell motility",
                     "r": "NEST:5"
                 }
             },
             {
                 "id": 88,
+                "x": -1723.9102108099905,
+                "y": 1715.9490980686978,
                 "v": {
                     "CD_MemberList": "ACTA2 ARHGAP26 CASR CBL CDH1 CHEK2 DNM2 EGFR ESR1 GNA11 GNA13 GNAQ GNAS HSP90AA1 LATS1 LMNA MAPK1 MYH11 NFE2L2 PAK1 PAK3 PALLD PIK3CA PIK3R1 PPP1CB PREX2 RAC1 RHOA RHPN2 SLIT2 SPRED1 TNF TPM1",
                     "HCX::isRoot": false,
@@ -4289,12 +4641,16 @@
                         16068,
                         2993
                     ],
-                    "n": "NEST:14",
+                    "CD_MemberList_Size": 33,
+                    "CD_MemberList_LogSize": 1.5185139398778875,
+                    "n": "Cytoskeleton",
                     "r": "NEST:14"
                 }
             },
             {
                 "id": 89,
+                "x": -1659.9667337431456,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ADGRA2 ARID5B CBR3 EBF1 EGF EPCAM ERG FCGR2A FGF10 FGF19 FLT1 FLT4 KDR NEGR1 NOTCH4 PREX2 RET SETBP1 SH2B3 SOX17 VEGFA VSIR",
                     "HCX::isRoot": false,
@@ -4322,12 +4678,16 @@
                         859,
                         5027
                     ],
+                    "CD_MemberList_Size": 22,
+                    "CD_MemberList_LogSize": 1.3424226808222062,
                     "n": "NEST:16",
                     "r": "NEST:16"
                 }
             },
             {
                 "id": 90,
+                "x": -1605.3830501134507,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ACTA2 CD276 DMD DPYD ENG FANCC FGF10 FOXA1 GREM1 INHBA PALLD PDGFRB TNF",
                     "HCX::isRoot": false,
@@ -4346,12 +4706,16 @@
                         3917,
                         2993
                     ],
-                    "n": "NEST:20",
+                    "CD_MemberList_Size": 13,
+                    "CD_MemberList_LogSize": 1.1139433523068367,
+                    "n": "Extracellular matrix organization",
                     "r": "NEST:20"
                 }
             },
             {
                 "id": 91,
+                "x": 829.4821722863126,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "APC CBL CDH1 CDH2 CTNNA1 CTNNB1 EGF EGFR FYN HDAC2",
                     "HCX::isRoot": false,
@@ -4367,12 +4731,16 @@
                         10261,
                         16068
                     ],
-                    "n": "NEST:142",
+                    "CD_MemberList_Size": 10,
+                    "CD_MemberList_LogSize": 1.0,
+                    "n": "EGF/ beta-catenin signaling",
                     "r": "NEST:142"
                 }
             },
             {
                 "id": 92,
+                "x": 891.2156079358829,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "APC CTNNA1 CTNNB1 EGFR ERBB2 HDAC2 TCF7L2",
                     "HCX::isRoot": false,
@@ -4385,12 +4753,16 @@
                         12086,
                         16068
                     ],
-                    "n": "NEST:182",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Beta-catenin-TCF complex",
                     "r": "NEST:182"
                 }
             },
             {
                 "id": 93,
+                "x": -654.9857802200422,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "CCND1 CCND2 CCND3 CCNE1 CCNE2 CDK4 CDK6 CDKN1A CDKN1B CDKN2A CDKN2B CDKN2C TP53",
                     "HCX::isRoot": false,
@@ -4409,12 +4781,16 @@
                         5299,
                         4495
                     ],
-                    "n": "NEST:150",
+                    "CD_MemberList_Size": 13,
+                    "CD_MemberList_LogSize": 1.1139433523068367,
+                    "n": "G1 to S cell cycle control",
                     "r": "NEST:150"
                 }
             },
             {
                 "id": 94,
+                "x": 131.91941629551002,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ANKRD11 GPS2 HDAC3 NCOR1 NCOR2 PML TBL1XR1",
                     "HCX::isRoot": false,
@@ -4427,12 +4803,16 @@
                         9226,
                         14576
                     ],
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
                     "n": "NEST:163",
                     "r": "NEST:163"
                 }
             },
             {
                 "id": 95,
+                "x": 204.8963506196742,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ANKRD11 CREBBP NCOA3 NCOR1 NCOR2",
                     "HCX::isRoot": false,
@@ -4443,12 +4823,16 @@
                         1807,
                         14576
                     ],
-                    "n": "NEST:210",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Regulation of androgen receptor signaling pathway",
                     "r": "NEST:210"
                 }
             },
             {
                 "id": 96,
+                "x": -1114.4129342346278,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "PPP2CA PPP2CB PPP2R1A PPP2R1B PPP2R2A",
                     "HCX::isRoot": false,
@@ -4459,12 +4843,16 @@
                         13524,
                         8693
                     ],
-                    "n": "NEST:170",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Phosphatase 2A catalytic subunit",
                     "r": "NEST:170"
                 }
             },
             {
                 "id": 97,
+                "x": -1224.3641029926657,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "E2F1 E2F2 E2F4 MDM2 RB1 TFDP1 TP53",
                     "HCX::isRoot": false,
@@ -4477,12 +4865,16 @@
                         13659,
                         8392
                     ],
-                    "n": "NEST:199",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Oncogene induced senescence",
                     "r": "NEST:199"
                 }
             },
             {
                 "id": 98,
+                "x": -1869.4235782519972,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "AXL B2M BIRC3 BTK CARD11 CD19 CD22 CD274 CD40 CD70 CD79A CD79B CIITA CSF1R CSF3R CTLA4 CXCR4 CYLD FAM46C FAS FCGR2A FCGR3A FLT3 FOXP1 FYN GATA3 HAVCR2 HGF HLA-A HLA-B HLA-C HLA-DMA HLA-DMB HLA-DOA HLA-DOB HLA-DPA1 HLA-DPB1 HLA-DQA1 HLA-DQA2 HLA-DQB1 HLA-DQB2 HLA-DRA HLA-DRB1 HLA-DRB5 HLA-E HLA-F HLA-G IDO1 IFNGR2 IGF1 IKBKE IKZF1 IKZF3 IL10RA IL15 IL2RA IL6R IL7R IRF1 IRF4 JAK2 JAK3 KIT KLHL6 LAG3 LYN MAFB MS4A1 MYD88 NFKBIA NKX2-1 NTRK3 P2RY8 PCBP1 PDCD1 PDCD1LG2 PHOX2B PIK3CD PIK3CG PLCG2 POU2F2 PRDM1 PRF1 PTPN22 SH2D1A SOD2 STAT4 STAT5A SYK TAP1 TAP2 TIGIT TLR4 TMEM173 TNFAIP3 TNFRSF14 TNFRSF17 TNFRSF9 VSIR",
                     "HCX::isRoot": false,
@@ -4587,12 +4979,16 @@
                         14653,
                         3420
                     ],
-                    "n": "NEST:8",
+                    "CD_MemberList_Size": 99,
+                    "CD_MemberList_LogSize": 1.99563519459755,
+                    "n": "Immune system",
                     "r": "NEST:8"
                 }
             },
             {
                 "id": 99,
+                "x": -1800.824784298602,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "B2M BIRC3 CARD11 CD19 CD274 CD40 CD70 CD79A CD79B CIITA CTLA4 CXCR4 FLT3 GATA3 HLA-A HLA-B HLA-C HLA-DMA HLA-DMB HLA-DOA HLA-DOB HLA-DPA1 HLA-DPB1 HLA-DQA1 HLA-DQA2 HLA-DQB1 HLA-DQB2 HLA-DRA HLA-DRB1 HLA-DRB5 HLA-E HLA-F HLA-G IDO1 IKZF1 IKZF3 IL15 IL7R IRF1 IRF4 JAK3 KLHL6 LAG3 MS4A1 P2RY8 PDCD1 PDCD1LG2 PHOX2B PRF1 PTPN22 SH2D1A STAT4 TAP2 TIGIT TNFRSF14 TNFRSF17 TNFRSF9",
                     "HCX::isRoot": false,
@@ -4655,12 +5051,16 @@
                         9026,
                         1640
                     ],
-                    "n": "NEST:18",
+                    "CD_MemberList_Size": 57,
+                    "CD_MemberList_LogSize": 1.7558748556724915,
+                    "n": "Regulation of immune responses",
                     "r": "NEST:18"
                 }
             },
             {
                 "id": 100,
+                "x": -1869.4235782519972,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "B2M BTK CD22 CD40 CIITA CSF1R CTLA4 FCGR2A FCGR3A FYN HAVCR2 HLA-A HLA-B HLA-C HLA-DMA HLA-DMB HLA-DOA HLA-DPA1 HLA-DPB1 HLA-DQA1 HLA-DQB1 HLA-DRA HLA-DRB1 HLA-DRB5 HLA-E HLA-F HLA-G IKZF1 IKZF3 KIT LYN PDCD1 PIK3CD PTPN22 SH2D1A SYK TAP1 TAP2 TIGIT",
                     "HCX::isRoot": false,
@@ -4705,12 +5105,16 @@
                         1788,
                         3420
                     ],
-                    "n": "NEST:25",
+                    "CD_MemberList_Size": 39,
+                    "CD_MemberList_LogSize": 1.591064607026499,
+                    "n": "Lymphocyte activation",
                     "r": "NEST:25"
                 }
             },
             {
                 "id": 101,
+                "x": -925.0622935645224,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "BARD1 BLM BRCA1 BRCA2 BUB1B FANCD2 RAD51 RAD51C TP53",
                     "HCX::isRoot": false,
@@ -4725,12 +5129,16 @@
                         5205,
                         1830
                     ],
-                    "n": "NEST:193",
+                    "CD_MemberList_Size": 9,
+                    "CD_MemberList_LogSize": 0.9542425094393249,
+                    "n": "Resolution of D-loop structures",
                     "r": "NEST:193"
                 }
             },
             {
                 "id": 102,
+                "x": 1150.319397252606,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "EGFR ERBB2 FGFR1 FRS2 KRAS STAT3",
                     "HCX::isRoot": false,
@@ -4742,12 +5150,16 @@
                         16068,
                         15531
                     ],
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
                     "n": "NEST:195",
                     "r": "NEST:195"
                 }
             },
             {
                 "id": 103,
+                "x": 1008.408378871769,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ARAF BRAF HRAS KRAS MAP2K1 MAPK1 RAF1",
                     "HCX::isRoot": false,
@@ -4760,12 +5172,16 @@
                         561,
                         5785
                     ],
-                    "n": "NEST:212",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "RAS-RAF-MAPK signaling",
                     "r": "NEST:212"
                 }
             },
             {
                 "id": 104,
+                "x": 1086.1590161174827,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "BCR CBL CBLB CSF3R EGF EGFR ERBB2 ERBB3 ERBB4 FRS2 INPPL1 IRS1 JAK1 JAK2 PDGFRA PIK3R1 PLCG2 PTPN11 RET STAT3 STAT5A",
                     "HCX::isRoot": false,
@@ -4792,12 +5208,16 @@
                         16068,
                         7800
                     ],
-                    "n": "NEST:89",
+                    "CD_MemberList_Size": 21,
+                    "CD_MemberList_LogSize": 1.3222192947339193,
+                    "n": "Erb and JAK-STAT signaling",
                     "r": "NEST:89"
                 }
             },
             {
                 "id": 105,
+                "x": -141.42992932876223,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "RAD21 SMC1A SMC3 STAG1 STAG2",
                     "HCX::isRoot": false,
@@ -4808,12 +5228,16 @@
                         6099,
                         16267
                     ],
-                    "n": "NEST:196",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Cohesin complex",
                     "r": "NEST:196"
                 }
             },
             {
                 "id": 106,
+                "x": -1869.4235782519972,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "B2M HLA-A HLA-B HLA-C HLA-E HLA-F HLA-G TAP2",
                     "HCX::isRoot": false,
@@ -4827,12 +5251,16 @@
                         12119,
                         3420
                     ],
-                    "n": "NEST:202",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "MHC class I including non-classical MHCs",
                     "r": "NEST:202"
                 }
             },
             {
                 "id": 107,
+                "x": 1294.4476917495194,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ARFRP1 CALR EGFR SEC23B TRAF3 TUSC3",
                     "HCX::isRoot": false,
@@ -4844,12 +5272,16 @@
                         16068,
                         9334
                     ],
-                    "n": "NEST:21",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Protein processing in ER",
                     "r": "NEST:21"
                 }
             },
             {
                 "id": 108,
+                "x": -1332.8129775822745,
+                "y": 1949.4303668813664,
                 "v": {
                     "CD_MemberList": "C8orf34 CBL FBXO11 GALNT12 MYOD1 TPM1",
                     "HCX::isRoot": false,
@@ -4861,12 +5293,16 @@
                         8918,
                         9550
                     ],
-                    "n": "NEST:22",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Structural constituent of muscle",
                     "r": "NEST:22"
                 }
             },
             {
                 "id": 109,
+                "x": -1957.7736299013195,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "ADGRA2 EGFL7 ENG ERG ETS1 FLT1 FLT4 KDR NOTCH4 SH2B3 SOX17 TMEM127 VEGFA VSIR",
                     "HCX::isRoot": false,
@@ -4886,12 +5322,16 @@
                         12700,
                         5027
                     ],
+                    "CD_MemberList_Size": 14,
+                    "CD_MemberList_LogSize": 1.146128035678238,
                     "n": "NEST:29",
                     "r": "NEST:29"
                 }
             },
             {
                 "id": 110,
+                "x": -1393.2004487353843,
+                "y": 1949.4303668813664,
                 "v": {
                     "CD_MemberList": "IFIT1 IFIT2 IFIT3 IRF2 PML TAP1 TAP2 TNF",
                     "HCX::isRoot": false,
@@ -4905,12 +5345,16 @@
                         7674,
                         927
                     ],
-                    "n": "NEST:36",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Interferon signaling",
                     "r": "NEST:36"
                 }
             },
             {
                 "id": 111,
+                "x": -1628.2456055272778,
+                "y": 1953.108862764464,
                 "v": {
                     "CD_MemberList": "CSF3R EPOR IFNAR2 IL6R IRS1 IRS2 JAK1 JAK2 JAK3 PIK3R1 PTPN11 SOCS1 STAT3 STAT5A STAT5B STAT6",
                     "HCX::isRoot": false,
@@ -4932,12 +5376,16 @@
                         8256,
                         9528
                     ],
-                    "n": "NEST:84",
+                    "CD_MemberList_Size": 16,
+                    "CD_MemberList_LogSize": 1.2041199826559248,
+                    "n": "JAK-STAT signaling",
                     "r": "NEST:84"
                 }
             },
             {
                 "id": 112,
+                "x": -1548.382160727895,
+                "y": 1949.4303668813664,
                 "v": {
                     "CD_MemberList": "EPHA2 EPHA3 EPHA5 EPHA7 EPHB1 EPHB2 PTPRD SLIT2",
                     "HCX::isRoot": false,
@@ -4951,12 +5399,16 @@
                         6485,
                         11023
                     ],
-                    "n": "NEST:97",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Ephrin receptor activity",
                     "r": "NEST:97"
                 }
             },
             {
                 "id": 113,
+                "x": -1723.9102108099905,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ACTA2 CASR CBL MYH11 NFE2L2 PALLD PIK3CA PPP1CB RAC1 TNF TPM1",
                     "HCX::isRoot": false,
@@ -4973,12 +5425,16 @@
                         614,
                         2993
                     ],
-                    "n": "NEST:23",
+                    "CD_MemberList_Size": 11,
+                    "CD_MemberList_LogSize": 1.0413926851582251,
+                    "n": "Actin filament-based process",
                     "r": "NEST:23"
                 }
             },
             {
                 "id": 114,
+                "x": 947.9519024481124,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "APC AXIN1 CTNNB1 GSK3B HLA-A",
                     "HCX::isRoot": false,
@@ -4989,12 +5445,16 @@
                         3420,
                         9906
                     ],
-                    "n": "NEST:239",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Beta-catenin destruction complex",
                     "r": "NEST:239"
                 }
             },
             {
                 "id": 115,
+                "x": -6.4592731162847485,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "BCLAF1 CASP8 CDC73 CREBBP EWSR1 FUS PRPF40B RBM10 SF1 SF3B1 SRSF2 TNF U2AF1 UPF1 ZRSR2",
                     "HCX::isRoot": false,
@@ -5015,12 +5475,16 @@
                         10676,
                         15610
                     ],
-                    "n": "NEST:26",
+                    "CD_MemberList_Size": 15,
+                    "CD_MemberList_LogSize": 1.1760912590556813,
+                    "n": "Spliceosomal-snRNP complex",
                     "r": "NEST:26"
                 }
             },
             {
                 "id": 116,
+                "x": -82.45800221059471,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "BCLAF1 CASP8 RBM10 SF1 SPEN SRSF2 U2AF1",
                     "HCX::isRoot": false,
@@ -5033,12 +5497,16 @@
                         2465,
                         16326
                     ],
-                    "n": "NEST:39",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Regulation of mRNA processing",
                     "r": "NEST:39"
                 }
             },
             {
                 "id": 117,
+                "x": -1332.8129775822745,
+                "y": 1717.9740055779694,
                 "v": {
                     "CD_MemberList": "C8orf34 CBL GALNT12 MYOD1 TPM1",
                     "HCX::isRoot": false,
@@ -5049,12 +5517,16 @@
                         5501,
                         9550
                     ],
-                    "n": "NEST:27",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Contractile fiber",
                     "r": "NEST:27"
                 }
             },
             {
                 "id": 118,
+                "x": -1605.3830501134507,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ACTA2 CD276 FANCC FGF10 GREM1 PALLD PDGFRB TNF",
                     "HCX::isRoot": false,
@@ -5068,12 +5540,16 @@
                         3917,
                         2993
                     ],
-                    "n": "NEST:31",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Extracellular matrix",
                     "r": "NEST:31"
                 }
             },
             {
                 "id": 119,
+                "x": -6.4592731162847485,
+                "y": 760.0288450885273,
                 "v": {
                     "CD_MemberList": "CDC73 PRPF40B RBM10 SF1 SF3B1 ZRSR2",
                     "HCX::isRoot": false,
@@ -5085,12 +5561,16 @@
                         10676,
                         15610
                     ],
-                    "n": "NEST:35",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "Spliceosomal complex",
                     "r": "NEST:35"
                 }
             },
             {
                 "id": 120,
+                "x": -1723.9102108099905,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "ACTA2 CBL MYH11 PALLD PIK3CA PPP1CB TNF TPM1",
                     "HCX::isRoot": false,
@@ -5104,12 +5584,16 @@
                         614,
                         816
                     ],
-                    "n": "NEST:40",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Actin filaments",
                     "r": "NEST:40"
                 }
             },
             {
                 "id": 121,
+                "x": -1780.6001698035398,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "MYH11 NFE2L2 PIK3CA PPP1CB TPM1",
                     "HCX::isRoot": false,
@@ -5120,12 +5604,16 @@
                         4791,
                         614
                     ],
-                    "n": "NEST:48",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Actin cytoskeleton",
                     "r": "NEST:48"
                 }
             },
             {
                 "id": 122,
+                "x": -1832.6730025244178,
+                "y": 1240.8690722362662,
                 "v": {
                     "CD_MemberList": "ACTA2 CASR MYH11 PALLD TPM1",
                     "HCX::isRoot": false,
@@ -5136,12 +5624,16 @@
                         614,
                         816
                     ],
-                    "n": "NEST:54",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Cell-extracellular matrix interactions",
                     "r": "NEST:54"
                 }
             },
             {
                 "id": 123,
+                "x": -1393.2004487353843,
+                "y": 1717.9740055779694,
                 "v": {
                     "CD_MemberList": "IFIT1 IFIT2 IFIT3 PML TAP1 TAP2 TNF",
                     "HCX::isRoot": false,
@@ -5154,12 +5646,16 @@
                         7674,
                         927
                     ],
-                    "n": "NEST:43",
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
+                    "n": "Type I interferon signaling pathway",
                     "r": "NEST:43"
                 }
             },
             {
                 "id": 124,
+                "x": -1957.7736299013195,
+                "y": 1719.2460883092717,
                 "v": {
                     "CD_MemberList": "ERG FLT1 FLT4 KDR NOTCH4 SH2B3 VEGFA VSIR",
                     "HCX::isRoot": false,
@@ -5173,12 +5669,16 @@
                         12700,
                         5027
                     ],
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
                     "n": "NEST:49",
                     "r": "NEST:49"
                 }
             },
             {
                 "id": 125,
+                "x": -1605.3830501134507,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "ACTA2 FANCC FGF10 PALLD PDGFRB TNF",
                     "HCX::isRoot": false,
@@ -5190,12 +5690,16 @@
                         3917,
                         816
                     ],
-                    "n": "NEST:51",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "ECM-cytoskeleton assembly",
                     "r": "NEST:51"
                 }
             },
             {
                 "id": 126,
+                "x": -1723.9102108099905,
+                "y": 1000.3889447355468,
                 "v": {
                     "CD_MemberList": "CBL MYH11 PIK3CA PPP1CB TPM1",
                     "HCX::isRoot": false,
@@ -5206,12 +5710,16 @@
                         12836,
                         614
                     ],
-                    "n": "NEST:63",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "Actin and actin-associated proteins",
                     "r": "NEST:63"
                 }
             },
             {
                 "id": 127,
+                "x": 255.39909606584115,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "DAXX NUP93 NUP98 RANBP2 TERT XPO1",
                     "HCX::isRoot": false,
@@ -5223,12 +5731,16 @@
                         14383,
                         9072
                     ],
-                    "n": "NEST:69",
+                    "CD_MemberList_Size": 6,
+                    "CD_MemberList_LogSize": 0.7781512503836436,
+                    "n": "SUMOylation for nuclear transport",
                     "r": "NEST:69"
                 }
             },
             {
                 "id": 128,
+                "x": -1957.7736299013195,
+                "y": 1480.5234026451944,
                 "v": {
                     "CD_MemberList": "ERG FLT1 FLT4 KDR NOTCH4 SH2B3 VEGFA",
                     "HCX::isRoot": false,
@@ -5241,12 +5753,16 @@
                         12700,
                         5027
                     ],
+                    "CD_MemberList_Size": 7,
+                    "CD_MemberList_LogSize": 0.8450980400142568,
                     "n": "NEST:80",
                     "r": "NEST:80"
                 }
             },
             {
                 "id": 129,
+                "x": -399.75290751771536,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "BCOR BCORL1 E2F6 EED EZH2 MGA TFDP1 TNF",
                     "HCX::isRoot": false,
@@ -5260,12 +5776,16 @@
                         7674,
                         8831
                     ],
-                    "n": "NEST:82",
+                    "CD_MemberList_Size": 8,
+                    "CD_MemberList_LogSize": 0.9030899869919435,
+                    "n": "Extended PRC1 complex",
                     "r": "NEST:82"
                 }
             },
             {
                 "id": 130,
+                "x": 255.39909606584115,
+                "y": 1238.133337983134,
                 "v": {
                     "CD_MemberList": "NUP93 NUP98 RANBP2 TERT XPO1",
                     "HCX::isRoot": false,
@@ -5276,7 +5796,9 @@
                         14383,
                         9072
                     ],
-                    "n": "NEST:93",
+                    "CD_MemberList_Size": 5,
+                    "CD_MemberList_LogSize": 0.6989700043360189,
+                    "n": "tRNA transport",
                     "r": "NEST:93"
                 }
             }
