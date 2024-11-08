@@ -14,6 +14,10 @@ Training mode, and Prediction and Interpretation mode
         --training_data TRAINING_DATA --gene2id GENE2ID_FILE --cell2id CELL2ID_FILE --mutations MUTATIONS_FILE
         --cn_deletions CN_DELETIONS_FILE --cn_amplifications CN_AMPLIFICATIONS_FILE [OPTIONS]
 
+.. code-block::
+
+  cellmaps_vnncmd.py train OUTPUT_DIRECTORY --inputdir HIERARCHY_DIR --config_file CONFIG_FILE
+
 *Prediction and Interpretation:*
 
 .. code-block::
@@ -22,9 +26,13 @@ Training mode, and Prediction and Interpretation mode
         --predict_data PREDICTION_DATA --gene2id GENE2ID_FILE --cell2id CELL2ID_FILE --mutations MUTATIONS_FILE
         --cn_deletions CN_DELETIONS_FILE --cn_amplifications CN_AMPLIFICATIONS_FILE [OPTIONS]
 
+.. code-block::
+
+  cellmaps_vnncmd.py predict OUTPUT_DIRECTORY --inputdir MODEL_DIR --config_file CONFIG_FILE
+
 **Arguments**
 
-*Required for both training step, and prediction and interpretation step*
+*Required*
 
 - ``outdir``:
     The directory where the output will be written to.
@@ -32,6 +40,14 @@ Training mode, and Prediction and Interpretation mode
 - ``--inputdir [HIERARCHY_DIR] [MODEL_DIR]``:
     For training, a directory containing hierarchy and parent network (the output of cellmaps_generate_hierarchy tool).
     For prediction, a directory containing trained model (the output of training mode of cellmaps_vnn).
+
+Most arguments can be set in configuration file. An example configuration file is provided in the GitHub repo
+in ``examples`` directory.
+
+*Required as flags or set in config*
+
+- ``--config_file CONFIG_FILE``:
+    Config file that can be used to populate arguments for training. If a given argument is set, it will override the default value. (default: None)
 
 - ``--training_data TRAINING_DATA`` or ``--predict_data PREDICTION_DATA``:
     For training, the training data to train the model. For prediction, data for which prediction will be performed.
@@ -66,6 +82,12 @@ Training mode, and Prediction and Interpretation mode
     Standardization File name. Default is 'std.txt'.
 
 *Optional for training*
+
+- ``--gene_attribute_name GENE_ATTRIBUTE_NAME``:
+    Name of the node attribute of the hierarchy with list of genes/ proteins of this node. Default: CD_MemberList. (default: CD_MemberList)
+
+-  ``--skip_parent_copy``:
+    If set, hierarchy parent (interactome) will not be copied (default: False)
 
 - ``--epoch EPOCH``:
     Training epochs. Defines the total number of training cycles the model will undergo. Default value is 300.
@@ -118,6 +140,19 @@ Training mode, and Prediction and Interpretation mode
 - ``--genotype_hiddens``:
     Mapping for the number of neurons in each term in genotype parts. Default is 4.
 
+- ``--slurm``:
+    If set, slurm script for training will be generated. (default: False)
+
+- ``--use_gpu``:
+    If set, slurm script will be adjusted to run on GPU. (default: False) [Use for slurm only.]
+
+- ``--slurm_partition SLURM_PARTITION``:
+    Slurm partition. If use_gpu is set, the default is nrnb-gpu. (default: None)
+
+- ``--slurm_account SLURM_ACCOUNT``:
+    Slurm account. If use_gpu is set, the default is nrnb-gpu. (default: None)
+
+
 Annotation mode
 ================
 
@@ -153,7 +188,7 @@ Annotation mode
     in --model_predictions argument.
 
 - ``--ndexserver NDEXSERVER``:
-    Server where the hierarchy can be converted to HCX and saved. Default is ``idekerlab.ndexbio.org``.
+    Server where the hierarchy can be converted to HCX and saved. Default is ``ndexbio.org``.
 
 - ``--ndexuser NDEXUSER``:
     NDEx user account.
@@ -163,3 +198,12 @@ Annotation mode
 
 - ``--visibility``:
     If set, makes Hierarchy and interactome network loaded onto NDEx publicly visible.
+
+- ``--slurm``:
+    If set, slurm script for training will be generated. (default: False)
+
+- ``--slurm_partition SLURM_PARTITION``:
+    Slurm partition (default: None)
+
+- ``--slurm_account SLURM_ACCOUNT``:
+    Slurm account (default: None)

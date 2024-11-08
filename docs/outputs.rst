@@ -19,6 +19,17 @@ Training
         GDSC1	0.0	1.0
         GDSC2	0.0	1.0
 
+- ``training_process.tsv``:
+    Progress of training in each epoch.
+
+    .. code-block::
+
+    epoch	train_corr	train_loss	true_auc	pred_auc	val_corr	val_loss	grad_norm	elapsed_time
+    0	0.0300	40.2999	0.7485	0.0637	nan	5.0000	0.0036	3.5948
+    1	-0.0034	40.3000	0.7476	0.0652	0.0921	5.0000	0.0253	3.3162
+    2	0.0722	40.2994	0.7477	0.0750	0.1169	5.0000	0.2334	3.2454
+    3	0.1603	40.2977	0.7497	0.0976	0.1607	5.0000	0.4573	3.3437
+
 
 Prediction
 -----------
