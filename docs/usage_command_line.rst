@@ -109,6 +109,7 @@ in ``examples`` directory.
     in the genotype part of the model. Default value is 4.
 
 - ``--optimize OPTIMIZE``:
+    WARNING: Not implemented yet (will be available in the future).
     Hyper-parameter optimization. Indicates whether or not hyper-parameter optimization is enabled.
     A value of 1 enables it, and 0 disables it. Default value is 1.
 
