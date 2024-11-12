@@ -263,23 +263,18 @@ class RLIPPCalculator:
         p_rho, p_pval = self.exec_lm(X_parent, y)
         c_rho, c_pval = self.exec_lm(X_child, y)
 
+        message = (f"The model was not sufficiently trained - the system importance scores cannot be calculated "
+                   f"correctly. ")
+
         if c_rho == 0:
-            logger.error(f"The model was not sufficiently trained - the system importance scores cannot be "
-                         f"calculated correctly. Reason: Division by zero error: c_rho is zero for "
-                         f"term '{term}' and drug '{drug}'")
-            raise CellmapsvnnError(f"The model was not sufficiently trained - the system importance scores cannot be "
-                                   f"calculated correctly. Reason: Division by zero error: c_rho is zero for "
-                                   f"term '{term}' and drug '{drug}'")
+            reason = f"Reason: Division by zero error: c_rho is zero for term '{term}' and drug '{drug}'"
+            raise CellmapsvnnError(message + reason)
 
         rlipp = p_rho / c_rho
 
         if np.isnan(rlipp) or np.isinf(rlipp):
-            logger.error(f"The model was not sufficiently trained - the system importance scores cannot be "
-                         f"calculated correctly. Reason: Invalid RLIPP value: {rlipp} for term '{term}' "
-                         f"and drug '{drug}'")
-            raise CellmapsvnnError(f"The model was not sufficiently trained - the system importance scores cannot be "
-                                   f"calculated correctly. Reason: Invalid RLIPP value: {rlipp} for term '{term}' "
-                                   f"and drug '{drug}'")
+            reason = f"Reason: Invalid RLIPP value: {rlipp} for term '{term}' and drug '{drug}'"
+            raise CellmapsvnnError(message + reason)
 
         rlipp = p_rho / c_rho
         result = '{}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\t{:.3e}\n'.format(term, p_rho, p_pval, c_rho, c_pval, rlipp)
@@ -350,6 +345,9 @@ class RLIPPCalculator:
 
                         time_passed = time.time() - start
                         logger.info('Drug {} completed in {:.4f} seconds'.format((i + 1), time_passed))
+                    except CellmapsvnnError as e:
+                        print(e)
+                        raise CellmapsvnnError(e)
                     except Exception as e:
                         logger.warning(f"Error during processing for drug {drug}: {e}")
                         print(f"Error during processing for drug {drug}: {e}")
