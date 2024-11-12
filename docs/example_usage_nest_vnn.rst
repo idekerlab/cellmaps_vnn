@@ -24,6 +24,8 @@ in `examples <https://github.com/idekerlab/cellmaps_vnn/tree/main/examples>`__ d
         --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt \
         --genotype_hiddens 4 --lr 0.0005 --epoch 15 --batchsize 64 --optimize 1 --zscore_method auc
 
+Same example, but using configuration file set via `--config_file`
+
 .. code-block::
 
     cellmaps_vnncmd.py train ./outdir_training --inputdir examples --config_file examples/config.yaml
@@ -44,6 +46,8 @@ Example run of NeST VNN prediction and interpretation:
         --cell2id examples/cell2ind.txt --predict_data examples/test_data.txt --mutations examples/cell2mutation.txt \
         --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt --batchsize 64 \
         --zscore_method auc
+
+Same example, but using configuration file set via `--config_file`
 
 .. code-block::
 
