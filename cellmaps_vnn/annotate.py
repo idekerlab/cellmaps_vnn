@@ -305,7 +305,8 @@ class VNNAnnotate:
         else:
             annotation_dict = self._get_scores_for_disease(self._theargs.disease, data)
         if len(annotation_dict) == 0:
-            logger.error("No system importance scores available for annotation.")
+            print("No system importance scores available for annotation. Training was not sufficient. "
+                  "Increase number of epochs and run train and predict again.")
             raise CellmapsvnnError("No system importance scores available for annotation. "
                                    "Please ensure valid data is provided for the hierarchy annotation.")
         self.annotate(annotation_dict)
