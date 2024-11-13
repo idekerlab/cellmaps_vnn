@@ -69,4 +69,4 @@ that is available on ndexbio.org with this uuid: ``0b7b8aee-332f-11ef-9621-00505
 
 .. code-block::
 
-    cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction --ndexuser USERNAME --ndexpassword - --parent_network 0b7b8aee-332f-11ef-9621-005056ae23aa
+    cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction --ndexuser USERNAME --ndexpassword - --parent_network 0b7b8aee-332f-11ef-9621-005056ae23aa --visibility
