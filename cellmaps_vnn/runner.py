@@ -46,12 +46,6 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         self._start_time = int(time.time())
         self._command = command
         self._args = args
-        self._inputdir = os.path.abspath(self._args.inputdir)
-        self._gene2id = os.path.abspath(self._args.gene2id)
-        self._cell2id = os.path.abspath(self._args.cell2id)
-        self._mutations = os.path.abspath(self._args.mutations)
-        self._cn_deletions = os.path.abspath(self._args.cn_deletions)
-        self._cn_amplifications = os.path.abspath(self._args.cn_amplifications)
         self._gpu = gpu
         self._slurm_partition = slurm_partition
         self._slurm_account = slurm_account
@@ -97,19 +91,30 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         :raises NotImplementedError: Always raised cause
                                      subclasses need to implement
         """
+
         if isinstance(self._command, VNNTrain):
             filename = 'cellmapvnntrainjob.sh'
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnntrain')
                 f.write(
                     'cellmaps_vnncmd.py train ' + os.path.join(self._outdir, 'out_train') +
-                    ' --inputdir ' + self._inputdir +
-                    ' --gene2id ' + self._gene2id +
-                    ' --cell2id ' + self._cell2id +
-                    ' --mutations ' + self._mutations +
-                    ' --cn_deletions ' + self._cn_deletions +
-                    ' --cn_amplifications ' + self._cn_amplifications +
-                    ' --training_data ' + os.path.abspath(self._args.training_data) +
+                    ' --inputdir ' + os.path.abspath(self._args.inputdir) +
+                    ' --gene_attribute_name ' + self._args.gene_attribute_name)
+                if self._args.config_file:
+                    f.write(' --config_file ' + os.path.abspath(self._args.config_file))
+                if self._args.gene2id:
+                    f.write(' --gene2id ' + os.path.abspath(self._args.gene2id))
+                if self._args.cell2id:
+                    f.write(' --cell2id ' + os.path.abspath(self._args.cell2id))
+                if self._args.mutations:
+                    f.write(' --mutations ' + os.path.abspath(self._args.mutations))
+                if self._args.cn_deletions:
+                    f.write(' --cn_deletions ' + os.path.abspath(self._args.cn_deletions))
+                if self._args.cn_amplifications:
+                    f.write(' --cn_amplifications ' + os.path.abspath(self._args.cn_amplifications))
+                if self._args.training_data:
+                    f.write(' --training_data ' + os.path.abspath(self._args.training_data))
+                f.write(
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -140,13 +145,22 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 self._write_slurm_directives(out=f, job_name='cellmapvnnpredict')
                 f.write(
                     'cellmaps_vnncmd.py predict ' + os.path.join(self._outdir, 'out_predict') +
-                    ' --inputdir ' + self._inputdir +
-                    ' --gene2id ' + self._gene2id +
-                    ' --cell2id ' + self._cell2id +
-                    ' --mutations ' + self._args.mutations +
-                    ' --cn_deletions ' + self._cn_deletions +
-                    ' --cn_amplifications ' + self._cn_amplifications +
-                    ' --predict_data ' + os.path.abspath(self._args.predict_data) +
+                    ' --inputdir ' + os.path.abspath(self._args.inputdir))
+                if self._args.config_file:
+                    f.write(' --config_file ' + os.path.abspath(self._args.config_file))
+                if self._args.gene2id:
+                    f.write(' --gene2id ' + os.path.abspath(self._args.gene2id))
+                if self._args.cell2id:
+                    f.write(' --cell2id ' + os.path.abspath(self._args.cell2id))
+                if self._args.mutations:
+                    f.write(' --mutations ' + os.path.abspath(self._args.mutations))
+                if self._args.cn_deletions:
+                    f.write(' --cn_deletions ' + os.path.abspath(self._args.cn_deletions))
+                if self._args.cn_amplifications:
+                    f.write(' --cn_amplifications ' + os.path.abspath(self._args.cn_amplifications))
+                if self._args.predict_data:
+                    f.write(' --predict_data ' + os.path.abspath(self._args.predict_data))
+                f.write(
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
@@ -154,6 +168,8 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     ' --cpu_count ' + str(self._args.cpu_count) +
                     ' --drug_count ' + str(self._args.drug_count)
                 )
+                if self._args.std:
+                    f.write(' --std ' + os.path.abspath(self._args.std))
                 f.write('\n')
                 f.write('exit $?\n')
 

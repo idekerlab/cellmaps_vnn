@@ -64,7 +64,7 @@ class VNNTrain:
                             type=str)
         parser.add_argument('--batchsize', help='Batchsize', type=int, default=64)
         parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
-        parser.add_argument('--epoch', help='Training epochs for training', type=int, default=300)
+        parser.add_argument('--epoch', help='Training epochs for training', type=int, default=50)
         parser.add_argument('--lr', help='Learning rate', type=float, default=0.001)
         parser.add_argument('--wd', help='Weight decay', type=float, default=0.001)
         parser.add_argument('--alpha', help='Loss parameter alpha', type=float, default=0.3)
