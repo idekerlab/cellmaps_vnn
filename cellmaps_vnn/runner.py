@@ -100,8 +100,6 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     'cellmaps_vnncmd.py train ' + os.path.join(self._outdir, 'out_train') +
                     ' --inputdir ' + os.path.abspath(self._args.inputdir) +
                     ' --gene_attribute_name ' + self._args.gene_attribute_name)
-                if self._args.config_file:
-                    f.write(' --config_file ' + os.path.abspath(self._args.config_file))
                 if self._args.gene2id:
                     f.write(' --gene2id ' + os.path.abspath(self._args.gene2id))
                 if self._args.cell2id:
@@ -146,8 +144,6 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 f.write(
                     'cellmaps_vnncmd.py predict ' + os.path.join(self._outdir, 'out_predict') +
                     ' --inputdir ' + os.path.abspath(self._args.inputdir))
-                if self._args.config_file:
-                    f.write(' --config_file ' + os.path.abspath(self._args.config_file))
                 if self._args.gene2id:
                     f.write(' --gene2id ' + os.path.abspath(self._args.gene2id))
                 if self._args.cell2id:
