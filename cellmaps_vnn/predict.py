@@ -28,19 +28,43 @@ class VNNPredict:
     DEFAULT_CPU_COUNT = 1
     DEFAULT_DRUG_COUNT = 0
 
-    def __init__(self, theargs):
+    def __init__(self, outdir, inputdir, config_file=None, predict_data=None, gene2id=None, cell2id=None,
+                 mutations=None, cn_deletions=None, cn_amplifications=None, batchsize=vnnconstants.DEFAULT_BATCHSIZE,
+                 zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD, cpu_count=DEFAULT_CPU_COUNT,
+                 drug_count=DEFAULT_DRUG_COUNT, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
+                 cuda=vnnconstants.DEFAULT_CUDA, std=None, slurm=False, use_gpu=False, slurm_partition=None,
+                 slurm_account=None):
         """
         Constructor for predicting with a trained model.
         """
-        if not os.path.exists(os.path.join(theargs.inputdir, 'model_final.pt')):
-            theargs.inputdir = os.path.join(theargs.inputdir, 'out_train')
-        self._theargs = theargs
-        self._outdir = os.path.abspath(theargs.outdir)
+        self._inputdir = inputdir
+        if not os.path.exists(os.path.join(self._inputdir, 'model_final.pt')):
+            self._inputdir = os.path.join(self._inputdir, 'out_train')
+        self._outdir = os.path.abspath(outdir)
+        self._config_file = config_file
+        self._predict_data = predict_data
+        self._gene2id = gene2id
+        self._cell2id = cell2id
+        self._mutations = mutations
+        self._cn_deletions = cn_deletions
+        self._cn_amplifications = cn_amplifications
+        self._batchsize = batchsize
+        self._zscore_method = zscore_method
+        self._cpu_count = cpu_count
+        self._drug_count = drug_count
+        self._genotype_hiddens = genotype_hiddens
+        self._std = std
+        self._cuda = cuda
+        self._slurm = slurm
+        self._use_gpu = use_gpu
+        self._slurm_partition = slurm_partition
+        self._slurm_account = slurm_account
+
         self._number_feature_grads = 0
-        self.use_cuda = torch.cuda.is_available() and self._theargs.cuda is not None
+        self.use_cuda = torch.cuda.is_available() and self._cuda is not None
 
         self.excluded_terms = []
-        excluded_terms_path = os.path.join(theargs.inputdir, 'vnn_excluded_terms.txt')
+        excluded_terms_path = os.path.join(self._inputdir, 'vnn_excluded_terms.txt')
         if os.path.exists(excluded_terms_path):
             with open(excluded_terms_path, 'r') as file:
                 self.excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
@@ -102,37 +126,35 @@ class VNNPredict:
         :raises CellmapsvnnError: If an error occurs during the prediction process.
         """
         try:
-            model = os.path.join(self._theargs.inputdir, 'model_final.pt')
-            std = os.path.join(self._theargs.inputdir, 'std.txt') if self._theargs.std is None else os.path.abspath(
-                self._theargs.std)
+            model = os.path.join(self._inputdir, 'model_final.pt')
+            std = os.path.join(self._inputdir, 'std.txt') if self._std is None else os.path.abspath(self._std)
             torch.set_printoptions(precision=5)
 
             # Load data and model for prediction
-            predict_data, cell2id_mapping = self._prepare_predict_data(
-                self._theargs.predict_data, self._theargs.cell2id, self._theargs.zscore_method, std)
+            predict_data, cell2id_mapping = self._prepare_predict_data(self._predict_data, self._cell2id,
+                                                                       self._zscore_method, std)
 
             # Load cell features
-            cell_features = util.load_cell_features(self._theargs.mutations, self._theargs.cn_deletions,
-                                                    self._theargs.cn_amplifications)
+            cell_features = util.load_cell_features(self._mutations, self._cn_deletions, self._cn_amplifications)
 
             hidden_dir = self._get_hidden_dir_path()
             if not os.path.exists(hidden_dir):
                 os.mkdir(hidden_dir)
 
             # Perform prediction
-            self.predict(predict_data, model, hidden_dir, self._theargs.batchsize,
+            self.predict(predict_data, model, hidden_dir, self._batchsize,
                          cell_features)
 
-            hierarchy_file = os.path.join(self._theargs.inputdir, vnnconstants.HIERARCHY_FILENAME)
+            hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
             factory = RawCX2NetworkFactory()
             hierarchy = factory.get_cx2network(hierarchy_file)
             rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
             gene_rho_file = os.path.join(self._outdir, 'gene_rho.out')
             # Perform interpretation
-            calc = RLIPPCalculator(hierarchy, self._theargs.predict_data, self._get_predict_dest_file(),
-                                   self._theargs.gene2id, self._theargs.cell2id, hidden_dir,
-                                   rlipp_file, gene_rho_file, self._theargs.cpu_count, self._theargs.genotype_hiddens,
-                                   self._theargs.drug_count, self.excluded_terms)
+            calc = RLIPPCalculator(hierarchy, self._predict_data, self._get_predict_dest_file(),
+                                   self._gene2id, self._cell2id, hidden_dir,
+                                   rlipp_file, gene_rho_file, self._cpu_count, self._genotype_hiddens,
+                                   self._drug_count, self.excluded_terms)
             calc.calc_scores()
             logger.info('Prediction and interpretation executed successfully')
             print('Prediction and interpretation executed successfully')
@@ -222,7 +244,7 @@ class VNNPredict:
 
     def _to_device(self, tensor):
         if self.use_cuda:
-            return tensor.cuda(self._theargs.cuda)
+            return tensor.cuda(self._cuda)
         return tensor
 
     def predict(self, predict_data, model_file, hidden_folder, batch_size, cell_features=None):
@@ -260,9 +282,9 @@ class VNNPredict:
         :return: Loaded model.
         """
         model = torch.load(model_file,
-                           map_location=f'cuda:{self._theargs.cuda}' if self.use_cuda else torch.device("cpu"))
+                           map_location=f'cuda:{self._cuda}' if self.use_cuda else torch.device("cpu"))
         if self.use_cuda:
-            model.cuda(self._theargs.cuda)
+            model.cuda(self._cuda)
         model.eval()
         return model
 
@@ -289,7 +311,7 @@ class VNNPredict:
         """
         test_predict = torch.zeros(0, 0)
         if self.use_cuda:
-            test_predict = test_predict.cuda(self._theargs.cuda)
+            test_predict = test_predict.cuda(self._cuda)
         saved_grads = {}
 
         for i, (inputdata, labels) in enumerate(data_loader):
@@ -392,8 +414,7 @@ class VNNPredict:
 
         :return: A list of dataset IDs for the registered files.
         """
-        output_ids = [copy_and_register_gene2id_file(self._theargs.gene2id, outdir, description, keywords,
-                                                     provenance_utils),
+        output_ids = [copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords, provenance_utils),
                       self._register_predict_file(outdir, description, keywords, provenance_utils)]
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
@@ -503,7 +524,7 @@ class VNNPredict:
 
     def _copy_and_register_original_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
-        hierarchy_in_file = os.path.join(self._theargs.inputdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
+        hierarchy_in_file = os.path.join(self._inputdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
         if not os.path.exists(hierarchy_in_file):
             return None
         shutil.copy(hierarchy_in_file, hierarchy_out_file)
@@ -522,7 +543,7 @@ class VNNPredict:
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
-        shutil.copy(os.path.join(self._theargs.inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
+        shutil.copy(os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
                      'description': description + ' Hierarchy network file used to build VNN',
@@ -537,7 +558,7 @@ class VNNPredict:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._theargs.inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
         if not os.path.exists(hierarchy_parent_in_file):
             return None
         hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)

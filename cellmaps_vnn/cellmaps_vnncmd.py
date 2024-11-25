@@ -142,7 +142,28 @@ def main(args):
                 slurm_account=theargs.slurm_account
             )
         elif theargs.command == VNNPredict.COMMAND:
-            cmd = VNNPredict(theargs)
+            cmd = VNNPredict(
+                theargs.outdir,
+                theargs.inputdir,
+                config_file=theargs.config_file,
+                predict_data=theargs.predict_data,
+                gene2id=theargs.gene2id,
+                cell2id=theargs.cell2id,
+                mutations=theargs.mutations,
+                cn_deletions=theargs.cn_deletions,
+                cn_amplifications=theargs.cn_amplifications,
+                batchsize=theargs.batchsize,
+                zscore_method=theargs.zscore_method,
+                cpu_count=theargs.cpu_count,
+                drug_count=theargs.drug_count,
+                genotype_hiddens=theargs.genotype_hiddens,
+                std=theargs.std,
+                cuda=theargs.cuda,
+                slurm=theargs.slurm,
+                use_gpu=theargs.use_gpu,
+                slurm_partition=theargs.slurm_partition,
+                slurm_account=theargs.slurm_account
+            )
         elif theargs.command == VNNAnnotate.COMMAND:
             cmd = VNNAnnotate(theargs)
             theargs.inputdir = theargs.model_predictions
