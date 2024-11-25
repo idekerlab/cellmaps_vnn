@@ -111,7 +111,36 @@ def main(args):
         logutils.setup_cmd_logging(theargs)
 
         if theargs.command == VNNTrain.COMMAND:
-            cmd = VNNTrain(theargs)
+            cmd = VNNTrain(
+                theargs.outdir,
+                theargs.inputdir,
+                theargs.gene_attribute_name,
+                config_file=theargs.config_file,
+                training_data=theargs.training_data,
+                gene2id=theargs.gene2id,
+                cell2id=theargs.cell2id,
+                mutations=theargs.mutations,
+                cn_deletions=theargs.cn_deletions,
+                cn_amplifications=theargs.cn_amplifications,
+                batchsize=theargs.batchsize,
+                zscore_method=theargs.zscore_method,
+                epoch=theargs.epoch,
+                lr=theargs.lr,
+                wd=theargs.wd,
+                alpha=theargs.alpha,
+                genotype_hiddens=theargs.genotype_hiddens,
+                patience=theargs.patience,
+                delta=theargs.delta,
+                min_dropout_layer=theargs.min_dropout_layer,
+                dropout_fraction=theargs.dropout_fraction,
+                optimize=theargs.optimize,
+                cuda=theargs.cuda,
+                skip_parent_copy=theargs.skip_parent_copy,
+                slurm=theargs.slurm,
+                use_gpu=theargs.use_gpu,
+                slurm_partition=theargs.slurm_partition,
+                slurm_account=theargs.slurm_account
+            )
         elif theargs.command == VNNPredict.COMMAND:
             cmd = VNNPredict(theargs)
         elif theargs.command == VNNAnnotate.COMMAND:

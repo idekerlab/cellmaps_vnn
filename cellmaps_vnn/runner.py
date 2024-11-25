@@ -116,7 +116,6 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     ' --batchsize ' + str(self._args.batchsize) +
                     ' --cuda ' + str(self._args.cuda) +
                     ' --zscore_method ' + self._args.zscore_method +
-                    ' --std ' + self._args.std +
                     ' --epoch ' + str(self._args.epoch) +
                     ' --lr ' + str(self._args.lr) +
                     ' --wd ' + str(self._args.wd) +
