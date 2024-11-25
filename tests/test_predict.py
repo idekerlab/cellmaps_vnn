@@ -15,6 +15,7 @@ class TestPredict(unittest.TestCase):
         self.mock_args.modeldir = '/path/to/model'
         self.mock_args.outdir = '/path/to/output'
         self.mock_args.predict_data = '/path/to/predict_data'
+        self.mock_args.gene2id = '/path/to/gene2id'
         self.mock_args.cell2id = '/path/to/cell2id'
         self.mock_args.mutations = '/path/to/mutations'
         self.mock_args.cn_deletions = '/path/to/cn_deletions'
@@ -30,7 +31,8 @@ class TestPredict(unittest.TestCase):
     @patch('cellmaps_vnn.util.load_mapping')
     @patch('cellmaps_vnn.predict.VNNPredict._load_pred_data')
     def test_prepare_predict_data(self, mock_load_pred_data, mock_load_mapping):
-        vnn_predict = VNNPredict(self.mock_args)
+        vnn_predict = VNNPredict(self.mock_args.outdir, self.mock_args.modeldir, cell2id=self.mock_args.cell2id,
+                                 predict_data=self.mock_args.predict_data, zscore_method=self.mock_args.zscore_method)
         mock_load_mapping.return_value = {'cell_line': 'cell_id'}
         mock_load_pred_data.return_value = ([0.5], [1])
         predict_data, cell2id_mapping = vnn_predict._prepare_predict_data(
