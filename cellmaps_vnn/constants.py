@@ -51,3 +51,11 @@ GENE_SET_COLUMN_NAME = 'CD_MemberList'
 """
 Name of the node attribute of the hierarchy with list of genes/ proteins of this node.
 """
+
+DEFAULT_BATCHSIZE = 64
+DEFAULT_ZSCORE_METHOD = 'auc'
+DEFAULT_GENOTYPE_HIDDENS = 4
+DEFAULT_CUDA = 0
+"""
+Set of constants for VNNTrain and VNNPredict
+"""

@@ -19,29 +19,25 @@ logger = logging.getLogger(__name__)
 class VNNTrain:
     COMMAND = 'train'
 
-    DEFAULT_BATCHSIZE = 64
-    DEFAULT_ZSCORE_METHOD = 'auc'
     DEFAULT_EPOCH = 50
     DEFAULT_LR = 0.001
     DEFAULT_WD = 0.001
     DEFAULT_ALPHA = 0.3
-    DEFAULT_GENOTYPE_HIDDENS = 4
     DEFAULT_PATIENCE = 30
     DEFAULT_DELTA = 0.001
     DEFAULT_MIN_DROPOUT_LAYER = 2
     DEFAULT_DROPOUT_FRACTION = 0.3
     DEFAULT_OPTIMIZE = 1
-    DEFAULT_CUDA = 0
     DEFAULT_STD = 'std.txt'
 
-    def __init__(self, outdir, inputdir, gene_attribute_name, config_file=None, training_data=None,
-                 gene2id=None, cell2id=None, mutations=None, cn_deletions=None, cn_amplifications=None,
-                 batchsize=DEFAULT_BATCHSIZE, zscore_method=DEFAULT_ZSCORE_METHOD, epoch=DEFAULT_EPOCH,
-                 lr=DEFAULT_LR, wd=DEFAULT_WD, alpha=DEFAULT_ALPHA, genotype_hiddens=DEFAULT_GENOTYPE_HIDDENS,
-                 patience=DEFAULT_PATIENCE, delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER,
-                 dropout_fraction=DEFAULT_DROPOUT_FRACTION, optimize=DEFAULT_OPTIMIZE, cuda=DEFAULT_CUDA,
-                 skip_parent_copy=False, slurm=False, use_gpu=False,
-                 slurm_partition=None, slurm_account=None):
+    def __init__(self, outdir, inputdir, gene_attribute_name=vnnconstants.GENE_SET_COLUMN_NAME, config_file=None,
+                 training_data=None, gene2id=None, cell2id=None, mutations=None, cn_deletions=None,
+                 cn_amplifications=None, batchsize=vnnconstants.DEFAULT_BATCHSIZE,
+                 zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD, epoch=DEFAULT_EPOCH, lr=DEFAULT_LR, wd=DEFAULT_WD,
+                 alpha=DEFAULT_ALPHA, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS, patience=DEFAULT_PATIENCE,
+                 delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER,
+                 dropout_fraction=DEFAULT_DROPOUT_FRACTION, optimize=DEFAULT_OPTIMIZE, cuda=vnnconstants.DEFAULT_CUDA,
+                 skip_parent_copy=False, slurm=False, use_gpu=False,slurm_partition=None, slurm_account=None):
         """
         Constructor for training a Visual Neural Network.
 
@@ -167,14 +163,14 @@ class VNNTrain:
         parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
                             type=str)
-        parser.add_argument('--batchsize', type=int, default=VNNTrain.DEFAULT_BATCHSIZE, help='Batch size')
-        parser.add_argument('--zscore_method', type=str, default=VNNTrain.DEFAULT_ZSCORE_METHOD,
+        parser.add_argument('--batchsize', type=int, default=vnnconstants.DEFAULT_BATCHSIZE, help='Batch size')
+        parser.add_argument('--zscore_method', type=str, default=vnnconstants.DEFAULT_ZSCORE_METHOD,
                             help='Z-score method (zscore/robustz)')
         parser.add_argument('--epoch', type=int, default=VNNTrain.DEFAULT_EPOCH, help='Training epochs')
         parser.add_argument('--lr', type=float, default=VNNTrain.DEFAULT_LR, help='Learning rate')
         parser.add_argument('--wd', type=float, default=VNNTrain.DEFAULT_WD, help='Weight decay')
         parser.add_argument('--alpha', type=float, default=VNNTrain.DEFAULT_ALPHA, help='Loss parameter alpha')
-        parser.add_argument('--genotype_hiddens', type=int, default=VNNTrain.DEFAULT_GENOTYPE_HIDDENS,
+        parser.add_argument('--genotype_hiddens', type=int, default=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
                             help='Neurons in genotype parts')
         parser.add_argument('--patience', type=int, default=VNNTrain.DEFAULT_PATIENCE, help='Early stopping epoch limit')
         parser.add_argument('--delta', type=float, default=VNNTrain.DEFAULT_DELTA, help='Minimum change in loss for '
@@ -185,7 +181,7 @@ class VNNTrain:
                             help='Dropout fraction')
         parser.add_argument('--optimize', type=int, default=VNNTrain.DEFAULT_OPTIMIZE,
                             help='Hyperparameter optimization')
-        parser.add_argument('--cuda', type=int, default=VNNTrain.DEFAULT_CUDA, help='Specify GPU')
+        parser.add_argument('--cuda', type=int, default=vnnconstants.DEFAULT_CUDA, help='Specify GPU')
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',

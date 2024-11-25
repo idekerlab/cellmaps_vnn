@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 class VNNPredict:
     COMMAND = 'predict'
 
+    DEFAULT_CPU_COUNT = 1
+    DEFAULT_DRUG_COUNT = 0
+
     def __init__(self, theargs):
         """
         Constructor for predicting with a trained model.
@@ -69,15 +72,17 @@ class VNNPredict:
         parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
                             type=str)
-        parser.add_argument('--batchsize', help='Batchsize', type=int, default=1000)
-        parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str, default='auc')
-        parser.add_argument('--cpu_count', help='No of available cores', type=int, default=1)
-        parser.add_argument('--drug_count', help='No of top performing drugs', type=int, default=0)
+        parser.add_argument('--batchsize', help='Batchsize', type=int, default=vnnconstants.DEFAULT_BATCHSIZE)
+        parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str,
+                            default=vnnconstants.DEFAULT_ZSCORE_METHOD)
+        parser.add_argument('--cpu_count', help='No of available cores', type=int, default=VNNPredict.DEFAULT_CPU_COUNT)
+        parser.add_argument('--drug_count', help='No of top performing drugs', type=int,
+                            default=VNNPredict.DEFAULT_DRUG_COUNT)
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts', type=int,
-                            default=4)
-        parser.add_argument('--cuda', help='Specify GPU', type=int, default=0)
-        parser.add_argument('--std', help='Standardization File (if not set standardization file from RO-Crate '
+                            default=vnnconstants.DEFAULT_GENOTYPE_HIDDENS)
+        parser.add_argument('--cuda', help='Specify GPU', type=int, default=vnnconstants.DEFAULT_CUDA)
+        parser.add_argument('--std', help='Path to standardization File (if not set standardization file from RO-Crate '
                                           'will be used)', type=str)
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
                             action='store_true')
@@ -98,7 +103,8 @@ class VNNPredict:
         """
         try:
             model = os.path.join(self._theargs.inputdir, 'model_final.pt')
-            std = os.path.join(self._theargs.inputdir, 'std.txt') if self._theargs.std is None else self._theargs.std
+            std = os.path.join(self._theargs.inputdir, 'std.txt') if self._theargs.std is None else os.path.abspath(
+                self._theargs.std)
             torch.set_printoptions(precision=5)
 
             # Load data and model for prediction
