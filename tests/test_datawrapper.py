@@ -68,7 +68,14 @@ class TestTrainingDataWrapper(unittest.TestCase):
         mock_load_numpy_data.return_value = "mocked_numpy_data"
         util.load_mapping = mock_load_mapping
         util.load_numpy_data = mock_load_numpy_data
-        wrapper = TrainingDataWrapper(self.theargs)
+        wrapper = TrainingDataWrapper(self.theargs.outdir, self.theargs.inputdir, self.theargs.gene_attribute_name,
+                                      self.theargs.training_data, self.theargs.cell2id, self.theargs.gene2id,
+                                      self.theargs.mutations, self.theargs.cn_deletions, self.theargs.cn_amplifications,
+                                      self.theargs.modelfile, self.theargs.genotype_hiddens, self.theargs.lr,
+                                      self.theargs.wd, self.theargs.alpha, self.theargs.epoch, self.theargs.batchsize,
+                                      self.theargs.cuda, self.theargs.zscore_method, self.theargs.stdfile,
+                                      self.theargs.patience, self.theargs.delta, self.theargs.min_dropout_layer,
+                                      self.theargs.dropout_fraction)
         self.assertEqual(wrapper._hierarchy, self.theargs.hierarchy)
         self.assertEqual(wrapper.num_hiddens_genotype, self.theargs.genotype_hiddens)
         self.assertEqual(wrapper.lr, self.theargs.lr)
@@ -76,7 +83,14 @@ class TestTrainingDataWrapper(unittest.TestCase):
         mock_load_graph.assert_called_once()
 
     def test_init(self):
-        wrapper = TrainingDataWrapper(self.theargs)
+        wrapper = TrainingDataWrapper(self.theargs.outdir, self.theargs.inputdir, self.theargs.gene_attribute_name,
+                                      self.theargs.training_data, self.theargs.cell2id, self.theargs.gene2id,
+                                      self.theargs.mutations, self.theargs.cn_deletions, self.theargs.cn_amplifications,
+                                      self.theargs.modelfile, self.theargs.genotype_hiddens, self.theargs.lr,
+                                      self.theargs.wd, self.theargs.alpha, self.theargs.epoch, self.theargs.batchsize,
+                                      self.theargs.cuda, self.theargs.zscore_method, self.theargs.stdfile,
+                                      self.theargs.patience, self.theargs.delta, self.theargs.min_dropout_layer,
+                                      self.theargs.dropout_fraction)
         self.assertEqual(wrapper._hierarchy, self.theargs.hierarchy)
         self.assertEqual(wrapper.num_hiddens_genotype, self.theargs.genotype_hiddens)
         self.assertEqual(wrapper.lr, self.theargs.lr)
