@@ -22,7 +22,7 @@ in `examples <https://github.com/idekerlab/cellmaps_vnn/tree/main/examples>`__ d
     cellmaps_vnncmd.py train ./outdir_training --inputdir examples --gene2id examples/gene2ind.txt \
         --cell2id examples/cell2ind.txt --training_data examples/training_data.txt --mutations examples/cell2mutation.txt \
         --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt \
-        --genotype_hiddens 4 --lr 0.0005 --epoch 15 --batchsize 64 --optimize 1 --zscore_method auc
+        --lr 0.001 --epoch 20 --batchsize 64
 
 Same example, but using configuration file set via `--config_file`
 
@@ -44,8 +44,7 @@ Example run of NeST VNN prediction and interpretation:
 
     cellmaps_vnncmd.py predict ./outdir_prediction --inputdir ./outdir_training --gene2id examples/gene2ind.txt \
         --cell2id examples/cell2ind.txt --predict_data examples/test_data.txt --mutations examples/cell2mutation.txt \
-        --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt --batchsize 64 \
-        --zscore_method auc
+        --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt
 
 Same example, but using configuration file set via `--config_file`
 
@@ -65,6 +64,9 @@ The flow of annotation process from  NeST VNN
 
     cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction
 
+If using NeST hierarchy provided in ``examples`` directory in the GitHub repo, you can upload it with its interactome
+that is available on ndexbio.org with this uuid: ``0b7b8aee-332f-11ef-9621-005056ae23aa``.
+
 .. code-block::
 
-    cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction --ndexuser USERNAME --ndexpassword -
+    cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction --ndexuser USERNAME --ndexpassword - --parent_network 0b7b8aee-332f-11ef-9621-005056ae23aa --visibility
