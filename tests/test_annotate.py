@@ -26,7 +26,8 @@ class TestVNNAnnotate(unittest.TestCase):
                 'P_pval': [0.5, 0.7], 'C_rho': [0.5, 0.7], 'C_pval': [0.5, 0.7],
                 'RLIPP': [0.5, 0.7],'Disease': ['Cancer', 'Other']}
         test_df = pd.DataFrame(data)
-        annotator = VNNAnnotate(self.mock_args)
+        annotator = VNNAnnotate(self.mock_args.outdir, self.mock_args.model_predictions,
+                                hierarchy=self.mock_args.hierarchy, disease=self.mock_args.disease)
         result = annotator._get_scores_for_disease('Cancer', test_df)
         self.assertEqual(result, {'Term1': [0.5, 0.5, 0.5, 0.5, 0.5]})
 
