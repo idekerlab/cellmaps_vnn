@@ -37,7 +37,7 @@ class VNNTrain:
                  alpha=DEFAULT_ALPHA, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS, patience=DEFAULT_PATIENCE,
                  delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER,
                  dropout_fraction=DEFAULT_DROPOUT_FRACTION, optimize=DEFAULT_OPTIMIZE, cuda=vnnconstants.DEFAULT_CUDA,
-                 skip_parent_copy=False, slurm=False, use_gpu=False,slurm_partition=None, slurm_account=None):
+                 skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None):
         """
         Constructor for training a Visual Neural Network.
 

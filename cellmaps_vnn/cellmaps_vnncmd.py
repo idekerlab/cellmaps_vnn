@@ -165,7 +165,20 @@ def main(args):
                 slurm_account=theargs.slurm_account
             )
         elif theargs.command == VNNAnnotate.COMMAND:
-            cmd = VNNAnnotate(theargs)
+            cmd = VNNAnnotate(
+                theargs.outdir,
+                theargs.model_predictions,
+                disease=theargs.disease,
+                hierarchy=theargs.hierarchy,
+                parent_network=theargs.parent_network,
+                ndexserver=theargs.ndexserver,
+                ndexuser=theargs.ndexuser,
+                ndexpassword=theargs.ndexpassword,
+                visibility=theargs.visibility,
+                slurm=theargs.slurm,
+                slurm_partition=theargs.slurm_partition,
+                slurm_account=theargs.slurm_account
+            )
             theargs.inputdir = theargs.model_predictions
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
