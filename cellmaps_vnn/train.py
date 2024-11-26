@@ -12,6 +12,7 @@ from cellmaps_vnn.data_wrapper import TrainingDataWrapper
 from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
 from cellmaps_vnn.util import copy_and_register_gene2id_file
+from cellmaps_vnn.optuna_vnn_trainer import OptunaVNNTrainer
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +209,13 @@ class VNNTrain:
                                                self._dropout_fraction)
             if self._optimize == 1:
                 VNNTrainer(data_wrapper).train_model()
+            elif self._optimize == 2:
+                print("Here")
+                trial_params = OptunaVNNTrainer(data_wrapper).exec_study()
+                print(trial_params)
+                for key, value in trial_params.items():
+                    if hasattr(data_wrapper, key):
+                        setattr(data_wrapper, key, value)
             else:
                 logger.error(f"The value {self._optimize} is wrong value for optimize.")
                 raise CellmapsvnnError(f"The value {self._optimize} is wrong value for optimize.")
