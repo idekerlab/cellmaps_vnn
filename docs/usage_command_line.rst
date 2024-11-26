@@ -78,9 +78,6 @@ in ``examples`` directory.
 - ``--zscore_method ZSCORE_METHOD``:
     Specifies the method used for z-scoring in the analysis. Default method is 'auc'.
 
-- ``--std STD_FILENAME``:
-    Standardization File name. Default is 'std.txt'.
-
 *Optional for training*
 
 - ``--gene_attribute_name GENE_ATTRIBUTE_NAME``:

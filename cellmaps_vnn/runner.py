@@ -6,6 +6,7 @@ import logging
 from cellmaps_utils import logutils, constants
 from cellmaps_utils.provenance import ProvenanceUtil
 from cellmaps_vnn.annotate import VNNAnnotate
+import cellmaps_vnn.constants as vnnconstants
 
 from cellmaps_vnn.predict import VNNPredict
 
@@ -36,7 +37,40 @@ class VnnRunner(object):
 class SLURMCellmapsvnnRunner(VnnRunner):
     def __init__(self, outdir=None,
                  command=None,
-                 args=None,
+                 inputdir=None,
+                 gene_attribute_name=vnnconstants.GENE_SET_COLUMN_NAME,
+                 gene2id=None,
+                 cell2id=None,
+                 mutations=None,
+                 cn_deletions=None,
+                 cn_amplifications=None,
+                 training_data=None,
+                 batchsize=vnnconstants.DEFAULT_BATCHSIZE,
+                 cuda=vnnconstants.DEFAULT_CUDA,
+                 zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD,
+                 epoch=VNNTrain.DEFAULT_EPOCH,
+                 lr=VNNTrain.DEFAULT_LR,
+                 wd=VNNTrain.DEFAULT_WD,
+                 alpha=VNNTrain.DEFAULT_ALPHA,
+                 genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
+                 optimize=VNNTrain.DEFAULT_OPTIMIZE,
+                 patience=VNNTrain.DEFAULT_PATIENCE,
+                 delta=VNNTrain.DEFAULT_DELTA,
+                 min_dropout_layer=VNNTrain.DEFAULT_MIN_DROPOUT_LAYER,
+                 dropout_fraction=VNNTrain.DEFAULT_DROPOUT_FRACTION,
+                 skip_parent_copy=False,
+                 cpu_count=VNNPredict.DEFAULT_CPU_COUNT,
+                 drug_count=VNNPredict.DEFAULT_DRUG_COUNT,
+                 predict_data=None,
+                 std=None,
+                 model_predictions=None,
+                 disease=None,
+                 hierarchy=None,
+                 parent_network=None,
+                 ndexserver=None,
+                 ndexuser=None,
+                 ndexpassword=None,
+                 visibility=False,
                  gpu=False,
                  slurm_partition=None,
                  slurm_account=None,
@@ -45,13 +79,40 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         super().__init__(outdir)
         self._start_time = int(time.time())
         self._command = command
-        self._args = args
-        self._inputdir = os.path.abspath(self._args.inputdir)
-        self._gene2id = os.path.abspath(self._args.gene2id)
-        self._cell2id = os.path.abspath(self._args.cell2id)
-        self._mutations = os.path.abspath(self._args.mutations)
-        self._cn_deletions = os.path.abspath(self._args.cn_deletions)
-        self._cn_amplifications = os.path.abspath(self._args.cn_amplifications)
+        self._inputdir = inputdir
+        self._gene_attribute_name = gene_attribute_name
+        self._gene2id = gene2id
+        self._cell2id = cell2id
+        self._mutations = mutations
+        self._cn_deletions = cn_deletions
+        self._cn_amplifications = cn_amplifications
+        self._training_data = training_data
+        self._batchsize = batchsize
+        self._cuda = cuda
+        self._zscore_method = zscore_method
+        self._epoch = epoch
+        self._lr = lr
+        self._wd = wd
+        self._alpha = alpha
+        self._genotype_hiddens = genotype_hiddens
+        self._optimize = optimize
+        self._patience = patience
+        self._delta = delta
+        self._min_dropout_layer = min_dropout_layer
+        self._dropout_fraction = dropout_fraction
+        self._skip_parent_copy = skip_parent_copy
+        self._cpu_count = cpu_count
+        self._drug_count = drug_count
+        self._predict_data = predict_data
+        self._std = std
+        self._model_predictions = model_predictions
+        self._disease = disease
+        self._hierarchy = hierarchy
+        self._parent_network = parent_network
+        self._ndexserver = ndexserver
+        self._ndexuser = ndexuser
+        self._ndexpassword = ndexpassword
+        self._visibility = visibility
         self._gpu = gpu
         self._slurm_partition = slurm_partition
         self._slurm_account = slurm_account
@@ -97,36 +158,45 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         :raises NotImplementedError: Always raised cause
                                      subclasses need to implement
         """
+
         if isinstance(self._command, VNNTrain):
+            if self._inputdir is None:
+                raise CellmapsvnnError("Input dir with hierarchy is required for training.")
             filename = 'cellmapvnntrainjob.sh'
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnntrain')
                 f.write(
                     'cellmaps_vnncmd.py train ' + os.path.join(self._outdir, 'out_train') +
-                    ' --inputdir ' + self._inputdir +
-                    ' --gene2id ' + self._gene2id +
-                    ' --cell2id ' + self._cell2id +
-                    ' --mutations ' + self._mutations +
-                    ' --cn_deletions ' + self._cn_deletions +
-                    ' --cn_amplifications ' + self._cn_amplifications +
-                    ' --training_data ' + os.path.abspath(self._args.training_data) +
-                    ' --batchsize ' + str(self._args.batchsize) +
-                    ' --cuda ' + str(self._args.cuda) +
-                    ' --zscore_method ' + self._args.zscore_method +
-                    ' --std ' + self._args.std +
-                    ' --epoch ' + str(self._args.epoch) +
-                    ' --lr ' + str(self._args.lr) +
-                    ' --wd ' + str(self._args.wd) +
-                    ' --alpha ' + str(self._args.alpha) +
-                    ' --genotype_hiddens ' + str(self._args.genotype_hiddens) +
-                    ' --optimize ' + str(self._args.optimize) +
-                    ' --patience ' + str(self._args.patience) +
-                    ' --delta ' + str(self._args.delta) +
-                    ' --min_dropout_layer ' + str(self._args.min_dropout_layer) +
-                    ' --dropout_fraction ' + str(self._args.dropout_fraction)
+                    ' --inputdir ' + os.path.abspath(self._inputdir) +
+                    ' --gene_attribute_name ' + self._gene_attribute_name)
+                if self._gene2id:
+                    f.write(' --gene2id ' + os.path.abspath(self._gene2id))
+                if self._cell2id:
+                    f.write(' --cell2id ' + os.path.abspath(self._cell2id))
+                if self._mutations:
+                    f.write(' --mutations ' + os.path.abspath(self._mutations))
+                if self._cn_deletions:
+                    f.write(' --cn_deletions ' + os.path.abspath(self._cn_deletions))
+                if self._cn_amplifications:
+                    f.write(' --cn_amplifications ' + os.path.abspath(self._cn_amplifications))
+                if self._training_data:
+                    f.write(' --training_data ' + os.path.abspath(self._training_data))
+                f.write(
+                    ' --batchsize ' + str(self._batchsize) +
+                    ' --cuda ' + str(self._cuda) +
+                    ' --zscore_method ' + self._zscore_method +
+                    ' --epoch ' + str(self._epoch) +
+                    ' --lr ' + str(self._lr) +
+                    ' --wd ' + str(self._wd) +
+                    ' --alpha ' + str(self._alpha) +
+                    ' --genotype_hiddens ' + str(self._genotype_hiddens) +
+                    ' --optimize ' + str(self._optimize) +
+                    ' --patience ' + str(self._patience) +
+                    ' --delta ' + str(self._delta) +
+                    ' --min_dropout_layer ' + str(self._min_dropout_layer) +
+                    ' --dropout_fraction ' + str(self._dropout_fraction)
                 )
-
-                if self._args.skip_parent_copy:
+                if self._skip_parent_copy:
                     f.write(' --skip_parent_copy')
                 f.write('\n')
                 f.write('exit $?\n')
@@ -135,25 +205,36 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             return filename
 
         elif isinstance(self._command, VNNPredict):
+            if self._inputdir is None:
+                raise CellmapsvnnError("Input dir with trained model is required for prediction.")
             filename = 'cellmapvnnpredictjob.sh'
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnnpredict')
                 f.write(
                     'cellmaps_vnncmd.py predict ' + os.path.join(self._outdir, 'out_predict') +
-                    ' --inputdir ' + self._inputdir +
-                    ' --gene2id ' + self._gene2id +
-                    ' --cell2id ' + self._cell2id +
-                    ' --mutations ' + self._args.mutations +
-                    ' --cn_deletions ' + self._cn_deletions +
-                    ' --cn_amplifications ' + self._cn_amplifications +
-                    ' --predict_data ' + os.path.abspath(self._args.predict_data) +
-                    ' --batchsize ' + str(self._args.batchsize) +
-                    ' --cuda ' + str(self._args.cuda) +
-                    ' --zscore_method ' + self._args.zscore_method +
-                    ' --genotype_hiddens ' + str(self._args.genotype_hiddens) +
-                    ' --cpu_count ' + str(self._args.cpu_count) +
-                    ' --drug_count ' + str(self._args.drug_count)
+                    ' --inputdir ' + os.path.abspath(self._inputdir))
+                if self._gene2id:
+                    f.write(' --gene2id ' + os.path.abspath(self._gene2id))
+                if self._cell2id:
+                    f.write(' --cell2id ' + os.path.abspath(self._cell2id))
+                if self._mutations:
+                    f.write(' --mutations ' + os.path.abspath(self._mutations))
+                if self._cn_deletions:
+                    f.write(' --cn_deletions ' + os.path.abspath(self._cn_deletions))
+                if self._cn_amplifications:
+                    f.write(' --cn_amplifications ' + os.path.abspath(self._cn_amplifications))
+                if self._predict_data:
+                    f.write(' --predict_data ' + os.path.abspath(self._predict_data))
+                f.write(
+                    ' --batchsize ' + str(self._batchsize) +
+                    ' --cuda ' + str(self._cuda) +
+                    ' --zscore_method ' + self._zscore_method +
+                    ' --genotype_hiddens ' + str(self._genotype_hiddens) +
+                    ' --cpu_count ' + str(self._cpu_count) +
+                    ' --drug_count ' + str(self._drug_count)
                 )
+                if self._std:
+                    f.write(' --std ' + os.path.abspath(self._std))
                 f.write('\n')
                 f.write('exit $?\n')
 
@@ -167,20 +248,20 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 self._write_slurm_directives(out=f, job_name='cellmapvnnannotate')
                 f.write(
                     'cellmaps_vnncmd.py annotate ' + os.path.join(self._outdir, 'out_annotate') +
-                    ' --model_predictions ' + ' '.join(self._args.model_predictions))
-                if self._args.disease:
-                    f.write(' --disease ' + self._args.disease)
-                if self._args.hierarchy:
-                    f.write(' --hierarchy ' + self._args.hierarchy)
-                if self._args.parent_network:
-                    f.write(' --parent_network ' + self._args.parent_network)
-                if self._args.ndexserver:
-                    f.write(' --ndexserver ' + self._args.ndexserver)
-                if self._args.ndexuser:
-                    f.write(' --ndexuser ' + self._args.ndexuser)
-                if self._args.ndexpassword:
-                    f.write(' --ndexpassword ' + self._args.ndexpassword)
-                if self._args.visibility:
+                    ' --model_predictions ' + ' '.join(self._model_predictions))
+                if self._disease:
+                    f.write(' --disease ' + self._disease)
+                if self._hierarchy:
+                    f.write(' --hierarchy ' + self._hierarchy)
+                if self._parent_network:
+                    f.write(' --parent_network ' + self._parent_network)
+                if self._ndexserver:
+                    f.write(' --ndexserver ' + self._ndexserver)
+                if self._ndexuser:
+                    f.write(' --ndexuser ' + self._ndexuser)
+                if self._ndexpassword:
+                    f.write(' --ndexpassword ' + self._ndexpassword)
+                if self._visibility:
                     f.write(' --visibility')
                 f.write('\n')
                 f.write('exit $?\n')

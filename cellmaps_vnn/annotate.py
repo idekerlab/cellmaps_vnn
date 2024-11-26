@@ -21,7 +21,12 @@ logger = logging.getLogger(__name__)
 class VNNAnnotate:
     COMMAND = 'annotate'
 
-    def __init__(self, theargs):
+    DEFAULT_NDEX_SERVER = 'ndexbio.org'
+    DEFAULT_PASSWORD = '-'
+
+    def __init__(self, outdir, model_predictions, disease=None, hierarchy=None, parent_network=None,
+                 ndexserver=DEFAULT_NDEX_SERVER, ndexuser=None, ndexpassword=DEFAULT_PASSWORD,
+                 visibility=False, slurm=False, slurm_partition=None, slurm_account=None):
         """
         Constructor. Sets up the hierarchy path either directly from the arguments or by looking for
         a hierarchy.cx2 file in the first RO-Crate directory provided. If neither is found, raises an error.
@@ -30,33 +35,42 @@ class VNNAnnotate:
         :type theargs: argparse.Namespace
         :raises CellmapsvnnError: If no hierarchy path is specified or found.
         """
-        self._theargs = theargs
-        self._outdir = os.path.abspath(theargs.outdir)
+        self._outdir = os.path.abspath(outdir)
         self.original_hierarchy = None
-        if not os.path.exists(os.path.join(theargs.model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
-            theargs.model_predictions[0] = os.path.join(theargs.model_predictions[0], 'out_predict')
-        if theargs.hierarchy is not None:
-            self.hierarchy = theargs.hierarchy
+        if not os.path.exists(os.path.join(model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
+            model_predictions[0] = os.path.join(model_predictions[0], 'out_predict')
+        if hierarchy is not None:
+            self.hierarchy = hierarchy
         else:
-            hierarchy_path = os.path.join(theargs.model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
+            hierarchy_path = os.path.join(model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
             if os.path.exists(hierarchy_path):
                 self.hierarchy = hierarchy_path
             else:
                 raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
-            original_hierarchy_path = os.path.join(theargs.model_predictions[0],
+            original_hierarchy_path = os.path.join(model_predictions[0],
                                                    vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
             if os.path.exists(original_hierarchy_path):
                 self.original_hierarchy = original_hierarchy_path
-        if theargs.parent_network is not None:
-            self.parent_network = theargs.parent_network
+        if parent_network is not None:
+            self.parent_network = parent_network
         else:
-            parent_network_path = os.path.join(theargs.model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
+            parent_network_path = os.path.join(model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
             if os.path.exists(parent_network_path):
                 self.parent_network = parent_network_path
             else:
                 self.parent_network = None
         if self.parent_network is not None and os.path.isfile(self.parent_network):
             self.parent_network = os.path.abspath(self.parent_network)
+
+        self._model_predictions = model_predictions
+        self._disease = disease
+        self._ndexserver = ndexserver
+        self._ndexuser = ndexuser
+        self._ndexpassword = ndexpassword
+        self._visibility = visibility
+        self._slurm = slurm
+        self._slurm_partition = slurm_partition
+        self._slurm_account = slurm_account
 
     @staticmethod
     def add_subparser(subparsers):
@@ -88,11 +102,11 @@ class VNNAnnotate:
         parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy '
                                                      'or NDEx UUID of parent network (required if uploading '
                                                      'HCX to NDEx)', type=str)
-        parser.add_argument('--ndexserver', default='ndexbio.org',
+        parser.add_argument('--ndexserver', default=VNNAnnotate.DEFAULT_NDEX_SERVER,
                             help='Server where annotated hierarchy will be uploaded to')
         parser.add_argument('--ndexuser',
                             help='NDEx user account. Required if uploading to NDEx.')
-        parser.add_argument('--ndexpassword',
+        parser.add_argument('--ndexpassword', default=VNNAnnotate.DEFAULT_PASSWORD,
                             help='NDEx password. Enter "-" to input password interactively, or provide a file '
                                  'containing the password. Required if uploading to NDEx.')
         parser.add_argument('--visibility', action='store_true',
@@ -137,7 +151,7 @@ class VNNAnnotate:
         """
         data = {}
 
-        for directory in self._theargs.model_predictions:
+        for directory in self._model_predictions:
             if not os.path.exists(os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)):
                 directory = os.path.join(directory, 'out_predict')
             filepath = os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)
@@ -224,13 +238,13 @@ class VNNAnnotate:
         network is not specified, it raises an error. If the password is specified as '-',
         it prompts the user to enter the password interactively.
         """
-        if self._theargs.ndexserver and self._theargs.ndexuser and self._theargs.ndexpassword:
+        if self._ndexserver and self._ndexuser and self._ndexpassword:
 
-            if self._theargs.ndexpassword == '-':
-                self._theargs.ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
+            if self._ndexpassword == '-':
+                self._ndexpassword = getpass.getpass(prompt="Enter NDEx Password: ")
 
-            ndex_uploader = NDExHierarchyUploader(self._theargs.ndexserver, self._theargs.ndexuser,
-                                                  self._theargs.ndexpassword, self._theargs.visibility)
+            ndex_uploader = NDExHierarchyUploader(self._ndexserver, self._ndexuser,
+                                                  self._ndexpassword, self._visibility)
 
             if self.parent_network is None:
                 logger.warning("Parent network was not specified. Hierarchy will not be in cell view.")
@@ -300,10 +314,10 @@ class VNNAnnotate:
         self._aggregate_prediction_scores_from_models()
         filepath = self._get_rlipp_out_dest_file()
         data = pd.read_csv(filepath, sep='\t')
-        if self._theargs.disease is None:
+        if self._disease is None:
             annotation_dict = self._aggregate_scores_from_diseases(data)
         else:
-            annotation_dict = self._get_scores_for_disease(self._theargs.disease, data)
+            annotation_dict = self._get_scores_for_disease(self._disease, data)
         if len(annotation_dict) == 0:
             print("No system importance scores available for annotation. Training was not sufficient. "
                   "Increase number of epochs and run train and predict again.")
@@ -331,7 +345,7 @@ class VNNAnnotate:
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
         return_ids = [hierarchy_id, rlipp_id]
-        gene2ind_path = os.path.join(self._theargs.model_predictions[0], 'gene2ind.txt')
+        gene2ind_path = os.path.join(self._model_predictions[0], 'gene2ind.txt')
         if os.path.exists(gene2ind_path):
             gene2ind_id = copy_and_register_gene2id_file(gene2ind_path, outdir, description, keywords,
                                                          provenance_utils)

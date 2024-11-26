@@ -21,8 +21,7 @@ in `examples <https://github.com/idekerlab/cellmaps_vnn/tree/main/examples>`__ d
 
     cellmaps_vnncmd.py train ./outdir_training --inputdir examples --gene2id examples/gene2ind.txt \
         --cell2id examples/cell2ind.txt --training_data examples/training_data.txt --mutations examples/cell2mutation.txt \
-        --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt \
-        --lr 0.001 --epoch 20 --batchsize 64
+        --cn_deletions examples/cell2cndeletion.txt --cn_amplifications examples/cell2cnamplification.txt --epoch 20
 
 Same example, but using configuration file set via `--config_file`
 
@@ -63,6 +62,8 @@ The flow of annotation process from  NeST VNN
 .. code-block::
 
     cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction
+
+Same example but with upload to NDEx:
 
 If using NeST hierarchy provided in ``examples`` directory in the GitHub repo, you can upload it with its interactome
 that is available on ndexbio.org with this uuid: ``0b7b8aee-332f-11ef-9621-005056ae23aa``.

@@ -19,38 +19,38 @@ logger = logging.getLogger(__name__)
 
 class TrainingDataWrapper:
 
-    def __init__(self, theargs):
+    def __init__(self, outdir, inputdir, gene_attribute_name, training_data, cell2id, gene2id, mutations, cn_deletions,
+                 cn_amplifications, modelfile, genotype_hiddens, lr, wd, alpha, epoch, batchsize, cuda, zscore_method,
+                 stdfile, patience, delta, min_dropout_layer, dropout_fraction):
         """
         Initializes the TrainingDataWrapper object with configuration and training data parameters.
-
-        :param theargs: Arguments containing configuration and training parameters.
         """
 
         self.root = None
         self.digraph = None
-        self.num_hiddens_genotype = theargs.genotype_hiddens
-        self.lr = theargs.lr
-        self.wd = theargs.wd
-        self.alpha = theargs.alpha
-        self.epochs = theargs.epoch
-        self.batchsize = theargs.batchsize
-        self.outdir = theargs.outdir
-        self.modelfile = theargs.modelfile
-        self.cuda = theargs.cuda
-        self.zscore_method = theargs.zscore_method
-        self.std = theargs.stdfile
-        self.patience = theargs.patience
-        self.delta = theargs.delta
-        self.min_dropout_layer = theargs.min_dropout_layer
-        self.dropout_fraction = theargs.dropout_fraction
-        self.gene_attribute_name = theargs.gene_attribute_name
+        self.outdir = outdir
+        self.num_hiddens_genotype = genotype_hiddens
+        self.lr = lr
+        self.wd = wd
+        self.alpha = alpha
+        self.epochs = epoch
+        self.batchsize = batchsize
+        self.modelfile = modelfile
+        self.cuda = cuda
+        self.zscore_method = zscore_method
+        self.std = stdfile
+        self.patience = patience
+        self.delta = delta
+        self.min_dropout_layer = min_dropout_layer
+        self.dropout_fraction = dropout_fraction
+        self.gene_attribute_name = gene_attribute_name
 
-        self._hierarchy = os.path.join(theargs.inputdir, constants.HIERARCHY_FILENAME)
-        self._training_data = theargs.training_data
-        self.cell_id_mapping = util.load_mapping(theargs.cell2id, 'cell lines')
-        self.gene_id_mapping = util.load_mapping(theargs.gene2id, 'genes')
+        self._hierarchy = os.path.join(inputdir, constants.HIERARCHY_FILENAME)
+        self._training_data = training_data
+        self.cell_id_mapping = util.load_mapping(cell2id, 'cell lines')
+        self.gene_id_mapping = util.load_mapping(gene2id, 'genes')
 
-        self.cell_features = util.load_cell_features(theargs.mutations, theargs.cn_deletions, theargs.cn_amplifications)
+        self.cell_features = util.load_cell_features(mutations, cn_deletions, cn_amplifications)
         self.train_feature, self.train_label, self.val_feature, self.val_label = self._prepare_train_data()
         self._load_graph(self._hierarchy)
 
