@@ -29,6 +29,7 @@ class VNNTrain:
     DEFAULT_MIN_DROPOUT_LAYER = 2
     DEFAULT_DROPOUT_FRACTION = 0.3
     DEFAULT_OPTIMIZE = 1
+    DEFAULT_N_TRIALS = 3
     DEFAULT_STD = 'std.txt'
 
     def __init__(self, outdir, inputdir, gene_attribute_name=vnnconstants.GENE_SET_COLUMN_NAME, config_file=None,
@@ -36,8 +37,8 @@ class VNNTrain:
                  cn_amplifications=None, batchsize=vnnconstants.DEFAULT_BATCHSIZE,
                  zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD, epoch=DEFAULT_EPOCH, lr=DEFAULT_LR, wd=DEFAULT_WD,
                  alpha=DEFAULT_ALPHA, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS, patience=DEFAULT_PATIENCE,
-                 delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER,
-                 dropout_fraction=DEFAULT_DROPOUT_FRACTION, optimize=DEFAULT_OPTIMIZE, cuda=vnnconstants.DEFAULT_CUDA,
+                 delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER, dropout_fraction=DEFAULT_DROPOUT_FRACTION,
+                 optimize=DEFAULT_OPTIMIZE, n_trials=DEFAULT_N_TRIALS, cuda=vnnconstants.DEFAULT_CUDA,
                  skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None):
         """
         Constructor for training a Visual Neural Network.
@@ -121,6 +122,7 @@ class VNNTrain:
         self._min_dropout_layer = min_dropout_layer
         self._dropout_fraction = dropout_fraction
         self._optimize = optimize
+        self._n_trials = n_trials
         self._cuda = cuda
         self._skip_parent_copy = skip_parent_copy
         self._slurm = slurm
@@ -181,7 +183,9 @@ class VNNTrain:
         parser.add_argument('--dropout_fraction', type=float, default=VNNTrain.DEFAULT_DROPOUT_FRACTION,
                             help='Dropout fraction')
         parser.add_argument('--optimize', type=int, default=VNNTrain.DEFAULT_OPTIMIZE,
-                            help='Hyperparameter optimization')
+                            help='Hyperparameter optimization (1- no optimization, 2- optuna optimizer)')
+        parser.add_argument('--n_trials', type=int, default=VNNTrain.DEFAULT_N_TRIALS,
+                            help='Number of trials in hyperparameter optimization')
         parser.add_argument('--cuda', type=int, default=vnnconstants.DEFAULT_CUDA, help='Specify GPU')
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
@@ -210,9 +214,7 @@ class VNNTrain:
             if self._optimize == 1:
                 VNNTrainer(data_wrapper).train_model()
             elif self._optimize == 2:
-                print("Here")
-                trial_params = OptunaVNNTrainer(data_wrapper).exec_study()
-                print(trial_params)
+                trial_params = OptunaVNNTrainer(data_wrapper, n_trials=self._n_trials).exec_study()
                 for key, value in trial_params.items():
                     if hasattr(data_wrapper, key):
                         setattr(data_wrapper, key, value)

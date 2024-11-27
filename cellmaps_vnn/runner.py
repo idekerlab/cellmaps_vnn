@@ -54,6 +54,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                  alpha=VNNTrain.DEFAULT_ALPHA,
                  genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
                  optimize=VNNTrain.DEFAULT_OPTIMIZE,
+                 n_trials=VNNTrain.DEFAULT_N_TRIALS,
                  patience=VNNTrain.DEFAULT_PATIENCE,
                  delta=VNNTrain.DEFAULT_DELTA,
                  min_dropout_layer=VNNTrain.DEFAULT_MIN_DROPOUT_LAYER,
@@ -96,6 +97,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
         self._alpha = alpha
         self._genotype_hiddens = genotype_hiddens
         self._optimize = optimize
+        self._n_trials = n_trials
         self._patience = patience
         self._delta = delta
         self._min_dropout_layer = min_dropout_layer
@@ -191,6 +193,7 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     ' --alpha ' + str(self._alpha) +
                     ' --genotype_hiddens ' + str(self._genotype_hiddens) +
                     ' --optimize ' + str(self._optimize) +
+                    ' --n_trials ' + str(self._n_trials) +
                     ' --patience ' + str(self._patience) +
                     ' --delta ' + str(self._delta) +
                     ' --min_dropout_layer ' + str(self._min_dropout_layer) +

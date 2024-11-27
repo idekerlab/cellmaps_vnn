@@ -13,7 +13,7 @@ class OptunaVNNTrainer(VNNTrainer):
     Trainer for neural networks with Optuna optimization.
     """
 
-    def __init__(self, data_wrapper):
+    def __init__(self, data_wrapper, n_trials=3):
         """
         Initializes the Optuna NN Trainer.
 
@@ -21,6 +21,12 @@ class OptunaVNNTrainer(VNNTrainer):
         :type data_wrapper: TrainingDataWrapper
         """
         super().__init__(data_wrapper)
+        self._n_trials = n_trials
+
+        user_lr = self.data_wrapper.lr
+        lr_candidates = [user_lr, user_lr * 0.1, user_lr * 2, 1.2e-4, 1.5e-4, 1.8e-4, 2e-4, 3e-4, 4e-4,
+                         5e-4, 1e-3]
+        self._lr_candidates = list(set(lr_candidates))
 
     def exec_study(self):
         """
@@ -31,7 +37,7 @@ class OptunaVNNTrainer(VNNTrainer):
         """
         logger.info("Starting Optuna study...")
         study = optuna.create_study(direction="maximize")
-        study.optimize(self._train_with_trial, n_trials=4)
+        study.optimize(self._train_with_trial, n_trials=self._n_trials)
         return self._print_result(study)
 
     def _train_with_trial(self, trial):
@@ -54,9 +60,14 @@ class OptunaVNNTrainer(VNNTrainer):
         :type trial: optuna.trial.Trial
         """
         logger.info("Setting up trial parameters...")
-        self.data_wrapper.genotype_hiddens = trial.suggest_categorical("genotype_hiddens", [4])
-        self.data_wrapper.lr = trial.suggest_categorical("lr", [1.2e-4, 1.5e-4, 1.8e-4, 2e-4, 3e-4, 4e-4, 5e-4, 1e-3])
 
+        # Learning rate tuning
+        self.data_wrapper.lr = trial.suggest_categorical("lr", self._lr_candidates)
+
+        # Genotype hidden layer sizes
+        self.data_wrapper.genotype_hiddens = trial.suggest_categorical("genotype_hiddens", [4])
+
+        # Batch size tuning
         batch_size = self.data_wrapper.batchsize
         if batch_size > len(self.train_feature) / 4:
             batch_size = 2 ** int(math.log(len(self.train_feature) / 4, 2))
