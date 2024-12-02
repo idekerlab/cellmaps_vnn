@@ -218,6 +218,7 @@ class VNNTrain:
                 for key, value in trial_params.items():
                     if hasattr(data_wrapper, key):
                         setattr(data_wrapper, key, value)
+                VNNTrainer(data_wrapper).train_model()
             else:
                 logger.error(f"The value {self._optimize} is wrong value for optimize.")
                 raise CellmapsvnnError(f"The value {self._optimize} is wrong value for optimize.")
