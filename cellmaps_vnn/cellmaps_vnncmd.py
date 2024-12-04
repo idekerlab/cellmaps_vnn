@@ -208,7 +208,7 @@ def main(args):
                                             alpha=getattr(theargs, 'alpha', None),
                                             genotype_hiddens=getattr(theargs, 'genotype_hiddens', None),
                                             optimize=getattr(theargs, 'optimize', None),
-                                            n_trails=getattr(theargs, 'n_trials', None),
+                                            n_trials=getattr(theargs, 'n_trials', None),
                                             patience=getattr(theargs, 'patience', None),
                                             delta=getattr(theargs, 'delta', None),
                                             min_dropout_layer=getattr(theargs, 'min_dropout_layer', None),
