@@ -46,7 +46,8 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    description="Python Boilerplate contains all the boilerplate you need to create a Python package with command line",
+    description="The Cell Maps VNN Tool enables creation, training, and usage of an interpretable neural "
+                "network-based models that predict cell response to a drug.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
