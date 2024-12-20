@@ -1,8 +1,11 @@
 # Configuration file with default values
 
-batchsize: 64           # Batch size
-zscore_method: "auc"    # Z-score method (zscore/robustz)
 epoch: 20              # Training epochs
+cuda: 0                 # Specify GPU
+zscore_method: "auc"    # Z-score method (auc/zscore/robustz)
+
+optimize: 0             # Hyper-parameter optimization (0-no optimization, 1-optuna optimizer)
+batchsize: 64           # Batch size
 lr: 0.001               # Learning rate
 wd: 0.001               # Weight decay
 alpha: 0.3              # Loss parameter alpha
@@ -11,8 +14,8 @@ patience: 30            # Early stopping epoch limit
 delta: 0.001            # Minimum change in loss for improvement
 min_dropout_layer: 2    # Start dropout from this layer
 dropout_fraction: 0.3   # Dropout fraction
-cuda: 0                 # Specify GPU
-optimize: 1             # Hyper-parameter optimization (not implemented yet)
+
+# Input data
 training_data: "./examples/training_data.txt"
 predict_data: "./examples/test_data.txt"
 gene2id: "./examples/gene2ind.txt"
