@@ -118,7 +118,7 @@ def main(args):
                 f"The following arguments are required either in the command line "
                 f"or config file: {', '.join(missing_args)}")
 
-    set_default_arguments(theargs, config)
+    set_arguments_from_config_and_defaults(theargs, config)
 
     try:
         logutils.setup_cmd_logging(theargs)
@@ -260,7 +260,7 @@ def main(args):
         logging.shutdown()
 
 
-def set_default_arguments(theargs, config):
+def set_arguments_from_config_and_defaults(theargs, config):
     """Sets default values for arguments if not already set."""
     defaults = {
         'gene_attribute_name': vnnconstants.GENE_SET_COLUMN_NAME,
@@ -282,12 +282,15 @@ def set_default_arguments(theargs, config):
         'dug_count': VNNPredict.DEFAULT_DRUG_COUNT
     }
 
-    for key, value in defaults.items():
+    # Apply values from config and then defaults
+    for key in vars(theargs):  # Check all attributes in theargs
         if getattr(theargs, key, None) is None:
+            # Check the config file for the value
             if key in config:
                 setattr(theargs, key, config[key])
-            else:
-                setattr(theargs, key, value)
+            # Apply defaults if no value is in the config
+            elif key in defaults:
+                setattr(theargs, key, defaults[key])
 
 
 if __name__ == '__main__':  # pragma: no cover
