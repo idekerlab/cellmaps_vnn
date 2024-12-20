@@ -2,6 +2,8 @@ import math
 
 import optuna
 from optuna.trial import TrialState
+
+from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
 import logging
 
@@ -13,7 +15,9 @@ class OptunaVNNTrainer(VNNTrainer):
     Trainer for neural networks with Optuna optimization.
     """
 
-    def __init__(self, data_wrapper, n_trials=3):
+    def __init__(self, data_wrapper, n_trials=20, batchsize_vals=None, lr_vals=None, wd_vals=None, alpha_vals=None,
+                 genotype_hiddens_vals=None, patience_vals=None, delta_vals=None, min_dropout_layer_vals=None,
+                 dropout_fraction_vals=None):
         """
         Initializes the Optuna NN Trainer.
 
@@ -23,10 +27,21 @@ class OptunaVNNTrainer(VNNTrainer):
         super().__init__(data_wrapper)
         self._n_trials = n_trials
 
-        user_lr = self.data_wrapper.lr
-        lr_candidates = [user_lr, user_lr * 0.1, user_lr * 2, 1.2e-4, 1.5e-4, 1.8e-4, 2e-4, 3e-4, 4e-4,
-                         5e-4, 1e-3]
-        self._lr_candidates = list(set(lr_candidates))
+        self._param_ranges = {
+            "batch_size": batchsize_vals,
+            "lr": lr_vals,
+            "weight_decay": wd_vals,
+            "alpha": alpha_vals,
+            "genotype_hiddens": genotype_hiddens_vals,
+            "patience": patience_vals,
+            "delta": delta_vals,
+            "min_dropout_layer": min_dropout_layer_vals,
+            "dropout_fraction": dropout_fraction_vals
+        }
+
+        if all(param is None for param in self._param_ranges.values()):
+            raise CellmapsvnnError("At least one parameter value must be provided as a list or range to perform "
+                                   "hyperparameter optimization.")
 
     def exec_study(self):
         """
@@ -61,20 +76,17 @@ class OptunaVNNTrainer(VNNTrainer):
         """
         logger.info("Setting up trial parameters...")
 
-        # Learning rate tuning
-        self.data_wrapper.lr = trial.suggest_categorical("lr", self._lr_candidates)
+        for param_name, param_range in self._param_ranges.items():
+            if param_range is not None:
+                if isinstance(param_range, list):
+                    trial_value = trial.suggest_categorical(param_name, param_range)
+                elif isinstance(param_range, tuple) and len(param_range) == 2:
+                    trial_value = trial.suggest_uniform(param_name, *param_range)
+                else:
+                    raise ValueError(f"Invalid parameter range format for {param_name}: {param_range}")
 
-        # Genotype hidden layer sizes
-        self.data_wrapper.genotype_hiddens = trial.suggest_categorical("genotype_hiddens", [4])
-
-        # Batch size tuning
-        batch_size = self.data_wrapper.batchsize
-        if batch_size > len(self.train_feature) / 4:
-            batch_size = 2 ** int(math.log(len(self.train_feature) / 4, 2))
-            self.data_wrapper.batchsize = trial.suggest_categorical("batchsize", [batch_size])
-
-        for key, value in trial.params.items():
-            logger.info(f"Parameter {key}: {value}")
+                setattr(self.data_wrapper, param_name, trial_value)
+                logger.info(f"Parameter {param_name}: {trial_value}")
 
     @staticmethod
     def _print_result(study):

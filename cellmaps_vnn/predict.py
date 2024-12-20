@@ -96,16 +96,13 @@ class VNNPredict:
         parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
                             type=str)
-        parser.add_argument('--batchsize', help='Batchsize', type=int, default=vnnconstants.DEFAULT_BATCHSIZE)
-        parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str,
-                            default=vnnconstants.DEFAULT_ZSCORE_METHOD)
-        parser.add_argument('--cpu_count', help='No of available cores', type=int, default=VNNPredict.DEFAULT_CPU_COUNT)
-        parser.add_argument('--drug_count', help='No of top performing drugs', type=int,
-                            default=VNNPredict.DEFAULT_DRUG_COUNT)
+        parser.add_argument('--batchsize', help='Batchsize', type=int)
+        parser.add_argument('--zscore_method', help='zscore method (zscore/robustz)', type=str)
+        parser.add_argument('--cpu_count', help='No of available cores', type=int)
+        parser.add_argument('--drug_count', help='No of top performing drugs', type=int)
         parser.add_argument('--genotype_hiddens',
-                            help='Mapping for the number of neurons in each term in genotype parts', type=int,
-                            default=vnnconstants.DEFAULT_GENOTYPE_HIDDENS)
-        parser.add_argument('--cuda', help='Specify GPU', type=int, default=vnnconstants.DEFAULT_CUDA)
+                            help='Mapping for the number of neurons in each term in genotype parts', type=int)
+        parser.add_argument('--cuda', help='Specify GPU', type=int)
         parser.add_argument('--std', help='Path to standardization File (if not set standardization file from RO-Crate '
                                           'will be used)', type=str)
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',

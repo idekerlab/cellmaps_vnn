@@ -14,6 +14,7 @@ from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
+import cellmaps_vnn.constants as vnnconstants
 
 logger = logging.getLogger(__name__)
 
@@ -88,24 +89,36 @@ def main(args):
     theargs.program = args[0]
     theargs.version = cellmaps_vnn.__version__
 
+    config = {}
     if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
         if theargs.config_file is not None:
             with open(theargs.config_file, "r") as file:
                 config = yaml.safe_load(file)
 
-                for key, value in config.items():
-                    if hasattr(theargs, key):
-                        setattr(theargs, key, value)
+    for key in vars(theargs):
+        value = getattr(theargs, key)
+        if value not in (None, False):
+            config[key] = value
 
+    if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
         required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
         if theargs.command == VNNTrain.COMMAND:
             required_args.append('gene2id')
             required_args.append('training_data')
         else:
             required_args.append('predict_data')
+
+        missing_args = []
         for arg in required_args:
-            if getattr(theargs, arg) is None:
-                raise CellmapsvnnError(f"The argument --{arg} is required either in command line or config file.")
+            if getattr(theargs, arg, None) is None and arg not in config:
+                missing_args.append(arg)
+
+        if missing_args:
+            raise CellmapsvnnError(
+                f"The following arguments are required either in the command line "
+                f"or config file: {', '.join(missing_args)}")
+
+    set_default_arguments(theargs, config)
 
     try:
         logutils.setup_cmd_logging(theargs)
@@ -245,6 +258,36 @@ def main(args):
         return 2
     finally:
         logging.shutdown()
+
+
+def set_default_arguments(theargs, config):
+    """Sets default values for arguments if not already set."""
+    defaults = {
+        'gene_attribute_name': vnnconstants.GENE_SET_COLUMN_NAME,
+        'batchsize': vnnconstants.DEFAULT_BATCHSIZE,
+        'zscore_method': vnnconstants.DEFAULT_ZSCORE_METHOD,
+        'epoch': VNNTrain.DEFAULT_EPOCH,
+        'lr': VNNTrain.DEFAULT_LR,
+        'wd': VNNTrain.DEFAULT_WD,
+        'alpha': VNNTrain.DEFAULT_ALPHA,
+        'genotype_hiddens': vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
+        'patience': VNNTrain.DEFAULT_PATIENCE,
+        'delta': VNNTrain.DEFAULT_DELTA,
+        'min_dropout_layer': VNNTrain.DEFAULT_MIN_DROPOUT_LAYER,
+        'dropout_fraction': VNNTrain.DEFAULT_DROPOUT_FRACTION,
+        'optimize': VNNTrain.DEFAULT_OPTIMIZE,
+        'n_trials': VNNTrain.DEFAULT_N_TRIALS,
+        'cuda': vnnconstants.DEFAULT_CUDA,
+        'cpu_count': VNNPredict.DEFAULT_CPU_COUNT,
+        'dug_count': VNNPredict.DEFAULT_DRUG_COUNT
+    }
+
+    for key, value in defaults.items():
+        if getattr(theargs, key, None) is None:
+            if key in config:
+                setattr(theargs, key, config[key])
+            else:
+                setattr(theargs, key, value)
 
 
 if __name__ == '__main__':  # pragma: no cover

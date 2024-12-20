@@ -28,7 +28,7 @@ class VNNTrain:
     DEFAULT_DELTA = 0.001
     DEFAULT_MIN_DROPOUT_LAYER = 2
     DEFAULT_DROPOUT_FRACTION = 0.3
-    DEFAULT_OPTIMIZE = 1
+    DEFAULT_OPTIMIZE = 0
     DEFAULT_N_TRIALS = 3
     DEFAULT_STD = 'std.txt'
 
@@ -70,7 +70,7 @@ class VNNTrain:
         :param epoch: Number of epochs for training. Default is 50.
         :type epoch: int
         :param lr: Learning rate. Default is 0.001.
-        :type lr: float
+        :type lr: float or list or tuple
         :param wd: Weight decay. Default is 0.001.
         :type wd: float
         :param alpha: Loss parameter alpha. Default is 0.3.
@@ -85,7 +85,7 @@ class VNNTrain:
         :type min_dropout_layer: int
         :param dropout_fraction: Dropout fraction. Default is 0.3.
         :type dropout_fraction: float
-        :param optimize: Hyperparameter optimization flag. Default is 1.
+        :param optimize: Hyperparameter optimization flag. Default is 0.
         :type optimize: int
         :param cuda: GPU index. Default is 0.
         :type cuda: int
@@ -110,18 +110,23 @@ class VNNTrain:
         self._mutations = mutations
         self._cn_deletions = cn_deletions
         self._cn_amplifications = cn_amplifications
-        self._batchsize = batchsize
         self._zscore_method = zscore_method
         self._epoch = epoch
-        self._lr = lr
-        self._wd = wd
-        self._alpha = alpha
-        self._genotype_hiddens = genotype_hiddens
-        self._patience = patience
-        self._delta = delta
-        self._min_dropout_layer = min_dropout_layer
-        self._dropout_fraction = dropout_fraction
+
         self._optimize = optimize
+        self._batchsize, self._optimize_batchsize = self._process_param(batchsize, 'batchsize')
+        self._lr, self._optimize_lr = self._process_param(lr, 'lr')
+        self._wd, self._optimize_wd = self._process_param(wd, 'wd')
+        self._alpha, self._optimize_alpha = self._process_param(alpha, 'alpha')
+        self._genotype_hiddens, self._optimize_genotype_hiddens = self._process_param(genotype_hiddens,
+                                                                                      'genotype_hiddens')
+        self._patience, self._optimize_patience = self._process_param(patience, 'patience')
+        self._delta, self._optimize_delta = self._process_param(delta, 'delta')
+        self._min_dropout_layer, self._optimize_min_dropout_layer = self._process_param(min_dropout_layer,
+                                                                                        'min_dropout_layer')
+        self._dropout_fraction, self._optimize_dropout_fraction = self._process_param(dropout_fraction,
+                                                                                      'dropout_fraction')
+
         self._n_trials = n_trials
         self._cuda = cuda
         self._skip_parent_copy = skip_parent_copy
@@ -131,6 +136,22 @@ class VNNTrain:
         self._slurm_account = slurm_account
         self._modelfile = self._get_model_dest_file()
         self._stdfile = self._get_std_dest_file()
+
+    def _process_param(self, param, name):
+        if isinstance(param, list) or isinstance(param, tuple):
+            if isinstance(param, tuple) or len(param) > 1:
+                if self._optimize != 0:
+                    return param[0], param
+                else:
+                    raise CellmapsvnnError(
+                        f'Hyperparameter optimization is not enabled (optimize set to 0), but multiple values '
+                        f'for {name} are provided. Please specify only one value, or enable optimization.'
+                    )
+            else:
+                return param[0], None
+        else:
+            return param, None
+
 
     @staticmethod
     def add_subparser(subparsers):
@@ -166,27 +187,22 @@ class VNNTrain:
         parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
         parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
                             type=str)
-        parser.add_argument('--batchsize', type=int, default=vnnconstants.DEFAULT_BATCHSIZE, help='Batch size')
-        parser.add_argument('--zscore_method', type=str, default=vnnconstants.DEFAULT_ZSCORE_METHOD,
-                            help='Z-score method (zscore/robustz)')
         parser.add_argument('--epoch', type=int, default=VNNTrain.DEFAULT_EPOCH, help='Training epochs')
-        parser.add_argument('--lr', type=float, default=VNNTrain.DEFAULT_LR, help='Learning rate')
-        parser.add_argument('--wd', type=float, default=VNNTrain.DEFAULT_WD, help='Weight decay')
-        parser.add_argument('--alpha', type=float, default=VNNTrain.DEFAULT_ALPHA, help='Loss parameter alpha')
-        parser.add_argument('--genotype_hiddens', type=int, default=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
-                            help='Neurons in genotype parts')
-        parser.add_argument('--patience', type=int, default=VNNTrain.DEFAULT_PATIENCE, help='Early stopping epoch limit')
-        parser.add_argument('--delta', type=float, default=VNNTrain.DEFAULT_DELTA, help='Minimum change in loss for '
-                                                                                        'improvement')
-        parser.add_argument('--min_dropout_layer', type=int, default=VNNTrain.DEFAULT_MIN_DROPOUT_LAYER,
-                            help='Start dropout from this layer')
-        parser.add_argument('--dropout_fraction', type=float, default=VNNTrain.DEFAULT_DROPOUT_FRACTION,
-                            help='Dropout fraction')
-        parser.add_argument('--optimize', type=int, default=VNNTrain.DEFAULT_OPTIMIZE,
-                            help='Hyperparameter optimization (1- no optimization, 2- optuna optimizer)')
-        parser.add_argument('--n_trials', type=int, default=VNNTrain.DEFAULT_N_TRIALS,
-                            help='Number of trials in hyperparameter optimization')
-        parser.add_argument('--cuda', type=int, default=vnnconstants.DEFAULT_CUDA, help='Specify GPU')
+        parser.add_argument('--zscore_method', type=str, choices=['auc', 'zscore', 'robustz'],
+                            help='Z-score method (choose from: auc, zscore, robustz). Default: auc')
+        parser.add_argument('--batchsize', type=int, nargs='+', help='Batch size')
+        parser.add_argument('--lr', type=float, nargs='+', help='Learning rate')
+        parser.add_argument('--wd', type=float, nargs='+', help='Weight decay')
+        parser.add_argument('--alpha', type=float, nargs='+', help='Loss parameter alpha')
+        parser.add_argument('--genotype_hiddens', type=int, nargs='+', help='Neurons in genotype parts')
+        parser.add_argument('--patience', type=int, nargs='+', help='Early stopping epoch limit')
+        parser.add_argument('--delta', type=float, nargs='+', help='Minimum change in loss for improvement')
+        parser.add_argument('--min_dropout_layer', type=int, nargs='+', help='Start dropout from this layer')
+        parser.add_argument('--dropout_fraction', type=float, nargs='+', help='Dropout fraction')
+        parser.add_argument('--optimize', type=int, help='Hyperparameter optimization (0- no optimization, '
+                                                         '1- optuna optimizer)')
+        parser.add_argument('--n_trials', type=int, help='Number of trials in hyperparameter optimization')
+        parser.add_argument('--cuda', type=int, help='Specify GPU')
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
@@ -211,10 +227,21 @@ class VNNTrain:
                                                self._batchsize, self._cuda, self._zscore_method, self._stdfile,
                                                self._patience, self._delta, self._min_dropout_layer,
                                                self._dropout_fraction)
-            if self._optimize == 1:
+            if self._optimize == 0:
                 VNNTrainer(data_wrapper).train_model()
-            elif self._optimize == 2:
-                trial_params = OptunaVNNTrainer(data_wrapper, n_trials=self._n_trials).exec_study()
+            elif self._optimize == 1:
+                trial_params = OptunaVNNTrainer(data_wrapper,
+                                                n_trials=self._n_trials,
+                                                batchsize_vals=self._optimize_batchsize,
+                                                lr_vals=self._optimize_lr,
+                                                wd_vals=self._optimize_wd,
+                                                alpha_vals=self._optimize_alpha,
+                                                genotype_hiddens_vals=self._optimize_genotype_hiddens,
+                                                patience_vals=self._optimize_patience,
+                                                delta_vals=self._optimize_delta,
+                                                min_dropout_layer_vals=self._optimize_min_dropout_layer,
+                                                dropout_fraction_vals=self._optimize_dropout_fraction
+                                                ).exec_study()
                 for key, value in trial_params.items():
                     if hasattr(data_wrapper, key):
                         setattr(data_wrapper, key, value)
