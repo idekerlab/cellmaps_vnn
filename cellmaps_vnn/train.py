@@ -219,36 +219,35 @@ class VNNTrain:
         """
         The logic for training the Visual Neural Network.
         """
+        if self._optimize not in [0, 1]:
+            logger.error(f"The value {self._optimize} is wrong value for optimize.")
+            raise CellmapsvnnError(f"The value {self._optimize} is wrong value for optimize.")
+
+        data_wrapper = TrainingDataWrapper(self._outdir, self._inputdir, self._gene_attribute_name,
+                                           self._training_data, self._cell2id, self._gene2id, self._mutations,
+                                           self._cn_deletions, self._cn_amplifications, self._modelfile,
+                                           self._genotype_hiddens, self._lr, self._wd, self._alpha, self._epoch,
+                                           self._batchsize, self._cuda, self._zscore_method, self._stdfile,
+                                           self._patience, self._delta, self._min_dropout_layer,
+                                           self._dropout_fraction)
+        if self._optimize == 1:
+            trial_params = OptunaVNNTrainer(data_wrapper,
+                                            n_trials=self._n_trials,
+                                            batchsize_vals=self._optimize_batchsize,
+                                            lr_vals=self._optimize_lr,
+                                            wd_vals=self._optimize_wd,
+                                            alpha_vals=self._optimize_alpha,
+                                            genotype_hiddens_vals=self._optimize_genotype_hiddens,
+                                            patience_vals=self._optimize_patience,
+                                            delta_vals=self._optimize_delta,
+                                            min_dropout_layer_vals=self._optimize_min_dropout_layer,
+                                            dropout_fraction_vals=self._optimize_dropout_fraction
+                                            ).exec_study()
+            for key, value in trial_params.items():
+                if hasattr(data_wrapper, key):
+                    setattr(data_wrapper, key, value)
         try:
-            data_wrapper = TrainingDataWrapper(self._outdir, self._inputdir, self._gene_attribute_name,
-                                               self._training_data, self._cell2id, self._gene2id, self._mutations,
-                                               self._cn_deletions, self._cn_amplifications, self._modelfile,
-                                               self._genotype_hiddens, self._lr, self._wd, self._alpha, self._epoch,
-                                               self._batchsize, self._cuda, self._zscore_method, self._stdfile,
-                                               self._patience, self._delta, self._min_dropout_layer,
-                                               self._dropout_fraction)
-            if self._optimize == 0:
-                VNNTrainer(data_wrapper).train_model()
-            elif self._optimize == 1:
-                trial_params = OptunaVNNTrainer(data_wrapper,
-                                                n_trials=self._n_trials,
-                                                batchsize_vals=self._optimize_batchsize,
-                                                lr_vals=self._optimize_lr,
-                                                wd_vals=self._optimize_wd,
-                                                alpha_vals=self._optimize_alpha,
-                                                genotype_hiddens_vals=self._optimize_genotype_hiddens,
-                                                patience_vals=self._optimize_patience,
-                                                delta_vals=self._optimize_delta,
-                                                min_dropout_layer_vals=self._optimize_min_dropout_layer,
-                                                dropout_fraction_vals=self._optimize_dropout_fraction
-                                                ).exec_study()
-                for key, value in trial_params.items():
-                    if hasattr(data_wrapper, key):
-                        setattr(data_wrapper, key, value)
-                VNNTrainer(data_wrapper).train_model()
-            else:
-                logger.error(f"The value {self._optimize} is wrong value for optimize.")
-                raise CellmapsvnnError(f"The value {self._optimize} is wrong value for optimize.")
+            VNNTrainer(data_wrapper).train_model()
         except Exception as e:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")

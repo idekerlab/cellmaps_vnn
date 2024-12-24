@@ -282,13 +282,10 @@ def set_arguments_from_config_and_defaults(theargs, config):
         'dug_count': VNNPredict.DEFAULT_DRUG_COUNT
     }
 
-    # Apply values from config and then defaults
-    for key in vars(theargs):  # Check all attributes in theargs
+    for key in vars(theargs):
         if getattr(theargs, key, None) is None:
-            # Check the config file for the value
             if key in config:
                 setattr(theargs, key, config[key])
-            # Apply defaults if no value is in the config
             elif key in defaults:
                 setattr(theargs, key, defaults[key])
 
