@@ -18,17 +18,17 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['cellmaps_utils==0.4.0',
+requirements = ['cellmaps_utils>=0.4.0,<1.0.0',
                 'ndex2>=3.8.0,<4.0.0',
-                'optuna',
-                'scikit-learn',
-                'networkx',
-                'pandas',
-                'torch',
-                'torchvision',
-                'torchaudio',
-                'scipy',
-                'joblib'
+                'optuna>=3.6.0,<4.0.0',
+                'scikit-learn>=1.3.0,<1.4.0',
+                'networkx>=2.8,<2.9',
+                'pandas>=2.0.0,<3.0.0',
+                'torch>=2.0.0,<3.0.0',
+                'torchvision>=0.15.0,<1.0.0',
+                'torchaudio>=2.0.0,<3.0.0',
+                'scipy>=1.10.0,<2.0.0',
+                'joblib>=1.3.2,<2.0.0'
                 ]
 
 setup_requirements = []
