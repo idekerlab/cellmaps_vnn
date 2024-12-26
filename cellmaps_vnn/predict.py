@@ -63,6 +63,12 @@ class VNNPredict:
         self._number_feature_grads = 0
         self.use_cuda = torch.cuda.is_available() and self._cuda is not None
 
+        if (isinstance(self._batchsize, list) or isinstance(self._batchsize, tuple)
+                or isinstance(self._genotype_hiddens, list) or isinstance(self._genotype_hiddens, tuple)):
+            raise CellmapsvnnError(
+                "Batch size and genotype hidden layer sizes must be integers during testing or prediction. Lists of "
+                "values for these parameters are only supported during hyperparameter optimization in training."
+            )
         self.excluded_terms = []
         excluded_terms_path = os.path.join(self._inputdir, 'vnn_excluded_terms.txt')
         if os.path.exists(excluded_terms_path):
@@ -416,7 +422,8 @@ class VNNPredict:
         for i in range(self._number_feature_grads):
             output_ids.append(self._register_feature_grad_file(outdir, description, keywords, provenance_utils, i))
         output_ids.extend(self._register_hidden_files(outdir, description, keywords, provenance_utils))
-        orginal_hierarchy_id = self._copy_and_register_original_hierarchy(outdir, description, keywords, provenance_utils)
+        orginal_hierarchy_id = self._copy_and_register_original_hierarchy(outdir, description, keywords,
+                                                                          provenance_utils)
         if orginal_hierarchy_id is not None:
             output_ids.append(orginal_hierarchy_id)
         output_ids.append(self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils))
