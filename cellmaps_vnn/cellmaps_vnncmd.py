@@ -279,7 +279,7 @@ def set_arguments_from_config_and_defaults(theargs, config):
         'n_trials': VNNTrain.DEFAULT_N_TRIALS,
         'cuda': vnnconstants.DEFAULT_CUDA,
         'cpu_count': VNNPredict.DEFAULT_CPU_COUNT,
-        'dug_count': VNNPredict.DEFAULT_DRUG_COUNT
+        'drug_count': VNNPredict.DEFAULT_DRUG_COUNT
     }
 
     for key in vars(theargs):
