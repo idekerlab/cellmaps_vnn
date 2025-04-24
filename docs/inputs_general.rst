@@ -3,11 +3,11 @@ General
 
 .. warning::
 
-    Currently, the package handles only NeST VNN inputs. See `NeST VNN <inputs_nestvnn.html>`_
+    Currently, the package handles only inputs in the NeST VNN format. See `NeST VNN <inputs_nestvnn.html>`_
 
 Feature files
 ~~~~~~~~~~~~~~
-The tool accepts one or multiple feature files. As for now, the tool only handles NEST VNN inputs.
+The tool accepts one or multiple feature files.
 
 Training
 ~~~~~~~~~
