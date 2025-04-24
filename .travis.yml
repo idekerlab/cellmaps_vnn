@@ -17,7 +17,6 @@ install:
 # Command to run tests, e.g. python setup.py test
 script:
     - coverage run --source cellmaps_vnn -m pytest
-    - coveralls debug
 
 after_success: coveralls
 
