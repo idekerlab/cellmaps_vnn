@@ -12,6 +12,7 @@ import cellmaps_vnn
 from cellmaps_vnn.annotate import VNNAnnotate
 from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.predict import VNNPredict
+from cellmaps_vnn.auto import VNNAuto
 from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
 import cellmaps_vnn.constants as vnnconstants
@@ -35,6 +36,7 @@ def _parse_arguments(desc, args):
     subparsers = parser.add_subparsers(dest='command', help='Command to run. Type <command> -h for more help')
     subparsers.required = True
 
+    VNNAuto.add_subparser(subparsers)
     VNNTrain.add_subparser(subparsers)
     VNNPredict.add_subparser(subparsers)
     VNNAnnotate.add_subparser(subparsers)
@@ -89,35 +91,11 @@ def main(args):
     theargs.program = args[0]
     theargs.version = cellmaps_vnn.__version__
 
-    config = {}
-    if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
-        if theargs.config_file is not None:
-            with open(theargs.config_file, "r") as file:
-                config = yaml.safe_load(file)
+    if theargs.command == VNNAuto.COMMAND:
+        auto_obj = VNNAuto()
+        return auto_obj.run()
 
-    for key in vars(theargs):
-        value = getattr(theargs, key)
-        if value not in (None, False):
-            config[key] = value
-
-    if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
-        required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
-        if theargs.command == VNNTrain.COMMAND:
-            required_args.append('gene2id')
-            required_args.append('training_data')
-        else:
-            required_args.append('predict_data')
-
-        missing_args = []
-        for arg in required_args:
-            if getattr(theargs, arg, None) is None and arg not in config:
-                missing_args.append(arg)
-
-        if missing_args:
-            raise CellmapsvnnError(
-                f"The following arguments are required either in the command line "
-                f"or config file: {', '.join(missing_args)}")
-
+    config = load_and_validate_config(theargs)
     set_arguments_from_config_and_defaults(theargs, config)
 
     try:
@@ -288,6 +266,50 @@ def set_arguments_from_config_and_defaults(theargs, config):
                 setattr(theargs, key, config[key])
             elif key in defaults:
                 setattr(theargs, key, defaults[key])
+
+
+def load_and_validate_config(theargs):
+    """
+    Loads configuration from a file and validates required arguments.
+
+    :param theargs: Parsed command-line arguments.
+    :type theargs: argparse.Namespace
+    :return: Merged configuration from file and command-line arguments.
+    :rtype: dict
+    :raises CellmapsvnnError: If required arguments are missing.
+    """
+    config = {}
+
+    # Load config file if provided
+    if theargs.command in (VNNTrain.COMMAND, VNNPredict.COMMAND, VNNAuto.COMMAND) and theargs.config_file is not None:
+        with open(theargs.config_file, "r") as file:
+            config = yaml.safe_load(file)
+
+    # Override or add arguments from command-line
+    for key in vars(theargs):
+        value = getattr(theargs, key)
+        if value not in (None, False):
+            config[key] = value
+
+    # Validate required arguments for specific commands
+    if theargs.command in (VNNTrain.COMMAND, VNNPredict.COMMAND):
+        required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
+        if theargs.command == VNNTrain.COMMAND:
+            required_args.extend(['gene2id', 'training_data'])
+        elif theargs.command == VNNPredict.COMMAND:
+            required_args.append('predict_data')
+        else:
+            required_args.append(['gene2id', 'training_data', 'predict_data'])
+
+        # Check for missing required arguments
+        missing_args = [arg for arg in required_args if getattr(theargs, arg, None) is None and arg not in config]
+        if missing_args:
+            raise CellmapsvnnError(
+                f"The following arguments are required either in the command line "
+                f"or config file: {', '.join(missing_args)}"
+            )
+
+    return config
 
 
 if __name__ == '__main__':  # pragma: no cover

@@ -44,8 +44,10 @@ class TrainingDataWrapper:
         self.min_dropout_layer = min_dropout_layer
         self.dropout_fraction = dropout_fraction
         self.gene_attribute_name = gene_attribute_name
-
-        self._hierarchy = os.path.join(inputdir, constants.HIERARCHY_FILENAME)
+        if os.path.isfile(inputdir):
+            self._hierarchy = inputdir
+        else:
+            self._hierarchy = os.path.join(inputdir, constants.HIERARCHY_FILENAME)
         self._training_data = training_data
         self.cell_id_mapping = util.load_mapping(cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(gene2id, 'genes')
