@@ -2,6 +2,11 @@
 Contains constants used by cellmaps vnn
 """
 
+IMPORTANCE_SCORE = 'importance_score'
+"""
+Importance score (set to P_rho currently)
+"""
+
 PRHO_SCORE = 'P_rho'
 """
 P rho score
