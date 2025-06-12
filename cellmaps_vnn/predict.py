@@ -38,8 +38,6 @@ class VNNPredict:
         Constructor for predicting with a trained model.
         """
         self._inputdir = inputdir
-        if not os.path.exists(os.path.join(self._inputdir, 'model_final.pt')):
-            self._inputdir = os.path.join(self._inputdir, 'out_train')
         self._outdir = os.path.abspath(outdir)
         self._config_file = config_file
         self._predict_data = predict_data
@@ -62,6 +60,7 @@ class VNNPredict:
 
         self._number_feature_grads = 0
         self.use_cuda = torch.cuda.is_available() and self._cuda is not None
+        self.excluded_terms = []
 
         if (isinstance(self._batchsize, list) or isinstance(self._batchsize, tuple)
                 or isinstance(self._genotype_hiddens, list) or isinstance(self._genotype_hiddens, tuple)):
@@ -69,11 +68,6 @@ class VNNPredict:
                 "Batch size and genotype hidden layer sizes must be integers during testing or prediction. Lists of "
                 "values for these parameters are only supported during hyperparameter optimization in training."
             )
-        self.excluded_terms = []
-        excluded_terms_path = os.path.join(self._inputdir, 'vnn_excluded_terms.txt')
-        if os.path.exists(excluded_terms_path):
-            with open(excluded_terms_path, 'r') as file:
-                self.excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
 
     @staticmethod
     def add_subparser(subparsers):
@@ -129,6 +123,8 @@ class VNNPredict:
         :raises CellmapsvnnError: If an error occurs during the prediction process.
         """
         try:
+            self._check_inputdir()
+            self._populate_excluded_terms()
             model = os.path.join(self._inputdir, 'model_final.pt')
             std = os.path.join(self._inputdir, 'std.txt') if self._std is None else os.path.abspath(self._std)
             torch.set_printoptions(precision=5)
@@ -164,6 +160,16 @@ class VNNPredict:
         except Exception as e:
             logger.error(f"Error in prediction flow: {e}")
             raise CellmapsvnnError(f"Encountered problem in prediction flow: {e}")
+
+    def _check_inputdir(self):
+        if not os.path.exists(os.path.join(self._inputdir, 'model_final.pt')):
+            self._inputdir = os.path.join(self._inputdir, 'out_train')
+
+    def _populate_excluded_terms(self):
+        excluded_terms_path = os.path.join(self._inputdir, 'vnn_excluded_terms.txt')
+        if os.path.exists(excluded_terms_path):
+            with open(excluded_terms_path, 'r') as file:
+                self.excluded_terms = set(int(line.strip()) for line in file if line.strip().isdigit())
 
     def _prepare_predict_data(self, test_file, cell2id_mapping_file, zscore_method, std_file):
         """

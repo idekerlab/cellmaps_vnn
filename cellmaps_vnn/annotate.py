@@ -37,31 +37,8 @@ class VNNAnnotate:
         """
         self._outdir = os.path.abspath(outdir)
         self.original_hierarchy = None
-        if not os.path.exists(os.path.join(model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
-            model_predictions[0] = os.path.join(model_predictions[0], 'out_predict')
-        if hierarchy is not None:
-            self.hierarchy = hierarchy
-        else:
-            hierarchy_path = os.path.join(model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
-            if os.path.exists(hierarchy_path):
-                self.hierarchy = hierarchy_path
-            else:
-                raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
-            original_hierarchy_path = os.path.join(model_predictions[0],
-                                                   vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
-            if os.path.exists(original_hierarchy_path):
-                self.original_hierarchy = original_hierarchy_path
-        if parent_network is not None:
-            self.parent_network = parent_network
-        else:
-            parent_network_path = os.path.join(model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
-            if os.path.exists(parent_network_path):
-                self.parent_network = parent_network_path
-            else:
-                self.parent_network = None
-        if self.parent_network is not None and os.path.isfile(self.parent_network):
-            self.parent_network = os.path.abspath(self.parent_network)
-
+        self.hierarchy = hierarchy
+        self.parent_network = parent_network
         self._model_predictions = model_predictions
         self._disease = disease
         self._ndexserver = ndexserver
@@ -311,6 +288,7 @@ class VNNAnnotate:
         The logic for annotating hierarchy with prediction results from cellmaps_vnn. It aggregates prediction scores
         from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
         """
+        self._check_hierarchy_and_parent()
         self._aggregate_prediction_scores_from_models()
         filepath = self._get_rlipp_out_dest_file()
         data = pd.read_csv(filepath, sep='\t')
@@ -453,3 +431,29 @@ class VNNAnnotate:
                                                        source_file=dest_path,
                                                        data_dict=data_dict)
         return dataset_id
+
+    def _check_hierarchy_and_parent(self):
+        if not os.path.exists(os.path.join(self._model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
+            self._model_predictions[0] = os.path.join(self._model_predictions[0], 'out_predict')
+
+        # Check first ro-crate for hierarchy if not specified and if hierarchy path exists
+        if self.hierarchy is None:
+            self.hierarchy = os.path.join(self._model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
+        if not os.path.exists(self.hierarchy):
+            raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
+
+        # Check first ro-crate for original hierarchy
+        original_hierarchy_path = os.path.join(self._model_predictions[0],
+                                               vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
+        if os.path.exists(original_hierarchy_path):
+            self.original_hierarchy = original_hierarchy_path
+
+        # Check first ro-crate for parent network and set the absolute path
+        if self.parent_network is None:
+            parent_network_path = os.path.join(self._model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
+            if os.path.exists(parent_network_path):
+                self.parent_network = parent_network_path
+            else:
+                self.parent_network = None
+        if self.parent_network is not None and os.path.isfile(self.parent_network):
+            self.parent_network = os.path.abspath(self.parent_network)
