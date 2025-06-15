@@ -31,8 +31,6 @@ class VNNAnnotate:
         Constructor. Sets up the hierarchy path either directly from the arguments or by looking for
         a hierarchy.cx2 file in the first RO-Crate directory provided. If neither is found, raises an error.
 
-        :param theargs: The arguments provided to the command line interface.
-        :type theargs: argparse.Namespace
         :raises CellmapsvnnError: If no hierarchy path is specified or found.
         """
         self._outdir = os.path.abspath(outdir)
@@ -72,13 +70,15 @@ class VNNAnnotate:
         parser.add_argument('--disease', help='Specify the disease or cancer type for which the annotations will be '
                                               'performed. This allows the annotation process to tailor the results '
                                               'according to the particular disease or cancer type. If not set, '
-                                              'prediction scores for all diseases will be aggregated.', type=str)
-        parser.add_argument('--hierarchy', help='Path to hierarchy (optional), if not set the hierarchy will be '
-                                                'selected from the first RO-Crate passed in --model_predictions '
-                                                'argument', type=str)
-        parser.add_argument('--parent_network', help='Path to interactome (parent network) of the annotated hierarchy '
-                                                     'or NDEx UUID of parent network (required if uploading '
-                                                     'HCX to NDEx)', type=str)
+                                              'prediction importance scores for all diseases will be aggregated.',
+                            type=str)
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
+                                                'hierarchy.cx2 in first RO-Crate (passed in --model_predictions).',
+                            type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of the annotated '
+                                                     'hierarchy or NDEx UUID of parent network. If not set, the '
+                                                     'process will search for hierarchy_parent.cx2 in first RO-Crate '
+                                                     '(passed in --model_predictions).', type=str)
         parser.add_argument('--ndexserver', default=VNNAnnotate.DEFAULT_NDEX_SERVER,
                             help='Server where annotated hierarchy will be uploaded to')
         parser.add_argument('--ndexuser',
@@ -93,6 +93,28 @@ class VNNAnnotate:
                             action='store_true')
         parser.add_argument('--slurm_partition', help='Slurm partition', type=str)
         parser.add_argument('--slurm_account', help='Slurm account', type=str)
+
+    def run(self):
+        """
+        The logic for annotating hierarchy with prediction results from cellmaps_vnn. It aggregates prediction scores
+        from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
+        """
+        self._process_input_hierarchy_and_parent()
+        hierarchy_cx, original_hierarchy_cx = self._get_hierarchy_cx()
+        self._aggregate_importance_scores_from_models()
+        if self._disease is None:
+            annotation_dict = self._aggregate_scores_from_diseases()
+        else:
+            annotation_dict = self._get_scores_for_disease(self._disease)
+        if len(annotation_dict) == 0:
+            print("No system importance scores available for annotation. Training was not sufficient. "
+                  "Increase number of epochs and run train and predict again.")
+            raise CellmapsvnnError("No system importance scores available for annotation. "
+                                   "Please ensure valid data is provided for the hierarchy annotation.")
+
+        hierarchy, original_hierarchy = self.annotate_hierarchy(annotation_dict, hierarchy_cx, original_hierarchy_cx)
+        self.save_hierarchy_to_file(hierarchy, original_hierarchy)
+        self._upload_to_ndex_if_credentials_provided()
 
     def _get_rlipp_out_dest_file(self):
         """
@@ -121,7 +143,7 @@ class VNNAnnotate:
         """
         return os.path.join(self._outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
 
-    def _aggregate_prediction_scores_from_models(self):
+    def _aggregate_importance_scores_from_models(self):
         """
         Aggregates prediction scores from multiple models' outputs by averaging them.
         The aggregated scores are then saved to the RLIPP output destination file.
@@ -159,14 +181,14 @@ class VNNAnnotate:
             for (term, disease), values in averaged_data.items():
                 outfile.write(f"{term}\t" + "\t".join([f"{v:.5e}" for v in values]) + f"\t{disease}\n")
 
-    @staticmethod
-    def _aggregate_scores_from_diseases(data):
+    def _aggregate_scores_from_diseases(self):
         """
         Aggregates the prediction scores for all diseases by averaging P_rho score.
 
         :return: A dictionary mapping each term to its averaged P_rho score across all diseases.
         :rtype: dict
         """
+        data = pd.read_csv(self._get_rlipp_out_dest_file(), sep='\t')
         aggregated_data = data.groupby('Term').agg({
             vnnconstants.PRHO_SCORE: 'mean',
             vnnconstants.P_PVAL_SCORE: 'mean',
@@ -183,8 +205,7 @@ class VNNAnnotate:
 
         return aggregated_dict
 
-    @staticmethod
-    def _get_scores_for_disease(disease, data):
+    def _get_scores_for_disease(self, disease):
         """
         Retrieves prediction scores for a specific disease, returning a dictionary mapping
         each term to its P_rho score for the given disease.
@@ -194,6 +215,7 @@ class VNNAnnotate:
         :return: A dictionary with Term as keys and P_rho scores as values for the specified disease.
         :rtype: dict
         """
+        data = pd.read_csv(self._get_rlipp_out_dest_file(), sep='\t')
         filtered_data = data[data['Disease'] == disease]
         if filtered_data.empty:
             return {}
@@ -248,20 +270,16 @@ class VNNAnnotate:
         if original_hierarchy is not None:
             original_hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
 
-    def annotate(self, annotation_dict):
+    def annotate_hierarchy(self, annotation_dict, hierarchy, original_hierarchy):
         """
         Annotates the hierarchy with P_rho scores from the given annotation dictionary,
         updating node attributes within the hierarchy file.
 
         :param annotation_dict: A dictionary mapping terms to their P_rho scores.
         :type annotation_dict: dict
+        :param hierarchy:
+        :param original_hierarchy:
         """
-        factory = RawCX2NetworkFactory()
-        hierarchy = factory.get_cx2network(self.hierarchy)
-        original_hierarchy = None
-        if self.original_hierarchy is not None:
-            original_hierarchy = factory.get_cx2network(self.original_hierarchy)
-
         for term, score in annotation_dict.items():
             node_id = term
             if not isinstance(term, int):
@@ -274,8 +292,10 @@ class VNNAnnotate:
                 self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.RLIPP_SCORE, score[4])
                 self._annotate_with_score(hierarchy, original_hierarchy, node_id, vnnconstants.IMPORTANCE_SCORE,
                                           score[0])
+        return hierarchy, original_hierarchy
 
-        # TODO: apply style to the hierarchy
+    def save_hierarchy_to_file(self, hierarchy, original_hierarchy):
+        factory = RawCX2NetworkFactory()
         path_to_style_network = os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'nest_style.cx2')
         style_network = factory.get_cx2network(path_to_style_network)
         vis_prop = style_network.get_visual_properties()
@@ -284,27 +304,6 @@ class VNNAnnotate:
         if original_hierarchy is not None:
             original_hierarchy.set_visual_properties(vis_prop)
             original_hierarchy.write_as_raw_cx2(self._get_original_hierarchy_dest_file())
-
-    def run(self):
-        """
-        The logic for annotating hierarchy with prediction results from cellmaps_vnn. It aggregates prediction scores
-        from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
-        """
-        self._check_hierarchy_and_parent()
-        self._aggregate_prediction_scores_from_models()
-        filepath = self._get_rlipp_out_dest_file()
-        data = pd.read_csv(filepath, sep='\t')
-        if self._disease is None:
-            annotation_dict = self._aggregate_scores_from_diseases(data)
-        else:
-            annotation_dict = self._get_scores_for_disease(self._disease, data)
-        if len(annotation_dict) == 0:
-            print("No system importance scores available for annotation. Training was not sufficient. "
-                  "Increase number of epochs and run train and predict again.")
-            raise CellmapsvnnError("No system importance scores available for annotation. "
-                                   "Please ensure valid data is provided for the hierarchy annotation.")
-        self.annotate(annotation_dict)
-        self._upload_to_ndex_if_credentials_provided()
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """
@@ -434,28 +433,38 @@ class VNNAnnotate:
                                                        data_dict=data_dict)
         return dataset_id
 
-    def _check_hierarchy_and_parent(self):
+    def _process_input_hierarchy_and_parent(self):
+
+        # Get first RO-Crate
         if not os.path.exists(os.path.join(self._model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
             self._model_predictions[0] = os.path.join(self._model_predictions[0], 'out_predict')
 
-        # Check first ro-crate for hierarchy if not specified and if hierarchy path exists
+        # HIERARCHY: Check first ro-crate for hierarchy if not specified by hierarchy flag
         if self.hierarchy is None:
             self.hierarchy = os.path.join(self._model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
         if not os.path.exists(self.hierarchy):
             raise CellmapsvnnError("No hierarchy was specified or found in first ro-crate")
+        self.hierarchy = os.path.abspath(self.hierarchy)
 
-        # Check first ro-crate for original hierarchy
+        # ORIGINAL HIERARCHY: Check first ro-crate for original hierarchy
         original_hierarchy_path = os.path.join(self._model_predictions[0],
                                                vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
         if os.path.exists(original_hierarchy_path):
-            self.original_hierarchy = original_hierarchy_path
+            self.original_hierarchy = os.path.abspath(original_hierarchy_path)
 
-        # Check first ro-crate for parent network and set the absolute path
+        # PARENT (INTERACTOME): Check first ro-crate for parent network if not specified by parent_network flag
         if self.parent_network is None:
             parent_network_path = os.path.join(self._model_predictions[0], vnnconstants.PARENT_NETWORK_NAME)
             if os.path.exists(parent_network_path):
                 self.parent_network = parent_network_path
-            else:
-                self.parent_network = None
         if self.parent_network is not None and os.path.isfile(self.parent_network):
             self.parent_network = os.path.abspath(self.parent_network)
+
+    def _get_hierarchy_cx(self):
+        factory = RawCX2NetworkFactory()
+        hierarchy = factory.get_cx2network(self.hierarchy)
+        original_hierarchy = None
+        if self.original_hierarchy:
+            original_hierarchy = factory.get_cx2network(self.original_hierarchy)
+
+        return hierarchy, original_hierarchy
