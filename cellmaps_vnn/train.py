@@ -39,7 +39,8 @@ class VNNTrain:
                  alpha=DEFAULT_ALPHA, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS, patience=DEFAULT_PATIENCE,
                  delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER, dropout_fraction=DEFAULT_DROPOUT_FRACTION,
                  optimize=DEFAULT_OPTIMIZE, n_trials=DEFAULT_N_TRIALS, cuda=vnnconstants.DEFAULT_CUDA,
-                 skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None):
+                 skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None,
+                 hierarchy=None, parent_network=None):
         """
         Constructor for training a Visual Neural Network.
 
@@ -102,6 +103,8 @@ class VNNTrain:
         """
         self._outdir = os.path.abspath(outdir)
         self._inputdir = inputdir
+        self._hierarchy = hierarchy
+        self._parent_network = parent_network
         self._gene_attribute_name = gene_attribute_name
         self._config_file = config_file
         self._training_data = training_data
@@ -152,7 +155,6 @@ class VNNTrain:
         else:
             return param, None
 
-
     @staticmethod
     def add_subparser(subparsers):
         """
@@ -171,13 +173,17 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.'
-                                                              'Note that the name of the hierarchy should be '
-                                                              'hierarchy.cx2.')
-        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy '
-                                                          'with list of genes/ proteins of this node. '
-                                                          'Default: CD_MemberList.', type=str,
-                            default=vnnconstants.GENE_SET_COLUMN_NAME)
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file.'
+                                               'Note that the name of the hierarchy should be hierarchy.cx2.')
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
+                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
+                                                     'or NDEx UUID of parent network. If not set, the process will '
+                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
+                                                     'if not found.', type=str)
+        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy with list of '
+                                                          'genes/ proteins of this node. Default: CD_MemberList.',
+                            type=str, default=vnnconstants.GENE_SET_COLUMN_NAME)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--training_data', help='Training data')
@@ -229,7 +235,7 @@ class VNNTrain:
                                            self._genotype_hiddens, self._lr, self._wd, self._alpha, self._epoch,
                                            self._batchsize, self._cuda, self._zscore_method, self._stdfile,
                                            self._patience, self._delta, self._min_dropout_layer,
-                                           self._dropout_fraction)
+                                           self._dropout_fraction, self._hierarchy)
         if self._optimize == 1:
             trial_params = OptunaVNNTrainer(data_wrapper,
                                             n_trials=self._n_trials,
@@ -352,7 +358,9 @@ class VNNTrain:
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
-        shutil.copy(os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
+        hierarchy_in_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME) if self._hierarchy is None \
+            else self._hierarchy
+        shutil.copy(hierarchy_in_file, hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
@@ -382,7 +390,8 @@ class VNNTrain:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME) \
+            if self._parent_network is None else self._parent_network
         if not os.path.exists(hierarchy_parent_in_file):
             logger.warning("No hierarchy parent in the input directory. Cannot copy.")
             return None

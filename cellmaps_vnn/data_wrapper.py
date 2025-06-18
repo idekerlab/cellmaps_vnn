@@ -21,7 +21,7 @@ class TrainingDataWrapper:
 
     def __init__(self, outdir, inputdir, gene_attribute_name, training_data, cell2id, gene2id, mutations, cn_deletions,
                  cn_amplifications, modelfile, genotype_hiddens, lr, wd, alpha, epoch, batchsize, cuda, zscore_method,
-                 stdfile, patience, delta, min_dropout_layer, dropout_fraction):
+                 stdfile, patience, delta, min_dropout_layer, dropout_fraction, hierarchy=None):
         """
         Initializes the TrainingDataWrapper object with configuration and training data parameters.
         """
@@ -45,7 +45,7 @@ class TrainingDataWrapper:
         self.dropout_fraction = dropout_fraction
         self.gene_attribute_name = gene_attribute_name
 
-        self._hierarchy = os.path.join(inputdir, constants.HIERARCHY_FILENAME)
+        self._hierarchy = hierarchy if hierarchy is not None else os.path.join(inputdir, constants.HIERARCHY_FILENAME)
         self._training_data = training_data
         self.cell_id_mapping = util.load_mapping(cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(gene2id, 'genes')

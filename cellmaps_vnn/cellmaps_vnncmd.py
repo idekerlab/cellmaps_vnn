@@ -153,7 +153,9 @@ def main(args):
                 slurm=theargs.slurm,
                 use_gpu=theargs.use_gpu,
                 slurm_partition=theargs.slurm_partition,
-                slurm_account=theargs.slurm_account
+                slurm_account=theargs.slurm_account,
+                hierarchy=theargs.hierarchy,
+                parent_network=theargs.parent_network
             )
         elif theargs.command == VNNPredict.COMMAND:
             cmd = VNNPredict(
