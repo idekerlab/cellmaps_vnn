@@ -390,9 +390,12 @@ class VNNTrain:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME) \
-            if self._parent_network is None else self._parent_network
-        if not os.path.exists(hierarchy_parent_in_file):
+        hierarchy_parent_in_file = None
+        if self._parent_network is not None:
+            hierarchy_parent_in_file = self._parent_network
+        if self._inputdir is not None:
+            hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        if hierarchy_parent_in_file is None or not os.path.exists(hierarchy_parent_in_file):
             logger.warning("No hierarchy parent in the input directory. Cannot copy.")
             return None
         hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
