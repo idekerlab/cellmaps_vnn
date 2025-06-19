@@ -33,11 +33,14 @@ class VNNPredict:
                  zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD, cpu_count=DEFAULT_CPU_COUNT,
                  drug_count=DEFAULT_DRUG_COUNT, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
                  cuda=vnnconstants.DEFAULT_CUDA, std=None, slurm=False, use_gpu=False, slurm_partition=None,
-                 slurm_account=None):
+                 slurm_account=None, hierarchy=None, parent_network=None):
         """
         Constructor for predicting with a trained model.
         """
         self._inputdir = inputdir
+        self._parent_network = parent_network
+        self._hierarchy_file = hierarchy if hierarchy is not None else os.path.join(self._inputdir,
+                                                                                    vnnconstants.HIERARCHY_FILENAME)
         self._outdir = os.path.abspath(outdir)
         self._config_file = config_file
         self._predict_data = predict_data
@@ -87,9 +90,15 @@ class VNNPredict:
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
         parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
+                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
+                                                     'or NDEx UUID of parent network. If not set, the process will '
+                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
+                                                     'if not found.', type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
-        parser.add_argument('--predict_data', help='Path to the dataset to be predicted', type=str)
+        parser.add_argument('--predict_data', help='Path to the file with text data', type=str)
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
         parser.add_argument('--mutations', help='Mutation information for cell lines', type=str)
@@ -103,8 +112,8 @@ class VNNPredict:
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts', type=int)
         parser.add_argument('--cuda', help='Specify GPU', type=int)
-        parser.add_argument('--std', help='Path to standardization File (if not set standardization file from RO-Crate '
-                                          'will be used)', type=str)
+        parser.add_argument('--std', help='Path to standardization File (if not set, standardization file from '
+                                          'RO-Crate will be used)', type=str)
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
                             action='store_true')
         parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
@@ -144,9 +153,8 @@ class VNNPredict:
             self.predict(predict_data, model, hidden_dir, self._batchsize,
                          cell_features)
 
-            hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
             factory = RawCX2NetworkFactory()
-            hierarchy = factory.get_cx2network(hierarchy_file)
+            hierarchy = factory.get_cx2network(self._hierarchy_file)
             rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
             gene_rho_file = os.path.join(self._outdir, 'gene_rho.out')
             # Perform interpretation
@@ -553,7 +561,7 @@ class VNNPredict:
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
-        shutil.copy(os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
+        shutil.copy(self._hierarchy_file, hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
                      'description': description + ' Hierarchy network file used to build VNN',
@@ -568,7 +576,8 @@ class VNNPredict:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        hierarchy_parent_in_file = self._parent_network if self._parent_network is not None \
+            else os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
         if not os.path.exists(hierarchy_parent_in_file):
             return None
         hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
