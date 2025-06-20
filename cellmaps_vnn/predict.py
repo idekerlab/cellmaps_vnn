@@ -155,14 +155,13 @@ class VNNPredict:
 
             factory = RawCX2NetworkFactory()
             hierarchy = factory.get_cx2network(self._hierarchy_file)
-            rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
-            gene_rho_file = os.path.join(self._outdir, 'gene_rho.out')
             # Perform interpretation
-            calc = RLIPPCalculator(hierarchy, self._predict_data, self._get_predict_dest_file(),
-                                   self._gene2id, self._cell2id, hidden_dir,
-                                   rlipp_file, gene_rho_file, self._cpu_count, self._genotype_hiddens,
+            calc = RLIPPCalculator(self._outdir, hierarchy, self._predict_data, self._get_predict_dest_file(),
+                                   self._gene2id, self._cell2id, hidden_dir, self._cpu_count, self._genotype_hiddens,
                                    self._drug_count, self.excluded_terms)
             calc.calc_scores()
+            # gene_calc = FakeImportanceScoreGenerator(hierarchy)
+            # gene_calc.calc_scores()
             logger.info('Prediction and interpretation executed successfully')
             print('Prediction and interpretation executed successfully')
         except Exception as e:

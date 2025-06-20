@@ -37,6 +37,8 @@ RLIPP_OUTPUT_FILE = 'rlipp.out'
 Output file from rlipp algorithm
 """
 
+GENE_RHO_FILE = 'gene_rho.out'
+
 HIERARCHY_FILENAME = 'hierarchy.cx2'
 """
 Hierarchy filename.

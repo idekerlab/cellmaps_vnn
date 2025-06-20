@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import time
+from cellmaps_vnn import constants
 from scipy import stats
 from multiprocessing import Pool
 from joblib import Parallel, delayed
@@ -10,11 +11,12 @@ from sklearn.decomposition import PCA
 from sklearn.linear_model import RidgeCV
 import logging
 from cellmaps_vnn.exceptions import CellmapsvnnError
+from cellmaps_vnn.importance_score import ImportanceScoreCalculator
 
 logger = logging.getLogger(__name__)
 
 
-class RLIPPCalculator:
+class RLIPPCalculator(ImportanceScoreCalculator):
     """
     A calculator for Relative Importance of Predictor Performance (RLIPP) scores.
 
@@ -33,9 +35,9 @@ class RLIPPCalculator:
     drug_count (int): No of top performing drugs
     """
 
-    def __init__(self, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
-                 rlipp_file, gene_rho_file, cpu_count, num_hiddens_genotype, drug_count, excluded_terms=[]):
-        self._hierarchy = hierarchy
+    def __init__(self, outdir, hierarchy, test_data, predicted_data, gene2idfile, cell2idfile, hidden_dir,
+                 cpu_count, num_hiddens_genotype, drug_count, excluded_terms=[]):
+        super().__init__(hierarchy=hierarchy, outdir=outdir)
         all_terms = list(hierarchy.get_nodes().keys())
         self.terms = [term for term in all_terms if term not in list(excluded_terms)]
 
@@ -62,8 +64,8 @@ class RLIPPCalculator:
         self.test_df = test_df[test_df['C'].isin(list(cell_index['C']))].reset_index(drop=True)
 
         self.hidden_dir = hidden_dir
-        self.rlipp_file = rlipp_file
-        self.gene_rho_file = gene_rho_file
+        self.rlipp_file = os.path.join(self._outdir, constants.RLIPP_OUTPUT_FILE)
+        self.gene_rho_file = os.path.join(self._outdir, constants.GENE_RHO_FILE)
         self.cpu_count = cpu_count
         self.num_hiddens_genotype = num_hiddens_genotype
         self.drug_count = drug_count
