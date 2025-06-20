@@ -33,14 +33,12 @@ class VNNPredict:
                  zscore_method=vnnconstants.DEFAULT_ZSCORE_METHOD, cpu_count=DEFAULT_CPU_COUNT,
                  drug_count=DEFAULT_DRUG_COUNT, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS,
                  cuda=vnnconstants.DEFAULT_CUDA, std=None, slurm=False, use_gpu=False, slurm_partition=None,
-                 slurm_account=None, hierarchy=None, parent_network=None):
+                 slurm_account=None):
         """
         Constructor for predicting with a trained model.
         """
         self._inputdir = inputdir
-        self._parent_network = parent_network
-        self._hierarchy_file = hierarchy if hierarchy is not None else os.path.join(self._inputdir,
-                                                                                    vnnconstants.HIERARCHY_FILENAME)
+        self._hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
         self._outdir = os.path.abspath(outdir)
         self._config_file = config_file
         self._predict_data = predict_data
@@ -89,13 +87,6 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
-        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
-                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
-        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
-                                                     'or NDEx UUID of parent network. If not set, the process will '
-                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
-                                                     'if not found.', type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--predict_data', help='Path to the file with text data', type=str)
@@ -575,8 +566,7 @@ class VNNPredict:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = self._parent_network if self._parent_network is not None \
-            else os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
         if not os.path.exists(hierarchy_parent_in_file):
             return None
         hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
