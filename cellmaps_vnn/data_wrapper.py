@@ -212,6 +212,10 @@ class TrainingDataWrapper:
                 for term in empty_terms:
                     file.write(f'{term}\n')
 
+        for node_id in pruned_hierarchy.get_nodes().keys():
+            node_genes = self._get_genes_of_node(pruned_hierarchy, node_id, names=True)
+            pruned_hierarchy.set_node_attribute(node_id, constants.GENE_SET_WITH_DATA, list(node_genes))
+
         hierarchy_json = pruned_hierarchy.to_cx2()
         for item in hierarchy_json:
             if 'nodeBypasses' in item:
@@ -259,7 +263,7 @@ class TrainingDataWrapper:
 
         return term_direct_gene_map
 
-    def _get_genes_of_node(self, cx2_network, node_id):
+    def _get_genes_of_node(self, cx2_network, node_id, names=False):
         """
         Retrieves genes associated with a specific node in the CX2 network.
 
@@ -277,7 +281,10 @@ class TrainingDataWrapper:
         if node_data and self.gene_attribute_name in node_data[ndex2.constants.ASPECT_VALUES]:
             for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES][self.gene_attribute_name].split():
                 if gene_identifier in self.gene_id_mapping:
-                    genes.add(self.gene_id_mapping[gene_identifier])
+                    if names:
+                        genes.add(gene_identifier)
+                    else:
+                        genes.add(self.gene_id_mapping[gene_identifier])
 
         return genes
 

@@ -38,6 +38,9 @@ Output file from rlipp algorithm
 """
 
 GENE_RHO_FILE = 'gene_rho.out'
+"""
+Output file for gene Rho from rlipp algorithm
+"""
 
 HIERARCHY_FILENAME = 'hierarchy.cx2'
 """
@@ -57,6 +60,11 @@ Parent network of hierarchy filename.
 GENE_SET_COLUMN_NAME = 'CD_MemberList'
 """
 Name of the node attribute of the hierarchy with list of genes/ proteins of this node.
+"""
+
+GENE_SET_WITH_DATA = 'VNN_gene_set_with_data'
+"""
+Hierarchy node attribute that contain genes with available data (eg. mutation, deletion, amplification) for vnn model
 """
 
 DEFAULT_BATCHSIZE = 64

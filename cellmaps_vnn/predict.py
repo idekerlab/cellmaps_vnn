@@ -3,6 +3,7 @@ import logging
 import shutil
 from datetime import date
 
+from cellmaps_vnn.importance_score import FakeGeneImportanceScoreCalculator
 from cellmaps_vnn.util import copy_and_register_gene2id_file
 from tqdm import tqdm
 import numpy as np
@@ -87,6 +88,7 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
+        parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--predict_data', help='Path to the file with text data', type=str)
@@ -151,8 +153,8 @@ class VNNPredict:
                                    self._gene2id, self._cell2id, hidden_dir, self._cpu_count, self._genotype_hiddens,
                                    self._drug_count, self.excluded_terms)
             calc.calc_scores()
-            # gene_calc = FakeImportanceScoreGenerator(hierarchy)
-            # gene_calc.calc_scores()
+            gene_calc = FakeGeneImportanceScoreCalculator(self._outdir, hierarchy)
+            gene_calc.calc_scores()
             logger.info('Prediction and interpretation executed successfully')
             print('Prediction and interpretation executed successfully')
         except Exception as e:
