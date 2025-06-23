@@ -1,8 +1,11 @@
+import json
 import logging
 import os
 import shutil
 from datetime import date
 import getpass
+
+import ndex2
 import numpy as np
 import pandas as pd
 from cellmaps_utils.ndexupload import NDExHierarchyUploader
@@ -101,6 +104,47 @@ class VNNAnnotate:
         """
         self._process_input_hierarchy_and_parent()
         hierarchy_cx, original_hierarchy_cx = self._get_hierarchy_cx()
+        self._process_scores_and_annotate_hierarchy(hierarchy_cx, original_hierarchy_cx)
+
+        parent_cx = self._get_parent_cx()
+        interactome_list = self._annotate_interactomes_of_systems(hierarchy_cx, parent_cx)
+
+        self._upload_to_ndex_if_credentials_provided(interactome_list)
+
+    def register_outputs(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the output files of the annotation process with the FAIRSCAPE service for data provenance.
+        This includes the annotated hierarchy and the RLIPP output files.
+
+        :param outdir: The output directory where the files are stored.
+        :type outdir: str
+        :param description: A description of the files for provenance registration.
+        :type description: str
+        :param keywords: A list of keywords associated with the files.
+        :type keywords: list
+        :param provenance_utils: The utility class for provenance registration.
+        :type provenance_utils: ProvenanceUtility
+        :return: A list of dataset IDs assigned to the registered files.
+        :rtype: list
+        """
+        hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
+        rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
+        return_ids = [hierarchy_id, rlipp_id]
+        gene2ind_path = os.path.join(self._model_predictions[0], 'gene2ind.txt')
+        if os.path.exists(gene2ind_path):
+            gene2ind_id = copy_and_register_gene2id_file(gene2ind_path, outdir, description, keywords,
+                                                         provenance_utils)
+            return_ids.append(gene2ind_id)
+        if self.original_hierarchy is not None:
+            original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
+            return_ids.append(original_hierarchy_id)
+        if self.parent_network is not None and os.path.isfile(self.parent_network):
+            hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
+                                                                           provenance_utils)
+            return_ids.append(hierarchy_parent_id)
+        return return_ids
+
+    def _process_scores_and_annotate_hierarchy(self, hierarchy_cx, original_hierarchy_cx):
         self._aggregate_importance_scores_from_models()
         if self._disease is None:
             annotation_dict = self._aggregate_scores_from_diseases()
@@ -112,9 +156,8 @@ class VNNAnnotate:
             raise CellmapsvnnError("No system importance scores available for annotation. "
                                    "Please ensure valid data is provided for the hierarchy annotation.")
 
-        hierarchy, original_hierarchy = self.annotate_hierarchy(annotation_dict, hierarchy_cx, original_hierarchy_cx)
-        self.save_hierarchy_to_file(hierarchy, original_hierarchy)
-        self._upload_to_ndex_if_credentials_provided()
+        hierarchy, original_hierarchy = self._annotate_hierarchy(annotation_dict, hierarchy_cx, original_hierarchy_cx)
+        self._save_hierarchy_to_file(hierarchy, original_hierarchy)
 
     def _get_rlipp_out_dest_file(self):
         """
@@ -228,7 +271,7 @@ class VNNAnnotate:
 
         return scores
 
-    def _upload_to_ndex_if_credentials_provided(self):
+    def _upload_to_ndex_if_credentials_provided(self, interactome_list):
         """
         Uploads hierarchy and parent network to NDEx if credentials are provided.
 
@@ -270,7 +313,7 @@ class VNNAnnotate:
         if original_hierarchy is not None:
             original_hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
 
-    def annotate_hierarchy(self, annotation_dict, hierarchy, original_hierarchy):
+    def _annotate_hierarchy(self, annotation_dict, hierarchy, original_hierarchy):
         """
         Annotates the hierarchy with P_rho scores from the given annotation dictionary,
         updating node attributes within the hierarchy file.
@@ -294,7 +337,7 @@ class VNNAnnotate:
                                           score[0])
         return hierarchy, original_hierarchy
 
-    def save_hierarchy_to_file(self, hierarchy, original_hierarchy):
+    def _save_hierarchy_to_file(self, hierarchy, original_hierarchy):
         factory = RawCX2NetworkFactory()
         path_to_style_network = os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'nest_style.cx2')
         style_network = factory.get_cx2network(path_to_style_network)
@@ -305,38 +348,8 @@ class VNNAnnotate:
             original_hierarchy.set_visual_properties(vis_prop)
             original_hierarchy.write_as_raw_cx2(self._get_original_hierarchy_dest_file())
 
-    def register_outputs(self, outdir, description, keywords, provenance_utils):
-        """
-        Registers the output files of the annotation process with the FAIRSCAPE service for data provenance.
-        This includes the annotated hierarchy and the RLIPP output files.
-
-        :param outdir: The output directory where the files are stored.
-        :type outdir: str
-        :param description: A description of the files for provenance registration.
-        :type description: str
-        :param keywords: A list of keywords associated with the files.
-        :type keywords: list
-        :param provenance_utils: The utility class for provenance registration.
-        :type provenance_utils: ProvenanceUtility
-        :return: A list of dataset IDs assigned to the registered files.
-        :rtype: list
-        """
-        hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
-        rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
-        return_ids = [hierarchy_id, rlipp_id]
-        gene2ind_path = os.path.join(self._model_predictions[0], 'gene2ind.txt')
-        if os.path.exists(gene2ind_path):
-            gene2ind_id = copy_and_register_gene2id_file(gene2ind_path, outdir, description, keywords,
-                                                         provenance_utils)
-            return_ids.append(gene2ind_id)
-        if self.original_hierarchy is not None:
-            original_hierarchy_id = self._register_original_hierarchy(outdir, description, keywords, provenance_utils)
-            return_ids.append(original_hierarchy_id)
-        if self.parent_network is not None and os.path.isfile(self.parent_network):
-            hierarchy_parent_id = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
-                                                                           provenance_utils)
-            return_ids.append(hierarchy_parent_id)
-        return return_ids
+    def _annotate_interactomes_of_systems(self, hierarchy_cx, parent_cx):
+        return list()
 
     def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
         """
@@ -468,3 +481,14 @@ class VNNAnnotate:
             original_hierarchy = factory.get_cx2network(self.original_hierarchy)
 
         return hierarchy, original_hierarchy
+
+    def _get_parent_cx(self):
+        factory = RawCX2NetworkFactory()
+        if self.parent_network is None:
+            return None
+        elif os.path.isfile(self.parent_network):
+            return factory.get_cx2network(self.parent_network)
+        else:
+            client = ndex2.client.Ndex2()
+            client_resp = client.get_network_as_cx2_stream(self.parent_network)
+            return factory.get_cx2network(json.loads(client_resp.content))
