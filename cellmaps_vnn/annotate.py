@@ -300,10 +300,13 @@ class VNNAnnotate:
                         system_interactome_uuid, _ = ndex_uploader._save_network(system_interactome)
                         self.styled_hierarchy.add_node_attribute(system_id, key='HCX::interactionNetworkUUID',
                                                           value=system_interactome_uuid)
-                        if system_id == root_id:
+                        if root_id is not None and system_id == root_id:
                             self.styled_hierarchy = ndex_uploader._update_hcx_annotations(self.styled_hierarchy,
                                                                                           system_interactome_uuid)
-                    _, hierarchyurl = ndex_uploader._save_network(self.styled_hierarchy)
+                            _, hierarchyurl = ndex_uploader._save_network(self.styled_hierarchy)
+                        else:
+                            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(self.styled_hierarchy,
+                                                                                                    self.parent_network)
                 elif os.path.isfile(self.parent_network):
                     _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
                         hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
