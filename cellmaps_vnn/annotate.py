@@ -299,14 +299,15 @@ class VNNAnnotate:
                     for system_id, (system_interactome, _) in interactome_list.items():
                         system_interactome_uuid, _ = ndex_uploader._save_network(system_interactome)
                         self.styled_hierarchy.add_node_attribute(system_id, key='HCX::interactionNetworkUUID',
-                                                          value=system_interactome_uuid)
-                        if root_id is not None and system_id == root_id:
+                                                                 value=system_interactome_uuid)
+                        if system_id == root_id:
                             self.styled_hierarchy = ndex_uploader._update_hcx_annotations(self.styled_hierarchy,
                                                                                           system_interactome_uuid)
-                            _, hierarchyurl = ndex_uploader._save_network(self.styled_hierarchy)
-                        else:
-                            _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(self.styled_hierarchy,
-                                                                                                    self.parent_network)
+                    if root_id is not None:
+                        _, hierarchyurl = ndex_uploader._save_network(self.styled_hierarchy)
+                    else:
+                        _, _, _, hierarchyurl = ndex_uploader.save_hierarchy_and_parent_network(self.styled_hierarchy,
+                                                                                                self.parent_network)
                 elif os.path.isfile(self.parent_network):
                     _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
                         hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
@@ -376,7 +377,8 @@ class VNNAnnotate:
 
             new_subnet = CX2Network()
             factory = RawCX2NetworkFactory()
-            interactome_style = factory.get_cx2network(os.path.join(os.path.dirname(cellmaps_vnn.__file__),'interactome_style.cx2'))
+            interactome_style = factory.get_cx2network(
+                os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'interactome_style.cx2'))
             new_subnet.set_visual_properties(interactome_style.get_visual_properties())
             system_name = node_obj.get(ndexconstants.ASPECT_VALUES, {}).get(ndexconstants.NODE_NAME, system_id)
             hierarchy_net_attrs['description'] = 'RESULTS FOR SYSTEM ' + str(system_name)
@@ -393,10 +395,14 @@ class VNNAnnotate:
                 if member_node_id is None:
                     continue
                 interactome_node = copy.deepcopy(parent_cx.get_node(member_node_id))
-                interactome_node[ndexconstants.ASPECT_VALUES]['mutation_importance_score'] = gene_scores[member]['mutation_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['deletion_importance_score'] = gene_scores[member]['deletion_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['amplification_importance_score'] = gene_scores[member]['amplification_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['importance_score'] = gene_scores[member]['importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['mutation_importance_score'] = gene_scores[member][
+                    'mutation_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['deletion_importance_score'] = gene_scores[member][
+                    'deletion_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['amplification_importance_score'] = gene_scores[member][
+                    'amplification_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['importance_score'] = gene_scores[member][
+                    'importance_score']
 
                 new_subnet.add_node(node_id=member_node_id, attributes=interactome_node['v'],
                                     x=interactome_node['x'], y=interactome_node['y'])
