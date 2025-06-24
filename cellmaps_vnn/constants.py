@@ -67,6 +67,16 @@ GENE_SET_WITH_DATA = 'VNN_gene_set_with_data'
 Hierarchy node attribute that contain genes with available data (eg. mutation, deletion, amplification) for vnn model
 """
 
+SCORE_FILE_NAME_SUFFIX = '_gene_scores.out'
+"""
+Suffix for gene score file
+"""
+
+SYSTEM_INTERACTOME_FILE_SUFFIX = '_interactome.cx2'
+"""
+Suffix for system's interactome file name
+"""
+
 DEFAULT_BATCHSIZE = 64
 DEFAULT_ZSCORE_METHOD = 'auc'
 DEFAULT_GENOTYPE_HIDDENS = 4

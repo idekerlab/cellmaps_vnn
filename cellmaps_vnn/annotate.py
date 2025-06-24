@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import os
@@ -11,10 +12,11 @@ import pandas as pd
 from cellmaps_utils.ndexupload import NDExHierarchyUploader
 from cellmaps_utils import constants
 from cellmaps_vnn.util import copy_and_register_gene2id_file
+import ndex2.constants as ndexconstants
 
 import cellmaps_vnn
 import cellmaps_vnn.constants as vnnconstants
-from ndex2.cx2 import RawCX2NetworkFactory
+from ndex2.cx2 import RawCX2NetworkFactory, CX2Network
 
 from cellmaps_vnn.exceptions import CellmapsvnnError
 
@@ -104,12 +106,10 @@ class VNNAnnotate:
         """
         self._process_input_hierarchy_and_parent()
         hierarchy_cx, original_hierarchy_cx = self._get_hierarchy_cx()
-        self._process_scores_and_annotate_hierarchy(hierarchy_cx, original_hierarchy_cx)
-
         parent_cx = self._get_parent_cx()
-        interactome_list = self._annotate_interactomes_of_systems(hierarchy_cx, parent_cx)
-
-        self._upload_to_ndex_if_credentials_provided(interactome_list)
+        interactome_dict, root_id = self._annotate_interactomes_of_systems(parent_cx, hierarchy_cx)
+        self._process_scores_and_annotate_hierarchy(hierarchy_cx, original_hierarchy_cx)
+        self._upload_to_ndex_if_credentials_provided(interactome_dict, root_id)
 
     def register_outputs(self, outdir, description, keywords, provenance_utils):
         """
@@ -157,6 +157,7 @@ class VNNAnnotate:
                                    "Please ensure valid data is provided for the hierarchy annotation.")
 
         hierarchy, original_hierarchy = self._annotate_hierarchy(annotation_dict, hierarchy_cx, original_hierarchy_cx)
+        hierarchy = self._annotate_hierarchy_edges(hierarchy)
         self._save_hierarchy_to_file(hierarchy, original_hierarchy)
 
     def _get_rlipp_out_dest_file(self):
@@ -271,7 +272,7 @@ class VNNAnnotate:
 
         return scores
 
-    def _upload_to_ndex_if_credentials_provided(self, interactome_list):
+    def _upload_to_ndex_if_credentials_provided(self, interactome_list, root_id):
         """
         Uploads hierarchy and parent network to NDEx if credentials are provided.
 
@@ -294,7 +295,16 @@ class VNNAnnotate:
                 hierarchy_network = cx_factory.get_cx2network(self._get_hierarchy_dest_file())
                 _, hierarchyurl = ndex_uploader._save_network(hierarchy_network)
             else:
-                if os.path.isfile(self.parent_network):
+                if interactome_list is not None:
+                    for system_id, (system_interactome, _) in interactome_list.items():
+                        system_interactome_uuid, _ = ndex_uploader._save_network(system_interactome)
+                        self.styled_hierarchy.add_node_attribute(system_id, key='HCX::interactionNetworkUUID',
+                                                          value=system_interactome_uuid)
+                        if system_id == root_id:
+                            self.styled_hierarchy = ndex_uploader._update_hcx_annotations(self.styled_hierarchy,
+                                                                                          system_interactome_uuid)
+                    _, hierarchyurl = ndex_uploader._save_network(self.styled_hierarchy)
+                elif os.path.isfile(self.parent_network):
                     _, _, _, hierarchyurl = ndex_uploader.upload_hierarchy_and_parent_network_from_files(
                         hierarchy_path=self._get_hierarchy_dest_file(), parent_path=self.parent_network)
                 else:
@@ -347,9 +357,67 @@ class VNNAnnotate:
         if original_hierarchy is not None:
             original_hierarchy.set_visual_properties(vis_prop)
             original_hierarchy.write_as_raw_cx2(self._get_original_hierarchy_dest_file())
+        self.styled_hierarchy = hierarchy
 
-    def _annotate_interactomes_of_systems(self, hierarchy_cx, parent_cx):
-        return list()
+    def _annotate_interactomes_of_systems(self, parent_cx, hierarchy_cx):
+        if parent_cx is None:
+            return None
+        interactome_dict = dict()
+        hierarchy_net_attrs = copy.deepcopy(hierarchy_cx.get_network_attributes())
+        for attr_to_remove in ['ndexSchema', 'HCX::modelFileCount', 'HCX::interactionNetworkUUID',
+                               'HCX::interactionNetworkName']:
+            if attr_to_remove in hierarchy_net_attrs:
+                del hierarchy_net_attrs[attr_to_remove]
+        root_id = None
+        for system_id, node_obj in hierarchy_cx.get_nodes().items():
+
+            new_subnet = CX2Network()
+            factory = RawCX2NetworkFactory()
+            interactome_style = factory.get_cx2network(os.path.join(os.path.dirname(cellmaps_vnn.__file__),'interactome_style.cx2'))
+            new_subnet.set_visual_properties(interactome_style.get_visual_properties())
+            system_name = node_obj.get(ndexconstants.ASPECT_VALUES, {}).get(ndexconstants.NODE_NAME, system_id)
+            hierarchy_net_attrs['description'] = 'RESULTS FOR SYSTEM ' + str(system_name)
+            new_subnet.set_network_attributes(hierarchy_net_attrs)
+            new_subnet.set_name(str(system_name) + ' assembly')
+
+            scores_file = os.path.join(self._model_predictions[0], str(system_id) + vnnconstants.SCORE_FILE_NAME_SUFFIX)
+            df = pd.read_csv(scores_file, sep='\t')
+            gene_scores = df.set_index('gene').T.to_dict()
+
+            member_ids = list()
+            for member in gene_scores.keys():
+                member_node_id = parent_cx.lookup_node_id_by_name(member)
+                if member_node_id is None:
+                    continue
+                interactome_node = copy.deepcopy(parent_cx.get_node(member_node_id))
+                interactome_node[ndexconstants.ASPECT_VALUES]['mutation_importance_score'] = gene_scores[member]['mutation_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['deletion_importance_score'] = gene_scores[member]['deletion_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['amplification_importance_score'] = gene_scores[member]['amplification_importance_score']
+                interactome_node[ndexconstants.ASPECT_VALUES]['importance_score'] = gene_scores[member]['importance_score']
+
+                new_subnet.add_node(node_id=member_node_id, attributes=interactome_node['v'],
+                                    x=interactome_node['x'], y=interactome_node['y'])
+                member_ids.append(member_node_id)
+
+            edge_ids_to_add = set()
+            for edge_id, edge_obj in parent_cx.get_edges().items():
+                if edge_obj['s'] in member_ids and edge_obj['t'] in member_ids:
+                    edge_ids_to_add.add(edge_id)
+
+            for edge in edge_ids_to_add:
+                interactome_edge = parent_cx.get_edge(edge)
+                new_subnet.add_edge(edge_id=edge, source=interactome_edge['s'],
+                                    target=interactome_edge['t'], attributes=interactome_edge['v'])
+
+            if 'HCX::isRoot' in node_obj['v'] and node_obj['v']['HCX::isRoot'] is True:
+                root_id = system_id
+
+            subnet_file_name = os.path.join(self._outdir,
+                                            str(system_name) + vnnconstants.SYSTEM_INTERACTOME_FILE_SUFFIX)
+            new_subnet.write_as_raw_cx2(subnet_file_name)
+            interactome_dict[system_id] = (new_subnet, subnet_file_name)
+
+        return interactome_dict, root_id
 
     def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
         """
@@ -492,3 +560,34 @@ class VNNAnnotate:
             client = ndex2.client.Ndex2()
             client_resp = client.get_network_as_cx2_stream(self.parent_network)
             return factory.get_cx2network(json.loads(client_resp.content))
+
+    def _annotate_hierarchy_edges(self, hierarchy):
+
+        node_id_score_map = {}
+        for node_id, node_obj in hierarchy.get_nodes().items():
+            score = node_obj[ndexconstants.ASPECT_VALUES].get(vnnconstants.IMPORTANCE_SCORE, 0)
+            node_id_score_map[node_id] = score
+
+        edge_target_map = {}
+
+        for edge_id, edge_obj in hierarchy.get_edges().items():
+            edge_target_map[edge_obj['t']] = edge_obj
+            hierarchy.add_edge_attribute(edge_id, key='edge_importance_score',
+                                         value=0.0,
+                                         datatype=ndexconstants.DOUBLE_DATATYPE)
+
+        for node_id, score in node_id_score_map.items():
+            if score < 0.7:
+                continue
+            is_root = False
+            cur_node_id = node_id
+            while is_root is False:
+                if cur_node_id not in edge_target_map:
+                    break
+                edge_obj = edge_target_map[cur_node_id]
+                if not edge_obj['v']['edge_importance_score'] > 0.0:
+                    edge_obj['v']['edge_importance_score'] = score
+                cur_node_id = edge_obj['s']
+                parent_node = hierarchy.get_node(cur_node_id)
+                is_root = parent_node['v'].get('HCX::isRoot', False)
+        return hierarchy
