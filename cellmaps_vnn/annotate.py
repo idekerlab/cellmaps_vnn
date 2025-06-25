@@ -107,6 +107,7 @@ class VNNAnnotate:
         The logic for annotating hierarchy with prediction results from cellmaps_vnn. It aggregates prediction scores
         from models, optionally filters them for a specific disease, and annotates the hierarchy with these scores.
         """
+        self._process_rocrates()
         self._process_input_hierarchy_and_parent()
         hierarchy_cx, original_hierarchy_cx = self._get_hierarchy_cx()
         parent_cx = self._get_parent_cx()
@@ -211,8 +212,6 @@ class VNNAnnotate:
         data = {}
 
         for directory in self._model_predictions:
-            if not os.path.exists(os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)):
-                directory = os.path.join(directory, 'out_predict')
             filepath = os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)
             has_disease = False
             with open(filepath, 'r') as file:
@@ -586,10 +585,6 @@ class VNNAnnotate:
         If paths are not explicitly provided, they are inferred from the first prediction RO-Crate directory.
         Raises an error if hierarchy cannot be found.
         """
-        # Get first RO-Crate
-        if not os.path.exists(os.path.join(self._model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
-            self._model_predictions[0] = os.path.join(self._model_predictions[0], 'out_predict')
-
         # HIERARCHY: Check first ro-crate for hierarchy if not specified by hierarchy flag
         if self.hierarchy is None:
             self.hierarchy = os.path.join(self._model_predictions[0], vnnconstants.HIERARCHY_FILENAME)
@@ -680,3 +675,8 @@ class VNNAnnotate:
                 parent_node = hierarchy.get_node(cur_node_id)
                 is_root = parent_node[ndexconstants.ASPECT_VALUES].get('HCX::isRoot', False)
         return hierarchy
+
+    def _process_rocrates(self):
+        for idx, directory in enumerate(self._model_predictions):
+            if not os.path.exists(os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)):
+                self._model_predictions[idx] = os.path.join(directory, 'out_predict')
