@@ -401,8 +401,8 @@ class VNNAnnotate:
         """
         Creates and annotates interactome subnetworks for each system node in the hierarchy.
 
-        For each system, gene-level importance scores are read from corresponding files and added
-        as node attributes in a new subnetwork extracted from the parent interactome.
+        For each system, gene-level importance scores are read from each prediction directory,
+        averaged, and added as node attributes in a new subnetwork extracted from the parent interactome.
 
         :param parent_cx: CX2 parent network (interactome) used as source for subnetworks
         :param hierarchy_cx: CX2 hierarchy network containing system nodes
@@ -431,25 +431,43 @@ class VNNAnnotate:
             new_subnet.set_network_attributes(hierarchy_net_attrs)
             new_subnet.set_name(str(system_name) + ' assembly')
 
-            scores_file = os.path.join(self._model_predictions[0], str(system_id) + vnnconstants.SCORE_FILE_NAME_SUFFIX)
-            df = pd.read_csv(scores_file, sep='\t')
-            gene_scores = df.set_index('gene').T.to_dict()
+            # Aggregate gene scores from all model_prediction directories
+            gene_scores_accumulator = {}
+            count = {}
+            for directory in self._model_predictions:
+                scores_file = os.path.join(directory, str(system_id) + vnnconstants.SCORE_FILE_NAME_SUFFIX)
+                if not os.path.isfile(scores_file):
+                    continue
+                df = pd.read_csv(scores_file, sep='\t')
+                for _, row in df.iterrows():
+                    gene = row['gene']
+                    if gene not in gene_scores_accumulator:
+                        gene_scores_accumulator[gene] = {
+                            'mutation_importance_score': 0.0,
+                            'deletion_importance_score': 0.0,
+                            'amplification_importance_score': 0.0,
+                            'importance_score': 0.0
+                        }
+                        count[gene] = 0
+                    gene_scores_accumulator[gene]['mutation_importance_score'] += row['mutation_importance_score']
+                    gene_scores_accumulator[gene]['deletion_importance_score'] += row['deletion_importance_score']
+                    gene_scores_accumulator[gene]['amplification_importance_score'] += row['amplification_importance_score']
+                    gene_scores_accumulator[gene]['importance_score'] += row['importance_score']
+                    count[gene] += 1
 
-            member_ids = list()
-            for member in gene_scores.keys():
-                member_node_id = parent_cx.lookup_node_id_by_name(member)
+            # Average the scores
+            for gene in gene_scores_accumulator:
+                for key in gene_scores_accumulator[gene]:
+                    gene_scores_accumulator[gene][key] /= count[gene]
+
+            member_ids = []
+            for gene, scores in gene_scores_accumulator.items():
+                member_node_id = parent_cx.lookup_node_id_by_name(gene)
                 if member_node_id is None:
                     continue
                 interactome_node = copy.deepcopy(parent_cx.get_node(member_node_id))
-                interactome_node[ndexconstants.ASPECT_VALUES]['mutation_importance_score'] = gene_scores[member][
-                    'mutation_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['deletion_importance_score'] = gene_scores[member][
-                    'deletion_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['amplification_importance_score'] = gene_scores[member][
-                    'amplification_importance_score']
-                interactome_node[ndexconstants.ASPECT_VALUES]['importance_score'] = gene_scores[member][
-                    'importance_score']
-
+                for key, val in scores.items():
+                    interactome_node[ndexconstants.ASPECT_VALUES][key] = val
                 new_subnet.add_node(node_id=member_node_id, attributes=interactome_node['v'],
                                     x=interactome_node['x'], y=interactome_node['y'])
                 member_ids.append(member_node_id)
