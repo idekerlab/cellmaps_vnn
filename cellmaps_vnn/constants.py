@@ -82,6 +82,14 @@ EDGE_IMPORTANCE_SCORE = 'edge_importance_score'
 Name of the edge importance score attribute
 """
 
+MUTATION_IMPORTANCE_SCORE = 'mutation_importance_score'
+DELETION_IMPORTANCE_SCORE = 'deletion_importance_score'
+AMPLIFICATION_IMPORTANCE_SCORE = 'amplification_importance_score'
+GENE_IMPORTANCE_SCORE = 'importance_score'
+"""
+Gene importance scores
+"""
+
 DEFAULT_BATCHSIZE = 64
 DEFAULT_ZSCORE_METHOD = 'auc'
 DEFAULT_GENOTYPE_HIDDENS = 4

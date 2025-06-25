@@ -443,16 +443,20 @@ class VNNAnnotate:
                     gene = row['gene']
                     if gene not in gene_scores_accumulator:
                         gene_scores_accumulator[gene] = {
-                            'mutation_importance_score': 0.0,
-                            'deletion_importance_score': 0.0,
-                            'amplification_importance_score': 0.0,
-                            'importance_score': 0.0
+                            vnnconstants.MUTATION_IMPORTANCE_SCORE: 0.0,
+                            vnnconstants.DELETION_IMPORTANCE_SCORE: 0.0,
+                            vnnconstants.AMPLIFICATION_IMPORTANCE_SCORE: 0.0,
+                            vnnconstants.GENE_IMPORTANCE_SCORE: 0.0
                         }
                         count[gene] = 0
-                    gene_scores_accumulator[gene]['mutation_importance_score'] += row['mutation_importance_score']
-                    gene_scores_accumulator[gene]['deletion_importance_score'] += row['deletion_importance_score']
-                    gene_scores_accumulator[gene]['amplification_importance_score'] += row['amplification_importance_score']
-                    gene_scores_accumulator[gene]['importance_score'] += row['importance_score']
+                    gene_scores_accumulator[gene][vnnconstants.MUTATION_IMPORTANCE_SCORE] \
+                        += row[vnnconstants.MUTATION_IMPORTANCE_SCORE]
+                    gene_scores_accumulator[gene][vnnconstants.DELETION_IMPORTANCE_SCORE] \
+                        += row[vnnconstants.DELETION_IMPORTANCE_SCORE]
+                    gene_scores_accumulator[gene][vnnconstants.AMPLIFICATION_IMPORTANCE_SCORE] \
+                        += row[vnnconstants.AMPLIFICATION_IMPORTANCE_SCORE]
+                    gene_scores_accumulator[gene][vnnconstants.GENE_IMPORTANCE_SCORE] \
+                        += row[vnnconstants.GENE_IMPORTANCE_SCORE]
                     count[gene] += 1
 
             # Average the scores
