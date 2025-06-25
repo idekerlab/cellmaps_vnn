@@ -77,6 +77,11 @@ SYSTEM_INTERACTOME_FILE_SUFFIX = '_interactome.cx2'
 Suffix for system's interactome file name
 """
 
+EDGE_IMPORTANCE_SCORE = 'edge_importance_score'
+"""
+Name of the edge importance score attribute
+"""
+
 DEFAULT_BATCHSIZE = 64
 DEFAULT_ZSCORE_METHOD = 'auc'
 DEFAULT_GENOTYPE_HIDDENS = 4

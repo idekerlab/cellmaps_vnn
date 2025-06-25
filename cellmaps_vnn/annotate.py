@@ -58,10 +58,13 @@ class VNNAnnotate:
         Adds a subparser for the 'annotate' command.
         """
         # TODO: modify description later
-        desc = """
-        Version: todo
+        desc = f"""
+        Version: {cellmaps_vnn.__version__}
 
-        The 'annotate' command takes ..
+        The 'annotate' command reads model prediction outputs (RLIPP scores) from one or more
+        RO-Crate directories and uses them to annotate a given hierarchy network in CX2 format.
+        The command can optionally filter scores by disease, generate SLURM scripts for batch
+        processing, and upload annotated networks to NDEx for visualization and sharing.
         """
         parser = subparsers.add_parser(VNNAnnotate.COMMAND,
                                        help='Run prediction using a trained model',
@@ -145,6 +148,19 @@ class VNNAnnotate:
         return return_ids
 
     def _process_scores_and_annotate_hierarchy(self, hierarchy_cx, original_hierarchy_cx):
+        """
+        Orchestrates the score aggregation and annotation of the hierarchy network.
+
+        This includes:
+        - Aggregating RLIPP importance scores from prediction files
+        - Selecting scores for a specific disease or averaging across diseases
+        - Annotating nodes with scores
+        - Propagating importance to hierarchy edges
+        - Writing updated networks to file
+
+        :param hierarchy_cx: Loaded CX2 network representing the hierarchy
+        :param original_hierarchy_cx: Loaded original CX2 hierarchy (if available)
+        """
         self._aggregate_importance_scores_from_models()
         if self._disease is None:
             annotation_dict = self._aggregate_scores_from_diseases()
@@ -323,6 +339,15 @@ class VNNAnnotate:
 
     @staticmethod
     def _annotate_with_score(hierarchy, original_hierarchy, node_id, score_name, score):
+        """
+        Adds a score attribute to a node in both the hierarchy and the original hierarchy (if provided).
+
+        :param hierarchy: The primary hierarchy network to annotate
+        :param original_hierarchy: The original hierarchy network (optional)
+        :param node_id: Node identifier to which the attribute is added
+        :param score_name: Name of the attribute (e.g., P_rho)
+        :param score: Score value to be annotated (float)
+        """
         hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
         if original_hierarchy is not None:
             original_hierarchy.add_node_attribute(node_id, score_name, score, datatype='double')
@@ -352,6 +377,16 @@ class VNNAnnotate:
         return hierarchy, original_hierarchy
 
     def _save_hierarchy_to_file(self, hierarchy, original_hierarchy):
+        """
+        Saves the annotated hierarchy and original hierarchy (if provided) to CX2 files.
+
+        This method applies visualization styling from built-in CX2 templates to enhance
+        the appearance of the saved networks. The styled hierarchy is also stored for
+        further use (e.g., NDEx upload).
+
+        :param hierarchy: Annotated hierarchy network
+        :param original_hierarchy: Original version of the hierarchy (if available)
+        """
         factory = RawCX2NetworkFactory()
         path_to_style_network = os.path.join(os.path.dirname(cellmaps_vnn.__file__), 'nest_style.cx2')
         style_network = factory.get_cx2network(path_to_style_network)
@@ -364,6 +399,18 @@ class VNNAnnotate:
         self.styled_hierarchy = hierarchy
 
     def _annotate_interactomes_of_systems(self, parent_cx, hierarchy_cx):
+        """
+        Creates and annotates interactome subnetworks for each system node in the hierarchy.
+
+        For each system, gene-level importance scores are read from corresponding files and added
+        as node attributes in a new subnetwork extracted from the parent interactome.
+
+        :param parent_cx: CX2 parent network (interactome) used as source for subnetworks
+        :param hierarchy_cx: CX2 hierarchy network containing system nodes
+        :return: A tuple (interactome_dict, root_id) where:
+                 - interactome_dict maps system node IDs to (CX2Network, output file path)
+                 - root_id is the ID of the root system node (if identified)
+        """
         if parent_cx is None:
             return None
         interactome_dict = dict()
@@ -480,6 +527,15 @@ class VNNAnnotate:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
+        """
+        Copies the parent network file to the output directory and registers it with FAIRSCAPE.
+
+        :param outdir: Directory where outputs are stored
+        :param description: Description for provenance metadata
+        :param keywords: Keywords to associate with the registered dataset
+        :param provenance_utils: Provenance utility for dataset registration
+        :return: The dataset ID assigned to the registered parent network file
+        """
         hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
         shutil.copy(self.parent_network, hierarchy_parent_out_file)
 
@@ -524,7 +580,12 @@ class VNNAnnotate:
         return dataset_id
 
     def _process_input_hierarchy_and_parent(self):
+        """
+        Initializes file paths for hierarchy, original hierarchy, and parent network.
 
+        If paths are not explicitly provided, they are inferred from the first prediction RO-Crate directory.
+        Raises an error if hierarchy cannot be found.
+        """
         # Get first RO-Crate
         if not os.path.exists(os.path.join(self._model_predictions[0], vnnconstants.RLIPP_OUTPUT_FILE)):
             self._model_predictions[0] = os.path.join(self._model_predictions[0], 'out_predict')
@@ -551,6 +612,12 @@ class VNNAnnotate:
             self.parent_network = os.path.abspath(self.parent_network)
 
     def _get_hierarchy_cx(self):
+        """
+        Loads the CX2 hierarchy and, if available, the original hierarchy from file paths.
+
+        :return: A tuple containing (hierarchy, original_hierarchy) CX2Network objects
+        """
+        ...
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(self.hierarchy)
         original_hierarchy = None
@@ -560,6 +627,11 @@ class VNNAnnotate:
         return hierarchy, original_hierarchy
 
     def _get_parent_cx(self):
+        """
+        Loads the parent network (interactome) from file or NDEx server.
+
+        :return: CX2Network object representing the parent network, or None if not found
+        """
         factory = RawCX2NetworkFactory()
         if self.parent_network is None:
             return None
@@ -570,8 +642,16 @@ class VNNAnnotate:
             client_resp = client.get_network_as_cx2_stream(self.parent_network)
             return factory.get_cx2network(json.loads(client_resp.content))
 
-    def _annotate_hierarchy_edges(self, hierarchy):
+    @staticmethod
+    def _annotate_hierarchy_edges(hierarchy):
+        """
+        Propagates node importance scores to the edges based on paths to the root node.
 
+        Edges leading from high-importance nodes are annotated with the score if not already annotated.
+
+        :param hierarchy: The CX2 hierarchy network to annotate
+        :return: The modified hierarchy with updated edge attributes
+        """
         node_id_score_map = {}
         for node_id, node_obj in hierarchy.get_nodes().items():
             score = node_obj[ndexconstants.ASPECT_VALUES].get(vnnconstants.IMPORTANCE_SCORE, 0)
@@ -580,8 +660,8 @@ class VNNAnnotate:
         edge_target_map = {}
 
         for edge_id, edge_obj in hierarchy.get_edges().items():
-            edge_target_map[edge_obj['t']] = edge_obj
-            hierarchy.add_edge_attribute(edge_id, key='edge_importance_score',
+            edge_target_map[edge_obj[ndexconstants.EDGE_TARGET]] = edge_obj
+            hierarchy.add_edge_attribute(edge_id, key=vnnconstants.EDGE_IMPORTANCE_SCORE,
                                          value=0.0,
                                          datatype=ndexconstants.DOUBLE_DATATYPE)
 
@@ -594,9 +674,9 @@ class VNNAnnotate:
                 if cur_node_id not in edge_target_map:
                     break
                 edge_obj = edge_target_map[cur_node_id]
-                if not edge_obj['v']['edge_importance_score'] > 0.0:
-                    edge_obj['v']['edge_importance_score'] = score
-                cur_node_id = edge_obj['s']
+                if not edge_obj[ndexconstants.ASPECT_VALUES][vnnconstants.EDGE_IMPORTANCE_SCORE] > 0.0:
+                    edge_obj[ndexconstants.ASPECT_VALUES][vnnconstants.EDGE_IMPORTANCE_SCORE] = score
+                cur_node_id = edge_obj[ndexconstants.EDGE_SOURCE]
                 parent_node = hierarchy.get_node(cur_node_id)
-                is_root = parent_node['v'].get('HCX::isRoot', False)
+                is_root = parent_node[ndexconstants.ASPECT_VALUES].get('HCX::isRoot', False)
         return hierarchy
