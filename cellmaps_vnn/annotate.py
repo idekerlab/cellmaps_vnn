@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 from cellmaps_utils.ndexupload import NDExHierarchyUploader
 from cellmaps_utils import constants
+from cellmaps_utils.provenance import ProvenanceUtil
+
 from cellmaps_vnn.util import copy_and_register_gene2id_file
 import ndex2.constants as ndexconstants
 
@@ -175,6 +177,7 @@ class VNNAnnotate:
 
         hierarchy, original_hierarchy = self._annotate_hierarchy(annotation_dict, hierarchy_cx, original_hierarchy_cx)
         hierarchy = self._annotate_hierarchy_edges(hierarchy)
+        hierarchy = self._add_provenance_info(hierarchy)
         self._save_hierarchy_to_file(hierarchy, original_hierarchy)
 
     def _get_rlipp_out_dest_file(self):
@@ -702,3 +705,10 @@ class VNNAnnotate:
         for idx, directory in enumerate(self._model_predictions):
             if not os.path.exists(os.path.join(directory, vnnconstants.RLIPP_OUTPUT_FILE)):
                 self._model_predictions[idx] = os.path.join(directory, 'out_predict')
+
+    def _add_provenance_info(self, hierarchy, provenance_utils=ProvenanceUtil(), author='cellmaps_vnn',
+                             version=cellmaps_vnn.__version__):
+        hierarchy.set_network_attribute(name='prov:wasGeneratedBy', values=author + ' ' + version)
+        rocrate_id = provenance_utils.get_id_of_rocrate(os.path.dirname(self.hierarchy))
+        if rocrate_id is not None:
+            hierarchy.set_network_attribute(name='prov:wasDerivedFrom',  values='RO-crate: ' + str(rocrate_id))
