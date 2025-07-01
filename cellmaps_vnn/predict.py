@@ -291,7 +291,8 @@ class VNNPredict:
         :return: Loaded model.
         """
         model = torch.load(model_file,
-                           map_location=f'cuda:{self._cuda}' if self.use_cuda else torch.device("cpu"))
+                           map_location=f'cuda:{self._cuda}' if self.use_cuda else torch.device("cpu"),
+                           weights_only=False)
         if self.use_cuda:
             model.cuda(self._cuda)
         model.eval()
