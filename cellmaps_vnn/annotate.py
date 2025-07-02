@@ -414,7 +414,7 @@ class VNNAnnotate:
                  - root_id is the ID of the root system node (if identified)
         """
         if parent_cx is None:
-            return None
+            return None, None
         interactome_dict = dict()
         hierarchy_net_attrs = copy.deepcopy(hierarchy_cx.get_network_attributes())
         for attr_to_remove in ['ndexSchema', 'HCX::modelFileCount', 'HCX::interactionNetworkUUID',
@@ -708,7 +708,8 @@ class VNNAnnotate:
 
     def _add_provenance_info(self, hierarchy, provenance_utils=ProvenanceUtil(), author='cellmaps_vnn',
                              version=cellmaps_vnn.__version__):
-        hierarchy.set_network_attribute(name='prov:wasGeneratedBy', values=author + ' ' + version)
+        hierarchy.add_network_attribute(key='prov:wasGeneratedBy', value=author + ' ' + version)
         rocrate_id = provenance_utils.get_id_of_rocrate(os.path.dirname(self.hierarchy))
         if rocrate_id is not None:
-            hierarchy.set_network_attribute(name='prov:wasDerivedFrom',  values='RO-crate: ' + str(rocrate_id))
+            hierarchy.add_network_attribute(key='prov:wasDerivedFrom',  value='RO-crate: ' + str(rocrate_id))
+        return  hierarchy
