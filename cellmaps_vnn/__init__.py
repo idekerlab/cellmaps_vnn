@@ -4,6 +4,6 @@
 
 __author__ = """Cell Maps team"""
 __email__ = 'tools@cm4ai.org'
-__version__ = '0.2.0'
+__version__ = '0.2.1a1'
 __repo_url__ = 'https://github.com/idekerlab/cellmaps_vnn'
 __description__ = 'Cell Maps Visual Neural Network Toolkit'

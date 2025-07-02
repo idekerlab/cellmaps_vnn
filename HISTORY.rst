@@ -2,6 +2,11 @@
 History
 =======
 
+0.2.1 (2025-07-01)
+------------------
+
+* Bug fixes: fixed _annotate_interactomes_of_systems method's return value and fix hierarchy annotations
+
 0.2.0 (2025-06-26)
 ------------------
 
