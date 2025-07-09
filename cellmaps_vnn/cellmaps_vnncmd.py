@@ -14,6 +14,7 @@ from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
+from cellmaps_vnn.util import PackageData
 import cellmaps_vnn.constants as vnnconstants
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ def _parse_arguments(desc, args):
     VNNTrain.add_subparser(subparsers)
     VNNPredict.add_subparser(subparsers)
     VNNAnnotate.add_subparser(subparsers)
+    PackageData.add_subparser(subparsers)
     parser.add_argument('--logconf', default=None,
                         help='Path to python logging configuration file in '
                              'this format: https://docs.python.org/3/library/'
@@ -196,6 +198,21 @@ def main(args):
                 slurm_account=theargs.slurm_account
             )
             theargs.inputdir = theargs.model_predictions
+        elif theargs.command == PackageData.COMMAND:
+            cmd = PackageData(theargs.outdir,
+                              theargs.inputdir,
+                              theargs.gene_attribute_name,
+                              config_file=theargs.config_file,
+                              training_data=theargs.training_data,
+                              gene2id=theargs.gene2id,
+                              cell2id=theargs.cell2id,
+                              mutations=theargs.mutations,
+                              skip_parent_copy=theargs.skip_parent_copy,
+                              cn_deletions=theargs.cn_deletions,
+                              cn_amplifications=theargs.cn_amplifications,
+                              hierarchy=theargs.hierarchy,
+                              parent_network=theargs.parent_network
+                              )
         else:
             raise Exception('Invalid command: ' + str(theargs.command))
 
