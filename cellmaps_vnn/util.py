@@ -10,7 +10,11 @@ import pandas as pd
 import torch
 from torch import inf
 
+from cellmaps_utils import logutils
+from cellmaps_utils import constants
+
 from cellmaps_vnn.exceptions import CellmapsvnnError
+import cellmaps_vnn.constants as vnnconstants
 
 logger = logging.getLogger(__name__)
 
@@ -268,3 +272,193 @@ def copy_and_register_gene2id_file(genet2id_in_file, outdir, description, keywor
                                                    source_file=gene2id_out_file,
                                                    data_dict=data_dict)
     return dataset_id
+
+
+class PackageData:
+    COMMAND = 'packagedata'
+
+
+    def __init__(self, outdir, inputdir, gene_attribute_name=vnnconstants.GENE_SET_COLUMN_NAME, config_file=None,
+                 training_data=None, gene2id=None, cell2id=None, mutations=None, cn_deletions=None,
+                 skip_parent_copy=False,
+                 cn_amplifications=None,hierarchy=None, parent_network=None):
+        """
+        Constructor for training a Visual Neural Network.
+
+        :param outdir: Directory to write results to.
+        :type outdir: str
+        :param inputdir: Path to directory or RO-Crate with hierarchy.cx2 file.
+        :type inputdir: str
+        :param gene_attribute_name: Name of the node attribute with genes/proteins.
+        :type gene_attribute_name: str
+        :param config_file: Path to configuration file for populating arguments.
+        :type config_file: str, optional
+        :param training_data: Training data file path.
+        :type training_data: str, optional
+        :param gene2id: File mapping genes to IDs.
+        :type gene2id: str, optional
+        :param cell2id: File mapping cells to IDs.
+        :type cell2id: str, optional
+        :param mutations: File with mutation information for cell lines.
+        :type mutations: str, optional
+        :param cn_deletions: File with copy number deletions for cell lines.
+        :type cn_deletions: str, optional
+        :param cn_amplifications: File with copy number amplifications for cell lines.
+        :type cn_amplifications: str, optional
+        :param skip_parent_copy: If True, do not copy hierarchy parent. Default is False.
+        :type skip_parent_copy: bool
+
+        """
+        self._outdir = os.path.abspath(outdir)
+        self._inputdir = inputdir
+        self._hierarchy = hierarchy
+        self._parent_network = parent_network
+        self._gene_attribute_name = gene_attribute_name
+        self._config_file = config_file
+        self._training_data = training_data
+        self._gene2id = gene2id
+        self._cell2id = cell2id
+        self._mutations = mutations
+        self._cn_deletions = cn_deletions
+        self._cn_amplifications = cn_amplifications
+        self._skip_parent_copy = skip_parent_copy
+
+
+    @staticmethod
+    def add_subparser(subparsers):
+        """
+        Adds a subparser for the 'packagedata' command.
+        """
+        # TODO: modify description later
+        desc = """
+        Version: todo
+
+        The {command} command takes training or testing data and packages it into an
+        RO-Crate
+        """.format(command=PackageData.COMMAND)
+        parser = subparsers.add_parser(PackageData.COMMAND,
+                                       help='Package training or testing data into RO-Crate',
+                                       description=desc,
+                                       formatter_class=constants.ArgParseFormatter)
+        parser.add_argument('outdir', help='Directory to write results to')
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file.'
+                                               'Note that the name of the hierarchy should be hierarchy.cx2.')
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
+                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
+                                                     'or NDEx UUID of parent network. If not set, the process will '
+                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
+                                                     'if not found.', type=str)
+        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy with list of '
+                                                          'genes/ proteins of this node. Default: CD_MemberList.',
+                            type=str, default=vnnconstants.GENE_SET_COLUMN_NAME)
+        parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
+                                                  'If a given argument is set, it will override the default value.')
+        parser.add_argument('--training_data', help='Training data')
+        parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
+        parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
+        parser.add_argument('--mutations', help='Mutation information for cell lines', type=str)
+        parser.add_argument('--cn_deletions', help='Copy number deletions for cell lines', type=str)
+        parser.add_argument('--cn_amplifications', help='Copy number amplifications for cell lines',
+                            type=str)
+        parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
+                            action='store_true')
+        parser.add_argument('--cuda', type=int, help='Specify GPU')
+        parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
+                            action='store_true')
+        parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
+                            action='store_true')
+        parser.add_argument('--slurm_partition', help='Slurm partition. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
+        parser.add_argument('--slurm_account', help='Slurm account. If use_gpu is set, the default is nrnb-gpu.',
+                            type=str)
+        return parser
+
+    def run(self):
+        """
+        The logic for training the Visual Neural Network.
+        """
+        logger.info('Hello world')
+
+
+    def register_outputs(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the model and standard deviation files with the FAIRSCAPE service for data provenance.
+        It generates dataset IDs for each registered file.
+
+        :param outdir: The directory where the output files are stored.
+        :param description: Description for the output files.
+        :param keywords: List of keywords associated with the files.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: A list of dataset IDs for the registered model and standard deviation files.
+        """
+        return_ids = [self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils),
+                      self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
+                      copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
+                                                     provenance_utils)]
+        if not self._skip_parent_copy:
+            id_hierarchy_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
+                                                                           provenance_utils)
+            if id_hierarchy_parent is not None:
+                return_ids.append(id_hierarchy_parent)
+
+        return return_ids
+
+
+    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
+        hierarchy_in_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME) if self._hierarchy is None \
+            else self._hierarchy
+        shutil.copy(hierarchy_in_file, hierarchy_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
+                     'description': description + ' Hierarchy network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_pruned_hierarchy(self, outdir, description, keywords, provenance_utils):
+        hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
+
+        data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
+                     'description': description + ' Hierarchy network file used to build VNN',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
+        hierarchy_parent_in_file = None
+        if self._parent_network is not None:
+            hierarchy_parent_in_file = self._parent_network
+        if self._inputdir is not None:
+            hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        if hierarchy_parent_in_file is None or not os.path.exists(hierarchy_parent_in_file):
+            logger.warning("No hierarchy parent in the input directory. Cannot copy.")
+            return None
+        hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
+        shutil.copy(hierarchy_parent_in_file, hierarchy_parent_out_file)
+
+        data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
+                     'description': description + ' Hierarchy parent network file',
+                     'keywords': keywords,
+                     'data-format': 'CX2',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime('%m-%d-%Y')}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=hierarchy_parent_out_file,
+                                                       data_dict=data_dict)
+        return dataset_id
