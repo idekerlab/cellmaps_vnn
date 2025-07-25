@@ -2,6 +2,7 @@
 import os
 import shutil
 from datetime import date
+import yaml
 
 from cellmaps_utils import constants as constants
 import cellmaps_vnn.constants as vnnconstants
@@ -249,6 +250,7 @@ class VNNTrain:
                                             min_dropout_layer_vals=self._optimize_min_dropout_layer,
                                             dropout_fraction_vals=self._optimize_dropout_fraction
                                             ).exec_study()
+            self._save_final_config(trial_params)
             for key, value in trial_params.items():
                 if hasattr(data_wrapper, key):
                     setattr(data_wrapper, key, value)
@@ -257,6 +259,30 @@ class VNNTrain:
         except Exception as e:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
+
+    def _save_final_config(self, best_params):
+        """
+        Writes a flattened config file that includes best Optuna parameters
+        and all original (non-optimized) settings.
+
+        :param best_params: dict from Optuna best trial
+        """
+        if self._config_file is None:
+            return  # skip if no config file was used
+
+        with open(self._config_file, 'r') as f:
+            config = yaml.safe_load(f)
+
+        # Overwrite optimized params with best values
+        for key, value in best_params.items():
+            config[key] = value
+
+        # Save new config next to original
+        final_config_path = os.path.join(self._outdir, 'config.yaml')
+        with open(final_config_path, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+
+        logger.info(f'Saved final config to: {final_config_path}')
 
     def _get_model_dest_file(self):
         """
@@ -297,7 +323,9 @@ class VNNTrain:
                                                                            provenance_utils)
             if id_hierarchy_parent is not None:
                 return_ids.append(id_hierarchy_parent)
-
+        if self._optimize != 0:
+            id_config = self._register_config_file(outdir, description, keywords, provenance_utils)
+            return_ids.append(id_config)
         return return_ids
 
     def _register_model_file(self, outdir, description, keywords, provenance_utils):
@@ -348,6 +376,34 @@ class VNNTrain:
                      'description': description,
                      'keywords': keywords,
                      'data-format': 'txt',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_config_file(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the standard deviation file with the FAIRSCAPE service for data provenance.
+
+        :param outdir: The output directory where the standard deviation file is stored.
+        :param description: Description of the standard deviation file for provenance registration.
+        :param keywords: List of keywords associated with the standard deviation file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered standard deviation file.
+        """
+        dest_path = os.path.join(self._outdir, "config.yaml")
+        description = description
+        description += ' config file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + ' config file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'yaml',
                      'author': cellmaps_vnn.__name__,
                      'version': cellmaps_vnn.__version__,
                      'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
