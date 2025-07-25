@@ -2,6 +2,11 @@
 History
 =======
 
+0.2.2 (2025-07-25)
+------------------
+
+* Bug fixes: fixed hyperparameter optimization and generation of config file with optimal parameters
+
 0.2.1 (2025-07-01)
 ------------------
 
