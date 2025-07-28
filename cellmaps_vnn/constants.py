@@ -67,6 +67,11 @@ GENE_SET_WITH_DATA = 'VNN_gene_set_with_data'
 Hierarchy node attribute that contain genes with available data (eg. mutation, deletion, amplification) for vnn model
 """
 
+GENE_SET_SIZE = 'Gene_set_size'
+"""
+Size of gene set used for VNN
+"""
+
 SCORE_FILE_NAME_SUFFIX = '_gene_scores.out'
 """
 Suffix for gene score file

@@ -314,7 +314,7 @@ class VNNTrain:
         """
         return_ids = [self._register_model_file(outdir, description, keywords, provenance_utils),
                       self._register_std_file(outdir, description, keywords, provenance_utils),
-                      self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils),
+                      self._register_hierarchy(outdir, description, keywords, provenance_utils),
                       self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
                       copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
                                                      provenance_utils)]
@@ -412,11 +412,8 @@ class VNNTrain:
                                                        data_dict=data_dict)
         return dataset_id
 
-    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
+    def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
-        hierarchy_in_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME) if self._hierarchy is None \
-            else self._hierarchy
-        shutil.copy(hierarchy_in_file, hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
