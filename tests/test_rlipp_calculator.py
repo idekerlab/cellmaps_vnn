@@ -9,10 +9,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from ndex2.cx2 import RawCX2NetworkFactory
-from sklearn.decomposition import PCA
-from sklearn.linear_model import RidgeCV
-
-import cellmaps_vnn
 from cellmaps_vnn.rlipp_calculator import RLIPPCalculator
 
 
@@ -26,12 +22,11 @@ class TestRLIPPCalculator(unittest.TestCase):
         hierarchy_file = os.path.join(self.examples_dir, "hierarchy.cx2")
         factory = RawCX2NetworkFactory()
         hierarchy = factory.get_cx2network(hierarchy_file)
-        self.calc = RLIPPCalculator(hierarchy, os.path.join(self.examples_dir, "test_data.txt"),
+        self.calc = RLIPPCalculator(self.temp_out_dir, hierarchy, os.path.join(self.examples_dir, "test_data.txt"),
                                     os.path.join(self.examples_dir, "predict.txt"),
                                     os.path.join(self.examples_dir, "gene2ind.txt"),
                                     os.path.join(self.examples_dir, "cell2ind.txt"),
-                                    self.temp_hidden_dir, os.path.join(self.temp_out_dir, 'rlipp.out'),
-                                    os.path.join(self.temp_out_dir, 'gene_rho.out'), 1, 4, 0)
+                                    self.temp_hidden_dir, 1, 4, 0)
 
     def tearDown(self):
         """Tear down test fixtures, if any."""

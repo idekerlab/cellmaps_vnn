@@ -3,6 +3,7 @@ import logging
 import shutil
 from datetime import date
 
+from cellmaps_vnn.importance_score import FakeGeneImportanceScoreCalculator
 from cellmaps_vnn.util import copy_and_register_gene2id_file
 from tqdm import tqdm
 import numpy as np
@@ -38,6 +39,7 @@ class VNNPredict:
         Constructor for predicting with a trained model.
         """
         self._inputdir = inputdir
+        self._hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
         self._outdir = os.path.abspath(outdir)
         self._config_file = config_file
         self._predict_data = predict_data
@@ -89,7 +91,7 @@ class VNNPredict:
         parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
-        parser.add_argument('--predict_data', help='Path to the dataset to be predicted', type=str)
+        parser.add_argument('--predict_data', help='Path to the file with text data', type=str)
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
         parser.add_argument('--mutations', help='Mutation information for cell lines', type=str)
@@ -103,8 +105,8 @@ class VNNPredict:
         parser.add_argument('--genotype_hiddens',
                             help='Mapping for the number of neurons in each term in genotype parts', type=int)
         parser.add_argument('--cuda', help='Specify GPU', type=int)
-        parser.add_argument('--std', help='Path to standardization File (if not set standardization file from RO-Crate '
-                                          'will be used)', type=str)
+        parser.add_argument('--std', help='Path to standardization File (if not set, standardization file from '
+                                          'RO-Crate will be used)', type=str)
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
                             action='store_true')
         parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
@@ -144,17 +146,15 @@ class VNNPredict:
             self.predict(predict_data, model, hidden_dir, self._batchsize,
                          cell_features)
 
-            hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
             factory = RawCX2NetworkFactory()
-            hierarchy = factory.get_cx2network(hierarchy_file)
-            rlipp_file = os.path.join(self._outdir, vnnconstants.RLIPP_OUTPUT_FILE)
-            gene_rho_file = os.path.join(self._outdir, 'gene_rho.out')
+            hierarchy = factory.get_cx2network(self._hierarchy_file)
             # Perform interpretation
-            calc = RLIPPCalculator(hierarchy, self._predict_data, self._get_predict_dest_file(),
-                                   self._gene2id, self._cell2id, hidden_dir,
-                                   rlipp_file, gene_rho_file, self._cpu_count, self._genotype_hiddens,
+            calc = RLIPPCalculator(self._outdir, hierarchy, self._predict_data, self._get_predict_dest_file(),
+                                   self._gene2id, self._cell2id, hidden_dir, self._cpu_count, self._genotype_hiddens,
                                    self._drug_count, self.excluded_terms)
             calc.calc_scores()
+            gene_calc = FakeGeneImportanceScoreCalculator(self._outdir, hierarchy)
+            gene_calc.calc_scores()
             logger.info('Prediction and interpretation executed successfully')
             print('Prediction and interpretation executed successfully')
         except Exception as e:
@@ -291,7 +291,8 @@ class VNNPredict:
         :return: Loaded model.
         """
         model = torch.load(model_file,
-                           map_location=f'cuda:{self._cuda}' if self.use_cuda else torch.device("cpu"))
+                           map_location=f'cuda:{self._cuda}' if self.use_cuda else torch.device("cpu"),
+                           weights_only=False)
         if self.use_cuda:
             model.cuda(self._cuda)
         model.eval()
@@ -553,7 +554,7 @@ class VNNPredict:
 
     def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.HIERARCHY_FILENAME)
-        shutil.copy(os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
+        shutil.copy(self._hierarchy_file, hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file used to build VNN',
                      'description': description + ' Hierarchy network file used to build VNN',

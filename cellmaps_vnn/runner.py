@@ -183,6 +183,10 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     f.write(' --cn_amplifications ' + os.path.abspath(self._cn_amplifications))
                 if self._training_data:
                     f.write(' --training_data ' + os.path.abspath(self._training_data))
+                if self._hierarchy:
+                    f.write(' --hierarchy ' + os.path.abspath(self._hierarchy))
+                if self._parent_network:
+                    f.write(' --parent_network ' + os.path.abspath(self._parent_network))
                 f.write(
                     ' --batchsize ' + str(self._batchsize) +
                     ' --cuda ' + str(self._cuda) +
@@ -228,6 +232,10 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                     f.write(' --cn_amplifications ' + os.path.abspath(self._cn_amplifications))
                 if self._predict_data:
                     f.write(' --predict_data ' + os.path.abspath(self._predict_data))
+                if self._hierarchy:
+                    f.write(' --hierarchy ' + os.path.abspath(self._hierarchy))
+                if self._parent_network:
+                    f.write(' --parent_network ' + os.path.abspath(self._parent_network))
                 f.write(
                     ' --batchsize ' + str(self._batchsize) +
                     ' --cuda ' + str(self._cuda) +
@@ -255,9 +263,9 @@ class SLURMCellmapsvnnRunner(VnnRunner):
                 if self._disease:
                     f.write(' --disease ' + self._disease)
                 if self._hierarchy:
-                    f.write(' --hierarchy ' + self._hierarchy)
+                    f.write(' --hierarchy ' + os.path.abspath(self._hierarchy))
                 if self._parent_network:
-                    f.write(' --parent_network ' + self._parent_network)
+                    f.write(' --parent_network ' + os.path.abspath(self._parent_network))
                 if self._ndexserver:
                     f.write(' --ndexserver ' + self._ndexserver)
                 if self._ndexuser:

@@ -2,6 +2,7 @@
 import os
 import shutil
 from datetime import date
+import yaml
 
 from cellmaps_utils import constants as constants
 import cellmaps_vnn.constants as vnnconstants
@@ -39,7 +40,8 @@ class VNNTrain:
                  alpha=DEFAULT_ALPHA, genotype_hiddens=vnnconstants.DEFAULT_GENOTYPE_HIDDENS, patience=DEFAULT_PATIENCE,
                  delta=DEFAULT_DELTA, min_dropout_layer=DEFAULT_MIN_DROPOUT_LAYER, dropout_fraction=DEFAULT_DROPOUT_FRACTION,
                  optimize=DEFAULT_OPTIMIZE, n_trials=DEFAULT_N_TRIALS, cuda=vnnconstants.DEFAULT_CUDA,
-                 skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None):
+                 skip_parent_copy=False, slurm=False, use_gpu=False, slurm_partition=None, slurm_account=None,
+                 hierarchy=None, parent_network=None):
         """
         Constructor for training a Visual Neural Network.
 
@@ -102,6 +104,8 @@ class VNNTrain:
         """
         self._outdir = os.path.abspath(outdir)
         self._inputdir = inputdir
+        self._hierarchy = hierarchy
+        self._parent_network = parent_network
         self._gene_attribute_name = gene_attribute_name
         self._config_file = config_file
         self._training_data = training_data
@@ -152,7 +156,6 @@ class VNNTrain:
         else:
             return param, None
 
-
     @staticmethod
     def add_subparser(subparsers):
         """
@@ -171,13 +174,17 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', required=True, help='Path to directory or RO-Crate with hierarchy.cx2 file.'
-                                                              'Note that the name of the hierarchy should be '
-                                                              'hierarchy.cx2.')
-        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy '
-                                                          'with list of genes/ proteins of this node. '
-                                                          'Default: CD_MemberList.', type=str,
-                            default=vnnconstants.GENE_SET_COLUMN_NAME)
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file.'
+                                               'Note that the name of the hierarchy should be hierarchy.cx2.')
+        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
+                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
+        parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
+                                                     'or NDEx UUID of parent network. If not set, the process will '
+                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
+                                                     'if not found.', type=str)
+        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy with list of '
+                                                          'genes/ proteins of this node. Default: CD_MemberList.',
+                            type=str, default=vnnconstants.GENE_SET_COLUMN_NAME)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--training_data', help='Training data')
@@ -229,7 +236,7 @@ class VNNTrain:
                                            self._genotype_hiddens, self._lr, self._wd, self._alpha, self._epoch,
                                            self._batchsize, self._cuda, self._zscore_method, self._stdfile,
                                            self._patience, self._delta, self._min_dropout_layer,
-                                           self._dropout_fraction)
+                                           self._dropout_fraction, self._hierarchy)
         if self._optimize == 1:
             trial_params = OptunaVNNTrainer(data_wrapper,
                                             n_trials=self._n_trials,
@@ -243,6 +250,7 @@ class VNNTrain:
                                             min_dropout_layer_vals=self._optimize_min_dropout_layer,
                                             dropout_fraction_vals=self._optimize_dropout_fraction
                                             ).exec_study()
+            self._save_final_config(trial_params)
             for key, value in trial_params.items():
                 if hasattr(data_wrapper, key):
                     setattr(data_wrapper, key, value)
@@ -251,6 +259,30 @@ class VNNTrain:
         except Exception as e:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
+
+    def _save_final_config(self, best_params):
+        """
+        Writes a flattened config file that includes best Optuna parameters
+        and all original (non-optimized) settings.
+
+        :param best_params: dict from Optuna best trial
+        """
+        if self._config_file is None:
+            return  # skip if no config file was used
+
+        with open(self._config_file, 'r') as f:
+            config = yaml.safe_load(f)
+
+        # Overwrite optimized params with best values
+        for key, value in best_params.items():
+            config[key] = value
+
+        # Save new config next to original
+        final_config_path = os.path.join(self._outdir, 'config.yaml')
+        with open(final_config_path, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+
+        logger.info(f'Saved final config to: {final_config_path}')
 
     def _get_model_dest_file(self):
         """
@@ -282,7 +314,7 @@ class VNNTrain:
         """
         return_ids = [self._register_model_file(outdir, description, keywords, provenance_utils),
                       self._register_std_file(outdir, description, keywords, provenance_utils),
-                      self._copy_and_register_hierarchy(outdir, description, keywords, provenance_utils),
+                      self._register_hierarchy(outdir, description, keywords, provenance_utils),
                       self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
                       copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
                                                      provenance_utils)]
@@ -291,7 +323,9 @@ class VNNTrain:
                                                                            provenance_utils)
             if id_hierarchy_parent is not None:
                 return_ids.append(id_hierarchy_parent)
-
+        if self._optimize != 0:
+            id_config = self._register_config_file(outdir, description, keywords, provenance_utils)
+            return_ids.append(id_config)
         return return_ids
 
     def _register_model_file(self, outdir, description, keywords, provenance_utils):
@@ -350,9 +384,36 @@ class VNNTrain:
                                                        data_dict=data_dict)
         return dataset_id
 
-    def _copy_and_register_hierarchy(self, outdir, description, keywords, provenance_utils):
+    def _register_config_file(self, outdir, description, keywords, provenance_utils):
+        """
+        Registers the standard deviation file with the FAIRSCAPE service for data provenance.
+
+        :param outdir: The output directory where the standard deviation file is stored.
+        :param description: Description of the standard deviation file for provenance registration.
+        :param keywords: List of keywords associated with the standard deviation file.
+        :param provenance_utils: The utility class for provenance registration.
+
+        :return: The dataset ID assigned to the registered standard deviation file.
+        """
+        dest_path = os.path.join(self._outdir, "config.yaml")
+        description = description
+        description += ' config file'
+        keywords = keywords
+        keywords.extend(['file'])
+        data_dict = {'name': os.path.basename(dest_path) + ' config file',
+                     'description': description,
+                     'keywords': keywords,
+                     'data-format': 'yaml',
+                     'author': cellmaps_vnn.__name__,
+                     'version': cellmaps_vnn.__version__,
+                     'date-published': date.today().strftime(provenance_utils.get_default_date_format_str())}
+        dataset_id = provenance_utils.register_dataset(outdir,
+                                                       source_file=dest_path,
+                                                       data_dict=data_dict)
+        return dataset_id
+
+    def _register_hierarchy(self, outdir, description, keywords, provenance_utils):
         hierarchy_out_file = os.path.join(outdir, vnnconstants.ORIGINAL_HIERARCHY_FILENAME)
-        shutil.copy(os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME), hierarchy_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_out_file) + ' Hierarchy network file',
                      'description': description + ' Hierarchy network file',
@@ -382,8 +443,12 @@ class VNNTrain:
         return dataset_id
 
     def _copy_and_register_hierarchy_parent(self, outdir, description, keywords, provenance_utils):
-        hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
-        if not os.path.exists(hierarchy_parent_in_file):
+        hierarchy_parent_in_file = None
+        if self._parent_network is not None:
+            hierarchy_parent_in_file = self._parent_network
+        if self._inputdir is not None:
+            hierarchy_parent_in_file = os.path.join(self._inputdir, vnnconstants.PARENT_NETWORK_NAME)
+        if hierarchy_parent_in_file is None or not os.path.exists(hierarchy_parent_in_file):
             logger.warning("No hierarchy parent in the input directory. Cannot copy.")
             return None
         hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)

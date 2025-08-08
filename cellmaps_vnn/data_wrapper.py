@@ -21,7 +21,7 @@ class TrainingDataWrapper:
 
     def __init__(self, outdir, inputdir, gene_attribute_name, training_data, cell2id, gene2id, mutations, cn_deletions,
                  cn_amplifications, modelfile, genotype_hiddens, lr, wd, alpha, epoch, batchsize, cuda, zscore_method,
-                 stdfile, patience, delta, min_dropout_layer, dropout_fraction):
+                 stdfile, patience, delta, min_dropout_layer, dropout_fraction, hierarchy=None):
         """
         Initializes the TrainingDataWrapper object with configuration and training data parameters.
         """
@@ -44,10 +44,7 @@ class TrainingDataWrapper:
         self.min_dropout_layer = min_dropout_layer
         self.dropout_fraction = dropout_fraction
         self.gene_attribute_name = gene_attribute_name
-        if os.path.isfile(inputdir):
-            self._hierarchy = inputdir
-        else:
-            self._hierarchy = os.path.join(inputdir, constants.HIERARCHY_FILENAME)
+        self._hierarchy = hierarchy if hierarchy is not None else os.path.join(inputdir, constants.HIERARCHY_FILENAME)
         self._training_data = training_data
         self.cell_id_mapping = util.load_mapping(cell2id, 'cell lines')
         self.gene_id_mapping = util.load_mapping(gene2id, 'genes')
@@ -214,6 +211,16 @@ class TrainingDataWrapper:
                 for term in empty_terms:
                     file.write(f'{term}\n')
 
+        for node_id in pruned_hierarchy.get_nodes().keys():
+            node_genes = self._get_genes_of_node(pruned_hierarchy, node_id, names=True)
+            pruned_hierarchy.set_node_attribute(node_id, constants.GENE_SET_WITH_DATA, list(node_genes))
+            pruned_hierarchy.set_node_attribute(node_id, constants.GENE_SET_SIZE, len(node_genes))
+
+        for node_id, node_data in cx2_network.get_nodes().items():
+            gene_attr_value = node_data[ndex2.constants.ASPECT_VALUES][self.gene_attribute_name]
+            all_genes = gene_attr_value.split(',') if ',' in gene_attr_value else gene_attr_value.split()
+            cx2_network.set_node_attribute(node_id, constants.GENE_SET_SIZE, len(all_genes))
+
         hierarchy_json = pruned_hierarchy.to_cx2()
         for item in hierarchy_json:
             if 'nodeBypasses' in item:
@@ -223,6 +230,9 @@ class TrainingDataWrapper:
 
         with open(os.path.join(self.outdir, constants.HIERARCHY_FILENAME), 'w') as output_file:
             json.dump(hierarchy_json, output_file, indent=4)
+
+        with open(os.path.join(self.outdir, constants.ORIGINAL_HIERARCHY_FILENAME), 'w') as output_file:
+            json.dump(cx2_network.to_cx2(), output_file, indent=4)
 
         self.digraph.remove_nodes_from(empty_terms)
 
@@ -261,7 +271,7 @@ class TrainingDataWrapper:
 
         return term_direct_gene_map
 
-    def _get_genes_of_node(self, cx2_network, node_id):
+    def _get_genes_of_node(self, cx2_network, node_id, names=False):
         """
         Retrieves genes associated with a specific node in the CX2 network.
 
@@ -277,9 +287,14 @@ class TrainingDataWrapper:
         node_data = cx2_network.get_node(node_id)
 
         if node_data and self.gene_attribute_name in node_data[ndex2.constants.ASPECT_VALUES]:
-            for gene_identifier in node_data[ndex2.constants.ASPECT_VALUES][self.gene_attribute_name].split():
+            gene_attr_value = node_data[ndex2.constants.ASPECT_VALUES][self.gene_attribute_name]
+            all_genes = gene_attr_value.split(',') if ',' in gene_attr_value else gene_attr_value.split()
+            for gene_identifier in all_genes:
                 if gene_identifier in self.gene_id_mapping:
-                    genes.add(self.gene_id_mapping[gene_identifier])
+                    if names:
+                        genes.add(gene_identifier)
+                    else:
+                        genes.add(self.gene_id_mapping[gene_identifier])
 
         return genes
 

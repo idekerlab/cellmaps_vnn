@@ -28,9 +28,9 @@ class OptunaVNNTrainer(VNNTrainer):
         self._n_trials = n_trials
 
         self._param_ranges = {
-            "batch_size": batchsize_vals,
+            "batchsize": batchsize_vals,
             "lr": lr_vals,
-            "weight_decay": wd_vals,
+            "wd": wd_vals,
             "alpha": alpha_vals,
             "genotype_hiddens": genotype_hiddens_vals,
             "patience": patience_vals,
