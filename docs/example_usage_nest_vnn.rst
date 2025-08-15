@@ -1,5 +1,5 @@
-Example Usage for NeST VNN
----------------------------
+Example for NeST VNN
+---------------------
 
 This tool can be used to run the `NeST VNN <https://github.com/idekerlab/nest_vnn>`__ model. The inputs needed for
 training the model and performing predictions are described in the `NeST VNN inputs <inputs_nestvnn.html>`_ section

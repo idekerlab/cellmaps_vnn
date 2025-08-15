@@ -25,9 +25,13 @@ The same command using a config file. If flags and config file are used, the val
 - ``outdir``:
     The directory where the output will be written to.
 
-- ``--inputdir [HIERARCHY_DIR] [MODEL_DIR]``:
-    For training, a directory containing hierarchy and parent network (the output of cellmaps_generate_hierarchy tool).
-    For prediction, a directory containing trained model (the output of training mode of cellmaps_vnn).
+*Required (one of these)*
+
+- ``--hierarchy``
+    Path to hierarchy file (optional). If not set, will look for hierarchy.cx2 in --inputdir.
+
+- ``--inputdir [HIERARCHY_DIR]``:
+    A directory containing hierarchy and parent network (the output of cellmaps_generate_hierarchy tool).
 
 Most arguments can be set in configuration file. An example configuration file is provided in the GitHub repo
 in ``examples`` directory.
@@ -37,8 +41,8 @@ in ``examples`` directory.
 
 If not set in config file following arguments are **required**
 
-- ``--training_data TRAINING_DATA`` or ``--predict_data PREDICTION_DATA``:
-    For training, the training data to train the model. For prediction, data for which prediction will be performed.
+- ``--training_data TRAINING_DATA``:
+    The training data to train the model.
 
 - ``--gene2id GENE2ID_PATH``:
     Gene to ID mapping file.
@@ -59,6 +63,10 @@ If not set in config file following arguments are **required**
 
 - ``--gene_attribute_name GENE_ATTRIBUTE_NAME``:
     Name of the node attribute of the hierarchy with list of genes/ proteins of this node. Default: CD_MemberList. (default: CD_MemberList)
+
+- ``--parent_network``
+    Path to interactome (parent network) file or NDEx UUID.
+    If not set, will look for hierarchy_parent.cx2 in --inputdir (non-fatal if not found).
 
 - ``--epoch EPOCH``:
     Training epochs. Defines the total number of training cycles the model will undergo. Default value is 300.
@@ -112,7 +120,7 @@ If not set in config file following arguments are **required**
 - ``--cuda CUDA``:
      Indicates the GPU to be used for processing, if available. Default is set to 0.
 
--  ``--skip_parent_copy``:
+- ``--skip_parent_copy``:
     If set, hierarchy parent (interactome) will not be copied (default: False)
 
 - ``--slurm``:
@@ -217,7 +225,7 @@ If not set in config file following arguments are **required**
 - ``--genotype_hiddens``:
     Mapping for the number of neurons in each term in genotype parts. Default is 4.
 
-- ``std``:
+- ``--std``:
     Path to standardization File (if not set standardization file from RO-Crate will be used).
 
 - ``--cuda CUDA``:
@@ -289,3 +297,12 @@ Annotation
 
 - ``--visibility``:
     If set, makes Hierarchy and interactome network loaded onto NDEx publicly visible.
+
+
+Tutorials
+==========
+
+Step by step guide on how to run Cell Maps VNN using command line is available in this
+`Jupyter Notebook <https://github.com/idekerlab/cellmaps_vnn/blob/main/notebooks/step-by-step-guide-run-vnn.ipynb>`__.
+
+Tutorial on hyperparameter optimization is available in this `Jupyter Notebook <https://github.com/idekerlab/cellmaps_vnn/blob/main/notebooks/hyperparameter-optimization.ipynb>`__.
