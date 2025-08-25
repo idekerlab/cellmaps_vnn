@@ -15,12 +15,10 @@ cellmaps_vnn
 
 
 
-
 Cell Maps Visual Neural Network Toolkit
 
 * Free software: MIT license
 * Documentation: https://cellmaps-vnn.readthedocs.io.
-
 
 
 Dependencies
@@ -101,41 +99,43 @@ against those changes.
 .. code-block::
 
     # From base directory of this repo cellmaps_vnn
-    pip uninstall cellmaps_vnn -y ; make clean dist; pip install dist/cellmaps_vnn*whl
-
+    pip uninstall cellmaps_vnn -y ; make clean dist; pip install dist/cellmaps_vnn*wh
 
 
 Needed files
 ------------
 
-**TODO:** Add description of needed files
+See the format of the files and examples in examples directory of this repository
 
+- gene2ind.txt: A tab-delimited file where the 1st column is index of genes and the 2nd column is the name of genes.
+- cell2ind.txt: A tab-delimited file where the 1st column is index of cells and the 2nd column is the name of cells (genotypes).
+- cell2mutation.txt: A comma-delimited file where each row has 718 binary values indicating each gene is mutated (1) or not (0). The column index of each gene should match with those in gene2ind.txt file. The line number should match with the indices of cells in cell2ind.txt file.
+- cell2cndeletion.txt: A comma-delimited file where each row has 718 binary values indicating copy number deletion (1) (0 for no copy number deletion).
+- cell2amplification.txt: A comma-delimited file where each row has 718 binary values indicating copy number amplification (1) (0 for no copy number amplification).
+- training_data.txt: A tab-delimited file containing all data points that you want to use to train the model. The 1st column is identification of cells (genotypes), the 2nd column is a SMILES string of the drug and the 3rd column is an observed drug response in a floating point number, and the 4th column is source where the data was obtained from.
+- hierarchy.cx2: Hierarchy in HCX format used to create a visible neural network.
+- test_data.txt: A tab-delimited file containing all data points that you want to estimate drug response for. The 1st column is identification of cells (genotypes), the 2nd column is a SMILES string of the drug and the 3rd column is an observed drug response in a floating point number, and the 4th column is source where the data was obtained from.
 
 Usage
 -----
 
 For information invoke :code:`cellmaps_vnncmd.py -h`
 
-**Example usage**
-
-**TODO:** Add information about example usage
-
-.. code-block::
-
-   cellmaps_vnncmd.py # TODO Add other needed arguments here
-
-
-Via Docker
-~~~~~~~~~~~~~~~~~~~~~~
+The tool can be used in 3 modes: train, predict and annotate.
 
 **Example usage**
 
-**TODO:** Add information about example usage
+.. code-block::
 
+   cellmaps_vnncmd.py train ./outdir_training --inputdir examples --config_file examples/config.yaml
 
 .. code-block::
 
-   Coming soon ...
+   cellmaps_vnncmd.py predict ./outdir_prediction --inputdir ./outdir_training --config_file examples/config.yaml
+
+.. code-block::
+
+   cellmaps_vnncmd.py annotate ./outdir_annotation --model_predictions ./outdir_prediction --ndexuser USERNAME --ndexpassword - --parent_network 0b7b8aee-332f-11ef-9621-005056ae23aa --visibility
 
 Credits
 -------
