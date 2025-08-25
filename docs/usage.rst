@@ -12,7 +12,8 @@ importance score, indicating which nodes of the hierarchy (gene sets) were impor
 
    usage_programmatically
    usage_command_line
-   usage_via_docker
    example_usage_nest_vnn
+   usage_multiple_models
+
 
 
