@@ -3,10 +3,10 @@ import os
 import shutil
 from datetime import date
 import yaml
+import logging
 
 from cellmaps_utils import constants as constants
 import cellmaps_vnn.constants as vnnconstants
-import logging
 
 import cellmaps_vnn
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
@@ -66,29 +66,31 @@ class VNNTrain:
         :param cn_amplifications: File with copy number amplifications for cell lines.
         :type cn_amplifications: str, optional
         :param batchsize: Batch size for training. Default is 64.
-        :type batchsize: int
+        :type batchsize: int or list/tuple (when optimize=1)
         :param zscore_method: Z-score method. Default is 'auc'.
         :type zscore_method: str
         :param epoch: Number of epochs for training. Default is 50.
         :type epoch: int
-        :param lr: Learning rate. Default is 0.001.
+        :param lr: Learning rate. Default is 0.001. May be a list/tuple if optimize=1.
         :type lr: float or list or tuple
         :param wd: Weight decay. Default is 0.001.
-        :type wd: float
+        :type wd: float or list or tuple
         :param alpha: Loss parameter alpha. Default is 0.3.
-        :type alpha: float
+        :type alpha: float or list or tuple
         :param genotype_hiddens: Number of neurons in genotype parts. Default is 4.
-        :type genotype_hiddens: int
+        :type genotype_hiddens: int or list or tuple
         :param patience: Early stopping epoch limit. Default is 30.
-        :type patience: int
+        :type patience: int or list or tuple
         :param delta: Minimum loss improvement for early stopping. Default is 0.001.
-        :type delta: float
+        :type delta: float or list or tuple
         :param min_dropout_layer: Layer number to start applying dropout. Default is 2.
-        :type min_dropout_layer: int
+        :type min_dropout_layer: int or list or tuple
         :param dropout_fraction: Dropout fraction. Default is 0.3.
-        :type dropout_fraction: float
-        :param optimize: Hyperparameter optimization flag. Default is 0.
+        :type dropout_fraction: float or list or tuple
+        :param optimize: Hyperparameter optimization flag. 0 = off, 1 = Optuna.
         :type optimize: int
+        :param n_trials: Number of Optuna trials when optimize=1.
+        :type n_trials: int
         :param cuda: GPU index. Default is 0.
         :type cuda: int
         :param skip_parent_copy: If True, do not copy hierarchy parent. Default is False.
@@ -101,6 +103,8 @@ class VNNTrain:
         :type slurm_partition: str, optional
         :param slurm_account: SLURM account name.
         :type slurm_account: str, optional
+        :param hierarchy: Optional direct path to hierarchy.cx2; otherwise will look in inputdir.
+        :param parent_network: Optional direct path or NDEx UUID for parent network.
         """
         self._outdir = os.path.abspath(outdir)
         self._inputdir = inputdir
@@ -142,14 +146,15 @@ class VNNTrain:
         self._stdfile = self._get_std_dest_file()
 
     def _process_param(self, param, name):
-        if isinstance(param, list) or isinstance(param, tuple):
+        if isinstance(param, (list, tuple)):
             if isinstance(param, tuple) or len(param) > 1:
                 if self._optimize != 0:
                     return param[0], param
                 else:
                     raise CellmapsvnnError(
-                        f'Hyperparameter optimization is not enabled (optimize set to 0), but multiple values '
-                        f'for {name} are provided. Please specify only one value, or enable optimization.'
+                        f'Hyperparameter optimization is not enabled (optimize=0), '
+                        f'but multiple values for {name} were provided. '
+                        f'Provide a single value or enable optimization.'
                     )
             else:
                 return param[0], None
@@ -161,32 +166,29 @@ class VNNTrain:
         """
         Adds a subparser for the 'train' command.
         """
-        # TODO: modify description later
         desc = """
-        Version: todo
-
-        The 'train' command trains a Visual Neural Network using specified hierarchy files
-        and data from drugcell or NeSTVNN repository. The resulting model is stored in a
-        directory specified by the user.
+        The 'train' command trains a Visual Neural Network using a hierarchy network
+        and drug response data. The resulting model and metadata are written to the output directory.
         """
         parser = subparsers.add_parser(VNNTrain.COMMAND,
                                        help='Train a Visual Neural Network',
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file.'
-                                               'Note that the name of the hierarchy should be hierarchy.cx2.')
-        parser.add_argument('--hierarchy', help='Path to hierarchy (optional). If not set, the process will search for '
-                                                'hierarchy.cx2 in inputdir. It will fail if not found.', type=str)
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file. '
+                                               'The hierarchy file is expected to be named hierarchy.cx2.')
+        parser.add_argument('--hierarchy', help='Explicit path to hierarchy (optional). If not set, the process will '
+                                                'search for hierarchy.cx2 in inputdir and fail if not found.',
+                            type=str)
         parser.add_argument('--parent_network', help='Path to interactome (parent network, optional) of hierarchy '
                                                      'or NDEx UUID of parent network. If not set, the process will '
-                                                     'search for hierarchy_parent.cx2 in inputdir, but it will not fail'
-                                                     'if not found.', type=str)
-        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy with list of '
-                                                          'genes/ proteins of this node. Default: CD_MemberList.',
+                                                     'search for hierarchy_parent.cx2 in inputdir, but will not fail '
+                                                     'if absent.', type=str)
+        parser.add_argument('--gene_attribute_name', help='Name of the node attribute of the hierarchy with the list '
+                                                          'of genes/proteins of this node. Default: CD_MemberList.',
                             type=str, default=vnnconstants.GENE_SET_COLUMN_NAME)
-        parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
-                                                  'If a given argument is set, it will override the default value.')
+        parser.add_argument('--config_file', help='YAML config to populate arguments; overwritten by explicit CLI '
+                                                  'args.')
         parser.add_argument('--training_data', help='Training data')
         parser.add_argument('--gene2id', help='Gene to ID mapping file', type=str)
         parser.add_argument('--cell2id', help='Cell to ID mapping file', type=str)
@@ -209,16 +211,16 @@ class VNNTrain:
         parser.add_argument('--optimize', type=int, help='Hyperparameter optimization (0- no optimization, '
                                                          '1- optuna optimizer)')
         parser.add_argument('--n_trials', type=int, help='Number of trials in hyperparameter optimization')
-        parser.add_argument('--cuda', type=int, help='Specify GPU')
+        parser.add_argument('--cuda', type=int, help='Specify GPU index')
         parser.add_argument('--skip_parent_copy', help='If set, hierarchy parent (interactome) will not be copied',
                             action='store_true')
         parser.add_argument('--slurm', help='If set, slurm script for training will be generated.',
                             action='store_true')
-        parser.add_argument('--use_gpu', help='If set, slurm script will be adjusted to run on GPU.',
+        parser.add_argument('--use_gpu', help='If set, SLURM job may request a GPU.',
                             action='store_true')
-        parser.add_argument('--slurm_partition', help='Slurm partition. If use_gpu is set, the default is nrnb-gpu.',
+        parser.add_argument('--slurm_partition', help='SLURM partition (if a SLURM runner is used). Default: nrnb-gpu.',
                             type=str)
-        parser.add_argument('--slurm_account', help='Slurm account. If use_gpu is set, the default is nrnb-gpu.',
+        parser.add_argument('--slurm_account', help='SLURM account (if a SLURM runner is used). Default: nrnb-gpu.',
                             type=str)
         return parser
 
@@ -340,8 +342,7 @@ class VNNTrain:
         :return: The dataset ID assigned to the registered model file.
         """
         dest_path = self._get_model_dest_file()
-        description = description
-        description += ' Model file'
+        description = f'{description} Model file'
         keywords = keywords
         keywords.extend(['file'])
         data_dict = {'name': os.path.basename(dest_path) + ' trained model file',
@@ -368,8 +369,7 @@ class VNNTrain:
         :return: The dataset ID assigned to the registered standard deviation file.
         """
         dest_path = self._get_std_dest_file()
-        description = description
-        description += ' standard deviation file'
+        description = f'{description} standard deviation file'
         keywords = keywords
         keywords.extend(['file'])
         data_dict = {'name': os.path.basename(dest_path) + ' standard deviation file',
@@ -396,8 +396,7 @@ class VNNTrain:
         :return: The dataset ID assigned to the registered standard deviation file.
         """
         dest_path = os.path.join(self._outdir, "config.yaml")
-        description = description
-        description += ' config file'
+        description = f'{description} config file'
         keywords = keywords
         keywords.extend(['file'])
         data_dict = {'name': os.path.basename(dest_path) + ' config file',
