@@ -177,9 +177,9 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', help='Path to directory or RO-Crate containing hierarchy.cx2 and optional '
-                                               'support files (training_data.txt, gene2ind.txt, cell2ind.txt, '
-                                               'cell2mutation(s).txt, cell2cndeletion.txt, cell2cnamplification(s).txt).')
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate containing hierarchy.cx2, training data file and '
+                                               'feature files (training_data.txt, gene2ind.txt, cell2ind.txt, '
+                                               'cell2mutation.txt, cell2cndeletion.txt, cell2cnamplification.txt).')
         parser.add_argument('--hierarchy', help='Explicit path to hierarchy (optional). If not set, the process will '
                                                 'search for hierarchy.cx2 in inputdir and fail if not found.',
                             type=str)
