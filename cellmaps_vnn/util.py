@@ -204,6 +204,30 @@ def build_input_vector(input_data, cell_features):
     return feature
 
 
+def _find_first_existing_file(directory, filenames):
+    if directory is None:
+        return None
+    if isinstance(filenames, str):
+        filenames = (filenames,)
+    for name in filenames:
+        candidate = os.path.join(directory, name)
+        if os.path.isfile(candidate):
+            return os.path.abspath(candidate)
+    return None
+
+
+def resolve_default_paths(inputdir, file_map):
+    """Resolves default file paths for known inputs within inputdir."""
+    resolved = {}
+    if inputdir is None:
+        return resolved
+    for key, names in file_map.items():
+        path = _find_first_existing_file(inputdir, names)
+        if path is not None:
+            resolved[key] = path
+    return resolved
+
+
 def get_grad_norm(model_params, norm_type):
     """
     Computes the gradient norm of model parameters.

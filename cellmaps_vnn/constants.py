@@ -57,6 +57,48 @@ PARENT_NETWORK_NAME = 'hierarchy_parent.cx2'
 Parent network of hierarchy filename.
 """
 
+TRAINING_DATA_FILENAME = 'training_data.txt'
+"""
+Default training data filename bundled with input directories.
+"""
+
+GENE2ID_FILENAME = 'gene2ind.txt'
+"""
+Default gene-to-index mapping filename bundled with input directories.
+"""
+
+CELL2ID_FILENAME = 'cell2ind.txt'
+"""
+Default cell-to-index mapping filename bundled with input directories.
+"""
+
+MUTATIONS_FILENAMES = ('cell2mutations.txt', 'cell2mutation.txt')
+"""
+Candidate filenames for mutation features bundled with input directories.
+"""
+
+CN_DELETIONS_FILENAMES = ('cell2cndeletion.txt',)
+"""
+Candidate filenames for copy-number deletion features bundled with input directories.
+"""
+
+CN_AMPLIFICATIONS_FILENAMES = ('cell2cnamplifications.txt', 'cell2cnamplification.txt')
+"""
+Candidate filenames for copy-number amplification features bundled with input directories.
+"""
+
+TRAIN_REQUIRED_INPUT_FILENAMES = {
+    'training_data': (TRAINING_DATA_FILENAME,),
+    'gene2id': (GENE2ID_FILENAME,),
+    'cell2id': (CELL2ID_FILENAME,),
+    'mutations': MUTATIONS_FILENAMES,
+    'cn_deletions': CN_DELETIONS_FILENAMES,
+    'cn_amplifications': CN_AMPLIFICATIONS_FILENAMES,
+}
+"""
+Mapping of train argument names to the filenames that should be discovered in an input directory.
+"""
+
 GENE_SET_COLUMN_NAME = 'CD_MemberList'
 """
 Name of the node attribute of the hierarchy with list of genes/ proteins of this node.

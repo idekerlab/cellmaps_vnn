@@ -12,7 +12,7 @@ import cellmaps_vnn
 from cellmaps_vnn.data_wrapper import TrainingDataWrapper
 from cellmaps_vnn.exceptions import CellmapsvnnError
 from cellmaps_vnn.vnn_trainer import VNNTrainer
-from cellmaps_vnn.util import copy_and_register_gene2id_file
+import cellmaps_vnn.util as vnnutil
 from cellmaps_vnn.optuna_vnn_trainer import OptunaVNNTrainer
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class VNNTrain:
 
         :param outdir: Directory to write results to.
         :type outdir: str
-        :param inputdir: Path to directory or RO-Crate with hierarchy.cx2 file.
+        :param inputdir: Path to directory or RO-Crate holding hierarchy.cx2 and optional training inputs.
         :type inputdir: str
         :param gene_attribute_name: Name of the node attribute with genes/proteins.
         :type gene_attribute_name: str
@@ -107,7 +107,7 @@ class VNNTrain:
         :param parent_network: Optional direct path or NDEx UUID for parent network.
         """
         self._outdir = os.path.abspath(outdir)
-        self._inputdir = inputdir
+        self._inputdir = os.path.abspath(inputdir) if inputdir is not None else None
         self._hierarchy = hierarchy
         self._parent_network = parent_network
         self._gene_attribute_name = gene_attribute_name
@@ -145,6 +145,8 @@ class VNNTrain:
         self._modelfile = self._get_model_dest_file()
         self._stdfile = self._get_std_dest_file()
 
+        self._resolve_inputs_from_inputdir()
+
     def _process_param(self, param, name):
         if isinstance(param, (list, tuple)):
             if isinstance(param, tuple) or len(param) > 1:
@@ -175,8 +177,9 @@ class VNNTrain:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', help='Path to directory or RO-Crate with hierarchy.cx2 file. '
-                                               'The hierarchy file is expected to be named hierarchy.cx2.')
+        parser.add_argument('--inputdir', help='Path to directory or RO-Crate containing hierarchy.cx2 and optional '
+                                               'support files (training_data.txt, gene2ind.txt, cell2ind.txt, '
+                                               'cell2mutation(s).txt, cell2cndeletion.txt, cell2cnamplification(s).txt).')
         parser.add_argument('--hierarchy', help='Explicit path to hierarchy (optional). If not set, the process will '
                                                 'search for hierarchy.cx2 in inputdir and fail if not found.',
                             type=str)
@@ -318,7 +321,7 @@ class VNNTrain:
                       self._register_std_file(outdir, description, keywords, provenance_utils),
                       self._register_hierarchy(outdir, description, keywords, provenance_utils),
                       self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
-                      copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
+                      vnnutil.copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
                                                      provenance_utils)]
         if not self._skip_parent_copy:
             id_hierarchy_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
@@ -356,6 +359,21 @@ class VNNTrain:
                                                        source_file=dest_path,
                                                        data_dict=data_dict)
         return dataset_id
+
+    def _resolve_inputs_from_inputdir(self):
+        """Populate missing input file paths by scanning ``self._inputdir``."""
+        if self._inputdir is None:
+            return
+        if not os.path.isdir(self._inputdir):
+            raise CellmapsvnnError(f'Input directory {self._inputdir} does not exist.')
+
+        resolved = vnnutil.resolve_default_paths(self._inputdir,
+                                                 vnnconstants.TRAIN_REQUIRED_INPUT_FILENAMES)
+        for arg_name, path in resolved.items():
+            attr_name = f'_{arg_name}'
+            if getattr(self, attr_name) is None:
+                logger.info('Discovered %s at %s', arg_name, path)
+                setattr(self, attr_name, path)
 
     def _register_std_file(self, outdir, description, keywords, provenance_utils):
         """

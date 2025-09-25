@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
+import os
 import sys
 import logging
 import logging.config
@@ -15,6 +16,7 @@ from cellmaps_vnn.predict import VNNPredict
 from cellmaps_vnn.runner import CellmapsvnnRunner, SLURMCellmapsvnnRunner
 from cellmaps_vnn.train import VNNTrain
 import cellmaps_vnn.constants as vnnconstants
+import cellmaps_vnn.util as vnnutil
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +101,23 @@ def main(args):
         value = getattr(theargs, key)
         if value not in (None, False):
             config[key] = value
+
+    if theargs.command in (VNNTrain.COMMAND):
+        inputdir_candidate = getattr(theargs, 'inputdir', None) or config.get('inputdir')
+        if inputdir_candidate is not None:
+            inputdir_abs = os.path.abspath(inputdir_candidate)
+            if os.path.isdir(inputdir_abs):
+                discovered = vnnutil.resolve_default_paths(
+                    inputdir_abs,
+                    vnnconstants.TRAIN_REQUIRED_INPUT_FILENAMES
+                )
+                for arg_name, path in discovered.items():
+                    if getattr(theargs, arg_name, None) is None and arg_name not in config:
+                        setattr(theargs, arg_name, path)
+                        config[arg_name] = path
+            else:
+                logger.debug('Input directory %s not found; skipping auto-discovery of training inputs',
+                             inputdir_abs)
 
     if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
         required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
