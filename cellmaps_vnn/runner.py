@@ -217,9 +217,15 @@ class SLURMCellmapsvnnRunner(VnnRunner):
             filename = 'cellmapvnnpredictjob.sh'
             with open(os.path.join(self._outdir, filename), 'w') as f:
                 self._write_slurm_directives(out=f, job_name='cellmapvnnpredict')
+                input_dirs = []
+                if isinstance(self._inputdir, list):
+                    input_dirs = [os.path.abspath(entry) for entry in self._inputdir]
+                else:
+                    input_dirs = [os.path.abspath(self._inputdir)]
+
                 f.write(
                     'cellmaps_vnncmd.py predict ' + os.path.join(self._outdir, 'out_predict') +
-                    ' --inputdir ' + os.path.abspath(self._inputdir))
+                    ' --inputdir ' + ' '.join(input_dirs))
                 if self._gene2id:
                     f.write(' --gene2id ' + os.path.abspath(self._gene2id))
                 if self._cell2id:

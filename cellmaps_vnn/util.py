@@ -228,6 +228,52 @@ def resolve_default_paths(inputdir, file_map):
     return resolved
 
 
+def ensure_list(value):
+    """Normalizes a value to a list."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    if isinstance(value, tuple):
+        return list(value)
+    return [value]
+
+
+def resolve_model_and_feature_dirs(inputdirs, model_filename):
+    """Returns normalized model and optional feature directories from user input."""
+    dirs = ensure_list(inputdirs)
+    if len(dirs) == 0:
+        raise CellmapsvnnError('At least one input directory is required for prediction.')
+    if len(dirs) > 2:
+        raise CellmapsvnnError('At most two input directories may be provided for prediction.')
+
+    abs_dirs = [os.path.abspath(path) for path in dirs]
+
+    def _find_model_dir(directory):
+        for candidate in (directory, os.path.join(directory, 'out_train')):
+            if os.path.isfile(os.path.join(candidate, model_filename)):
+                return candidate
+        return None
+
+    model_dir = _find_model_dir(abs_dirs[0])
+    feature_dir = None
+
+    if len(abs_dirs) == 1:
+        if model_dir is None:
+            raise CellmapsvnnError(f'Model file {model_filename} not found in {abs_dirs[0]}.')
+    else:
+        other_model_dir = _find_model_dir(abs_dirs[1])
+        if model_dir is None and other_model_dir is None:
+            raise CellmapsvnnError('Could not locate trained model in the provided directories.')
+        if model_dir is None:
+            model_dir = other_model_dir
+            feature_dir = abs_dirs[0]
+        else:
+            feature_dir = abs_dirs[1]
+
+    return model_dir, feature_dir
+
+
 def get_grad_norm(model_params, norm_type):
     """
     Computes the gradient norm of model parameters.

@@ -38,8 +38,10 @@ class VNNPredict:
         """
         Constructor for predicting with a trained model.
         """
-        self._inputdir = inputdir
-        self._hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
+        self._inputdir_raw = inputdir
+        self._inputdir = None
+        self._feature_dir = None
+        self._hierarchy_file = None
         self._outdir = os.path.abspath(outdir)
         self._config_file = config_file
         self._predict_data = predict_data
@@ -88,7 +90,10 @@ class VNNPredict:
                                        description=desc,
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
-        parser.add_argument('--inputdir', required=True, help='Path to RO-Crate with the trained model', type=str)
+        parser.add_argument('--inputdir', required=True, nargs='+',
+                            help='One or two directories. One must contain model_final.pt (or out_train/model_final.pt); '
+                                 'the other, if present, may store feature files and test data.',
+                            type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
                                                   'If a given argument is set, it will override the default value.')
         parser.add_argument('--predict_data', help='Path to the file with text data', type=str)
@@ -125,10 +130,13 @@ class VNNPredict:
         :raises CellmapsvnnError: If an error occurs during the prediction process.
         """
         try:
+            self._configure_input_dirs()
             self._check_inputdir()
+            self._resolve_inputs_from_feature_dir()
             self._populate_excluded_terms()
-            model = os.path.join(self._inputdir, 'model_final.pt')
-            std = os.path.join(self._inputdir, 'std.txt') if self._std is None else os.path.abspath(self._std)
+            model = os.path.join(self._inputdir, vnnconstants.MODEL_FILENAME)
+            std = (os.path.join(self._inputdir, vnnconstants.STD_FILENAME)
+                   if self._std is None else os.path.abspath(self._std))
             torch.set_printoptions(precision=5)
 
             # Load data and model for prediction
@@ -161,9 +169,27 @@ class VNNPredict:
             logger.error(f"Error in prediction flow: {e}")
             raise CellmapsvnnError(f"Encountered problem in prediction flow: {e}")
 
+    def _configure_input_dirs(self):
+        self._inputdir, self._feature_dir = util.resolve_model_and_feature_dirs(
+            self._inputdir_raw, vnnconstants.MODEL_FILENAME
+        )
+        self._hierarchy_file = os.path.join(self._inputdir, vnnconstants.HIERARCHY_FILENAME)
+
     def _check_inputdir(self):
-        if not os.path.exists(os.path.join(self._inputdir, 'model_final.pt')):
-            self._inputdir = os.path.join(self._inputdir, 'out_train')
+        model_path = os.path.join(self._inputdir, vnnconstants.MODEL_FILENAME)
+        if not os.path.isfile(model_path):
+            raise CellmapsvnnError(f'Model file {vnnconstants.MODEL_FILENAME} not found in {self._inputdir}.')
+
+    def _resolve_inputs_from_feature_dir(self):
+        if self._feature_dir is None:
+            return
+
+        discovered = util.resolve_default_paths(self._feature_dir, vnnconstants.PREDICT_OPTIONAL_INPUT_FILENAMES)
+        for arg_name, path in discovered.items():
+            attr_name = f'_{arg_name}'
+            if getattr(self, attr_name) is None:
+                logger.info('Discovered %s at %s', arg_name, path)
+                setattr(self, attr_name, path)
 
     def _populate_excluded_terms(self):
         excluded_terms_path = os.path.join(self._inputdir, 'vnn_excluded_terms.txt')

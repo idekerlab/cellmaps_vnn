@@ -119,14 +119,9 @@ def main(args):
                 logger.debug('Input directory %s not found; skipping auto-discovery of training inputs',
                              inputdir_abs)
 
-    if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
-        required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications']
-        if theargs.command == VNNTrain.COMMAND:
-            required_args.append('gene2id')
-            required_args.append('training_data')
-        else:
-            required_args.append('predict_data')
-
+    if theargs.command == VNNTrain.COMMAND:
+        required_args = ['cell2id', 'mutations', 'cn_deletions', 'cn_amplifications',
+                            'gene2id', 'training_data']
         missing_args = []
         for arg in required_args:
             if getattr(theargs, arg, None) is None and arg not in config:

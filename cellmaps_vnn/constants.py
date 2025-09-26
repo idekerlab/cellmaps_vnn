@@ -87,6 +87,16 @@ CN_AMPLIFICATIONS_FILENAMES = ('cell2cnamplifications.txt', 'cell2cnamplificatio
 Candidate filenames for copy-number amplification features bundled with input directories.
 """
 
+STD_FILENAME = 'std.txt'
+"""
+Default standardization filename bundled with model directories.
+"""
+
+MODEL_FILENAME = 'model_final.pt'
+"""
+Filename for the trained VNN model.
+"""
+
 TRAIN_REQUIRED_INPUT_FILENAMES = {
     'training_data': (TRAINING_DATA_FILENAME,),
     'gene2id': (GENE2ID_FILENAME,),
@@ -97,6 +107,18 @@ TRAIN_REQUIRED_INPUT_FILENAMES = {
 }
 """
 Mapping of train argument names to the filenames that should be discovered in an input directory.
+"""
+
+PREDICT_OPTIONAL_INPUT_FILENAMES = {
+    'predict_data': ('test_data.txt', 'predict_data.txt'),
+    'gene2id': (GENE2ID_FILENAME,),
+    'cell2id': (CELL2ID_FILENAME,),
+    'mutations': MUTATIONS_FILENAMES,
+    'cn_deletions': CN_DELETIONS_FILENAMES,
+    'cn_amplifications': CN_AMPLIFICATIONS_FILENAMES,
+}
+"""
+Mapping of predict argument names to filenames that may be discovered in supplied input directories.
 """
 
 GENE_SET_COLUMN_NAME = 'CD_MemberList'
