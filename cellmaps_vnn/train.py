@@ -295,7 +295,7 @@ class VNNTrain:
 
         :return: The file path for the model file.
         """
-        return os.path.join(self._outdir, 'model_final.pt')
+        return os.path.join(self._outdir, vnnconstants.MODEL_FILENAME)
 
     def _get_std_dest_file(self):
         """

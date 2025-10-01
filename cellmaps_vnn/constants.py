@@ -92,7 +92,7 @@ STD_FILENAME = 'std.txt'
 Default standardization filename bundled with model directories.
 """
 
-MODEL_FILENAME = 'model_final.pt'
+MODEL_FILENAME = 'model.pt'
 """
 Filename for the trained VNN model.
 """

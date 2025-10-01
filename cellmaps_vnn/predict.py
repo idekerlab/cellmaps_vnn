@@ -91,7 +91,7 @@ class VNNPredict:
                                        formatter_class=constants.ArgParseFormatter)
         parser.add_argument('outdir', help='Directory to write results to')
         parser.add_argument('--inputdir', required=True, nargs='+',
-                            help='One or two directories. One must contain model_final.pt (or out_train/model_final.pt); '
+                            help='One or two directories. One must contain model.pt (or out_train/model.pt); '
                                  'the other, if present, may store feature files and test data.',
                             type=str)
         parser.add_argument('--config_file', help='Config file that can be used to populate arguments for training. '
