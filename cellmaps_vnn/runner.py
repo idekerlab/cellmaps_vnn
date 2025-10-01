@@ -384,17 +384,24 @@ class CellmapsvnnRunner(VnnRunner):
             if os.path.exists(os.path.join(entry, constants.RO_CRATE_METADATA_FILE)):
                 rocrate_dirs.append(entry)
         if len(rocrate_dirs) > 0:
-            prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(rocrate_dirs,
-                                                                                    override_name=self._name,
-                                                                                    override_project_name=
-                                                                                    self._project_name,
-                                                                                    override_organization_name=
-                                                                                    self._organization_name,
-                                                                                    extra_keywords=[
-                                                                                        'VNN',
-                                                                                        'Visible Neural Network',
-                                                                                        self._command.COMMAND
-                                                                                    ])
+            try:
+                prov_attrs = self._provenance_utils.get_merged_rocrate_provenance_attrs(
+                    rocrate_dirs,
+                    override_name=self._name,
+                    override_project_name=self._project_name,
+                    override_organization_name=self._organization_name,
+                    extra_keywords=[
+                        'VNN',
+                        'Visible Neural Network',
+                        self._command.COMMAND
+                    ])
+            except (KeyError, TypeError, AttributeError) as e:
+                logger.warning('Unable to read provenance attributes from %s because %s. '
+                               'Falling back to example provenance metadata.',
+                               rocrate_dirs, e)
+                self._set_default_provenance_fields(force=False)
+                return
+
             if self._name is None:
                 self._name = prov_attrs.get_name()
 
@@ -406,10 +413,19 @@ class CellmapsvnnRunner(VnnRunner):
             self._keywords = prov_attrs.get_keywords()
             self._description = prov_attrs.get_description()
         else:
+            self._set_default_provenance_fields(force=True)
+
+    def _set_default_provenance_fields(self, force=False):
+        """Assign default provenance metadata when input provenance is missing or incomplete."""
+        if force or self._name is None:
             self._name = 'VNN tool'
+        if force or self._organization_name is None:
             self._organization_name = 'Example'
+        if force or self._project_name is None:
             self._project_name = 'Example'
+        if force or not self._keywords:
             self._keywords = ['vnn']
+        if force or not self._description:
             self._description = 'Example input dataset VNN'
 
     def _create_rocrate(self):
