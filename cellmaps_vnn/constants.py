@@ -62,6 +62,16 @@ TRAINING_DATA_FILENAME = 'training_data.txt'
 Default training data filename bundled with input directories.
 """
 
+TEST_DATA_FILENAME = 'predict_data.txt'
+"""
+Default training data filename bundled with input directories.
+"""
+
+CONFIG_FILENAME = 'config.yaml'
+"""
+Name of config file
+"""
+
 GENE2ID_FILENAME = 'gene2ind.txt'
 """
 Default gene-to-index mapping filename bundled with input directories.
@@ -97,6 +107,11 @@ MODEL_FILENAME = 'model.pt'
 Filename for the trained VNN model.
 """
 
+PREDICTIONS_FILENAME = 'predictions.txt'
+"""
+Filename for the file with predictions made by the model.
+"""
+
 TRAIN_REQUIRED_INPUT_FILENAMES = {
     'training_data': (TRAINING_DATA_FILENAME,),
     'gene2id': (GENE2ID_FILENAME,),
@@ -110,7 +125,7 @@ Mapping of train argument names to the filenames that should be discovered in an
 """
 
 PREDICT_OPTIONAL_INPUT_FILENAMES = {
-    'predict_data': ('test_data.txt', 'predict_data.txt'),
+    'predict_data': ('test_data.txt', TEST_DATA_FILENAME),
     'gene2id': (GENE2ID_FILENAME,),
     'cell2id': (CELL2ID_FILENAME,),
     'mutations': MUTATIONS_FILENAMES,

@@ -283,7 +283,7 @@ class VNNTrain:
             config[key] = value
 
         # Save new config next to original
-        final_config_path = os.path.join(self._outdir, 'config.yaml')
+        final_config_path = os.path.join(self._outdir, vnnconstants.CONFIG_FILENAME)
         with open(final_config_path, 'w') as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
@@ -413,7 +413,7 @@ class VNNTrain:
 
         :return: The dataset ID assigned to the registered standard deviation file.
         """
-        dest_path = os.path.join(self._outdir, "config.yaml")
+        dest_path = os.path.join(self._outdir, vnnconstants.CONFIG_FILENAME)
         description = f'{description} config file'
         keywords = keywords
         keywords.extend(['file'])

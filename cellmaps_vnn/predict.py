@@ -259,7 +259,7 @@ class VNNPredict:
 
         :return: The file path to the prediction results file.
         """
-        return os.path.join(self._outdir, 'predict.txt')
+        return os.path.join(self._outdir, vnnconstants.PREDICTIONS_FILENAME)
 
     def _get_feature_grad_dest_file(self, grad):
         """

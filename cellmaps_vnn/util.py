@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch import inf
-
+import cellmaps_vnn.constants as vnnconstants
 from cellmaps_vnn.exceptions import CellmapsvnnError
 
 logger = logging.getLogger(__name__)
@@ -324,7 +324,7 @@ def pearson_corr(x, y):
 
 
 def copy_and_register_gene2id_file(genet2id_in_file, outdir, description, keywords, provenance_utils):
-    gene2id_out_file = os.path.join(outdir, 'gene2ind.txt')
+    gene2id_out_file = os.path.join(outdir, vnnconstants.GENE2ID_FILENAME)
     shutil.copy(genet2id_in_file, gene2id_out_file)
 
     data_dict = {'name': os.path.basename(gene2id_out_file) + ' gene to index mapping file',

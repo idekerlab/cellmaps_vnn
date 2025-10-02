@@ -136,7 +136,7 @@ class VNNAnnotate:
         hierarchy_id = self._register_hierarchy(outdir, description, keywords, provenance_utils)
         rlipp_id = self._register_rlipp_file(outdir, description, keywords, provenance_utils)
         return_ids = [hierarchy_id, rlipp_id]
-        gene2ind_path = os.path.join(self._model_predictions[0], 'gene2ind.txt')
+        gene2ind_path = os.path.join(self._model_predictions[0], vnnconstants.GENE2ID_FILENAME)
         if os.path.exists(gene2ind_path):
             gene2ind_id = copy_and_register_gene2id_file(gene2ind_path, outdir, description, keywords,
                                                          provenance_utils)
@@ -560,7 +560,7 @@ class VNNAnnotate:
         :param provenance_utils: Provenance utility for dataset registration
         :return: The dataset ID assigned to the registered parent network file
         """
-        hierarchy_parent_out_file = os.path.join(outdir, 'hierarchy_parent.cx2')
+        hierarchy_parent_out_file = os.path.join(outdir, vnnconstants.PARENT_NETWORK_NAME)
         shutil.copy(self.parent_network, hierarchy_parent_out_file)
 
         data_dict = {'name': os.path.basename(hierarchy_parent_out_file) + ' Hierarchy parent network file',
