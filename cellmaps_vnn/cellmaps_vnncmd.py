@@ -20,21 +20,38 @@ import cellmaps_vnn.util as vnnutil
 
 logger = logging.getLogger(__name__)
 
+LEGACY_COMMANDS = {
+    VNNTrain.COMMAND,
+    VNNPredict.COMMAND,
+    VNNAnnotate.COMMAND
+}
 
-def _parse_arguments(desc, args):
-    """
-    Parses command line arguments
+MODE_TO_COMMAND = {
+    'train': VNNTrain.COMMAND,
+    'predict': VNNPredict.COMMAND,
+    'test': VNNPredict.COMMAND,
+    'optimizetrain': VNNTrain.COMMAND,
+    'trainoptimize': VNNTrain.COMMAND
+}
 
-    :param desc: description to display on command line
-    :type desc: str
-    :param args: command line arguments usually :py:func:`sys.argv[1:]`
-    :type args: list
-    :return: arguments parsed by :py:mod:`argparse`
-    :rtype: :py:class:`argparse.Namespace`
-    """
+MODEL_FILE_CANDIDATES = (
+    vnnconstants.MODEL_FILENAME,
+    'model.pkl',
+    'model.pth',
+    'model_final.pt'
+)
+
+CONFIG_FILE_CANDIDATES = (
+    vnnconstants.CONFIG_FILENAME,
+    'config.yml'
+)
+
+
+def _build_parser(desc):
     parser = argparse.ArgumentParser(description=desc,
                                      formatter_class=constants.ArgParseFormatter)
-    subparsers = parser.add_subparsers(dest='command', help='Command to run. Type <command> -h for more help')
+    subparsers = parser.add_subparsers(dest='command',
+                                       help='Command to run. Type <command> -h for more help')
     subparsers.required = True
 
     VNNTrain.add_subparser(subparsers)
@@ -66,8 +83,188 @@ def _parse_arguments(desc, args):
     parser.add_argument('--version', action='version',
                         version=('%(prog)s ' +
                                  cellmaps_vnn.__version__))
+    return parser
 
-    return parser.parse_args(args)
+
+def _transform_mode_invocation(args, parser):
+    mode_parser = argparse.ArgumentParser(add_help=False)
+    mode_parser.add_argument('outdir',
+                             help='Destination directory where the implementation writes the output RO-Crate.')
+    mode_parser.add_argument('--mode', required=True,
+                             choices=sorted(MODE_TO_COMMAND.keys()),
+                             help='Execution mode to run.')
+    mode_parser.add_argument('--input_crate', '--input_rocrate',
+                             dest='input_crate',
+                             help='Path to the input RO-Crate that contains feature table files and hierarchy.')
+    mode_parser.add_argument('--model',
+                             dest='model_crate',
+                             help='Path to the trained model RO-Crate.')
+    parsed, remaining = mode_parser.parse_known_args(args)
+
+    command = MODE_TO_COMMAND[parsed.mode]
+
+    if any(item == '--inputdir' for item in remaining):
+        parser.error('--mode interface cannot be combined with --inputdir; use either legacy subcommands or --mode.')
+
+    transformed = [command, parsed.outdir]
+
+    if command == VNNPredict.COMMAND:
+        if parsed.input_crate is None:
+            mode_parser.error('--input_crate is required when --mode is set to predict or test.')
+        if parsed.model_crate is None:
+            mode_parser.error('--model is required when --mode is set to predict or test.')
+        transformed.extend(['--inputdir', parsed.model_crate, parsed.input_crate])
+    else:
+        if parsed.input_crate is None:
+            mode_parser.error('--input_crate is required when --mode is set to train or optimizetrain.')
+        transformed.extend(['--inputdir', parsed.input_crate])
+
+        if parsed.mode in ('optimizetrain', 'trainoptimize'):
+            optimize_values = [remaining[idx + 1] for idx, token in enumerate(remaining)
+                               if token == '--optimize' and idx + 1 < len(remaining)]
+            if optimize_values and any(val != '1' for val in optimize_values):
+                parser.error('--mode={} requires --optimize set to 1.'.format(parsed.mode))
+            if '--optimize' not in remaining:
+                transformed.extend(['--optimize', '1'])
+
+    transformed.extend(remaining)
+
+    metadata = {
+        'mode': parsed.mode,
+        'input_crate': parsed.input_crate,
+        'model_crate': parsed.model_crate,
+        'outdir': parsed.outdir
+    }
+    return transformed, metadata
+
+
+def _find_existing_file(base_dir, candidates):
+    for name in candidates:
+        candidate = os.path.join(base_dir, name)
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def _ensure_rocrate_directory(path, label):
+    if path is None:
+        raise CellmapsvnnError(f'{label} is required when using --mode.')
+    abs_path = os.path.abspath(path)
+    if not os.path.isdir(abs_path):
+        raise CellmapsvnnError(f'{label} "{path}" does not exist or is not a directory.')
+    crate_manifest = os.path.join(abs_path, 'ro-crate-metadata.json')
+    if not os.path.isfile(crate_manifest):
+        raise CellmapsvnnError(f'{label} "{abs_path}" is missing ro-crate-metadata.json.')
+    return abs_path
+
+
+def _ensure_model_crate(path):
+    abs_path = _ensure_rocrate_directory(path, 'Model RO-Crate')
+    model_file = _find_existing_file(abs_path, MODEL_FILE_CANDIDATES)
+    if model_file is None:
+        out_train_dir = os.path.join(abs_path, 'out_train')
+        if os.path.isdir(out_train_dir):
+            model_file = _find_existing_file(out_train_dir, MODEL_FILE_CANDIDATES)
+    if model_file is None:
+        raise CellmapsvnnError(f'Model RO-Crate "{abs_path}" does not contain a model.* file.')
+
+    config_file = _find_existing_file(abs_path, CONFIG_FILE_CANDIDATES)
+    if config_file is None:
+        out_train_dir = os.path.join(abs_path, 'out_train')
+        if os.path.isdir(out_train_dir):
+            config_file = _find_existing_file(out_train_dir, CONFIG_FILE_CANDIDATES)
+    if config_file is None:
+        raise CellmapsvnnError(f'Model RO-Crate "{abs_path}" is missing a config.yml/config.yaml file.')
+
+    return abs_path, model_file, config_file
+
+
+def _prepare_mode_inputs(args):
+    if getattr(args, 'command_source', None) != 'mode':
+        return
+
+    if args.mode in ('train', 'optimizetrain', 'trainoptimize'):
+        input_abs = _ensure_rocrate_directory(args.input_crate,
+                                              'Input RO-Crate')
+        args.input_crate = input_abs
+        args.inputdir = input_abs
+    elif args.mode in ('predict', 'test'):
+        input_abs = _ensure_rocrate_directory(args.input_crate,
+                                              'Input RO-Crate')
+        model_abs, _, config_file = _ensure_model_crate(args.model_crate)
+
+        args.input_crate = input_abs
+        args.model_crate = model_abs
+        args.inputdir = [model_abs, input_abs]
+        if getattr(args, 'config_file', None) is None:
+            args.config_file = config_file
+    else:
+        raise CellmapsvnnError(f'Unsupported mode "{args.mode}".')
+
+
+def _normalize_optimize_flag(args, config):
+    if getattr(args, 'mode', None) not in ('optimizetrain', 'trainoptimize'):
+        return
+    if getattr(args, 'optimize', None) != 1:
+        return
+
+    range_candidates = (
+        'batchsize',
+        'lr',
+        'wd',
+        'alpha',
+        'genotype_hiddens',
+        'patience',
+        'delta',
+        'min_dropout_layer',
+        'dropout_fraction'
+    )
+
+    has_range = False
+    for candidate in range_candidates:
+        value = getattr(args, candidate, None)
+        if isinstance(value, (list, tuple)) and len(value) > 1:
+            has_range = True
+            break
+    if not has_range:
+        logger.info('No hyperparameter ranges provided; falling back to standard training.')
+        args.optimize = 0
+        config['optimize'] = 0
+
+
+def _parse_arguments(desc, args):
+    """
+    Parses command line arguments
+
+    :param desc: description to display on command line
+    :type desc: str
+    :param args: command line arguments usually :py:func:`sys.argv[1:]`
+    :type args: list
+    :return: arguments parsed by :py:mod:`argparse`
+    :rtype: :py:class:`argparse.Namespace`
+    """
+    parser = _build_parser(desc)
+    starts_with_command = len(args) > 0 and args[0] in LEGACY_COMMANDS
+
+    if '--mode' in args and not starts_with_command:
+        transformed_args, metadata = _transform_mode_invocation(args, parser)
+        namespace = parser.parse_args(transformed_args)
+        namespace.mode = metadata['mode']
+        namespace.input_crate = metadata['input_crate']
+        namespace.model_crate = metadata['model_crate']
+        namespace.command_source = 'mode'
+        return namespace
+
+    if len(args) > 0 and not starts_with_command and '--mode' not in args and not args[0].startswith('-'):
+        parser.error(f'Unrecognized invocation "{args[0]}". Use a legacy subcommand '
+                     f'({", ".join(sorted(LEGACY_COMMANDS))}) or supply --mode.')
+
+    namespace = parser.parse_args(args)
+    namespace.mode = getattr(namespace, 'command', None)
+    namespace.input_crate = getattr(namespace, 'inputdir', None)
+    namespace.model_crate = None
+    namespace.command_source = 'legacy'
+    return namespace
 
 
 def main(args):
@@ -90,6 +287,8 @@ def main(args):
     theargs = _parse_arguments(desc, args[1:])
     theargs.program = args[0]
     theargs.version = cellmaps_vnn.__version__
+
+    _prepare_mode_inputs(theargs)
 
     config = {}
     if theargs.command == VNNTrain.COMMAND or theargs.command == VNNPredict.COMMAND:
@@ -133,6 +332,8 @@ def main(args):
                 f"or config file: {', '.join(missing_args)}")
 
     set_arguments_from_config_and_defaults(theargs, config)
+
+    _normalize_optimize_flag(theargs, config)
 
     try:
         logutils.setup_cmd_logging(theargs)
