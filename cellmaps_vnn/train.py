@@ -21,6 +21,18 @@ logger = logging.getLogger(__name__)
 class VNNTrain:
     COMMAND = 'train'
 
+    _OPTUNA_PARAM_TO_DATAWRAPPER = {
+        'batchsize': 'batchsize',
+        'lr': 'lr',
+        'wd': 'wd',
+        'alpha': 'alpha',
+        'genotype_hiddens': 'num_hiddens_genotype',
+        'patience': 'patience',
+        'delta': 'delta',
+        'min_dropout_layer': 'min_dropout_layer',
+        'dropout_fraction': 'dropout_fraction'
+    }
+
     DEFAULT_EPOCH = 50
     DEFAULT_LR = 0.001
     DEFAULT_WD = 0.001
@@ -242,52 +254,95 @@ class VNNTrain:
                                            self._batchsize, self._cuda, self._zscore_method, self._stdfile,
                                            self._patience, self._delta, self._min_dropout_layer,
                                            self._dropout_fraction, self._hierarchy)
-        if self._optimize == 1:
-            trial_params = OptunaVNNTrainer(data_wrapper,
-                                            n_trials=self._n_trials,
-                                            batchsize_vals=self._optimize_batchsize,
-                                            lr_vals=self._optimize_lr,
-                                            wd_vals=self._optimize_wd,
-                                            alpha_vals=self._optimize_alpha,
-                                            genotype_hiddens_vals=self._optimize_genotype_hiddens,
-                                            patience_vals=self._optimize_patience,
-                                            delta_vals=self._optimize_delta,
-                                            min_dropout_layer_vals=self._optimize_min_dropout_layer,
-                                            dropout_fraction_vals=self._optimize_dropout_fraction
-                                            ).exec_study()
-            self._save_final_config(trial_params)
-            for key, value in trial_params.items():
-                if hasattr(data_wrapper, key):
-                    setattr(data_wrapper, key, value)
         try:
+            if self._optimize == 1:
+                trial_params = OptunaVNNTrainer(data_wrapper,
+                                                n_trials=self._n_trials,
+                                                batchsize_vals=self._optimize_batchsize,
+                                                lr_vals=self._optimize_lr,
+                                                wd_vals=self._optimize_wd,
+                                                alpha_vals=self._optimize_alpha,
+                                                genotype_hiddens_vals=self._optimize_genotype_hiddens,
+                                                patience_vals=self._optimize_patience,
+                                                delta_vals=self._optimize_delta,
+                                                min_dropout_layer_vals=self._optimize_min_dropout_layer,
+                                                dropout_fraction_vals=self._optimize_dropout_fraction
+                                                ).exec_study()
+                self._apply_trial_params(trial_params, data_wrapper)
             VNNTrainer(data_wrapper).train_model()
         except Exception as e:
             logger.error(f"Training error: {e}")
             raise CellmapsvnnError(f"Encountered problem in training: {e}")
+        finally:
+            self._save_final_config()
 
-    def _save_final_config(self, best_params):
+    def _apply_trial_params(self, trial_params, data_wrapper):
+        """Apply Optuna-selected parameters to trainer and data wrapper."""
+        for key, value in trial_params.items():
+            trainer_attr = f'_{key}'
+            if hasattr(self, trainer_attr):
+                setattr(self, trainer_attr, value)
+            data_attr = self._OPTUNA_PARAM_TO_DATAWRAPPER.get(key, key)
+            if hasattr(data_wrapper, data_attr):
+                setattr(data_wrapper, data_attr, value)
+
+    def _save_final_config(self):
         """
-        Writes a flattened config file that includes best Optuna parameters
-        and all original (non-optimized) settings.
-
-        :param best_params: dict from Optuna best trial
+        Writes a config file capturing the effective parameters used for training.
         """
-        if self._config_file is None:
-            return  # skip if no config file was used
+        config = {}
+        if self._config_file is not None and os.path.isfile(self._config_file):
+            with open(self._config_file, 'r') as f:
+                loaded = yaml.safe_load(f)
+                if isinstance(loaded, dict):
+                    config.update(loaded)
 
-        with open(self._config_file, 'r') as f:
-            config = yaml.safe_load(f)
+        config.update(self._build_final_config_dict())
 
-        # Overwrite optimized params with best values
-        for key, value in best_params.items():
-            config[key] = value
-
-        # Save new config next to original
         final_config_path = os.path.join(self._outdir, vnnconstants.CONFIG_FILENAME)
         with open(final_config_path, 'w') as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
         logger.info(f'Saved final config to: {final_config_path}')
+        return final_config_path
+
+    def _build_final_config_dict(self):
+        """Return dictionary of resolved training parameters."""
+        params = {
+            'outdir': self._outdir,
+            'inputdir': self._inputdir,
+            'config_file': self._config_file,
+            'gene_attribute_name': self._gene_attribute_name,
+            'training_data': self._training_data,
+            'gene2id': self._gene2id,
+            'cell2id': self._cell2id,
+            'mutations': self._mutations,
+            'cn_deletions': self._cn_deletions,
+            'cn_amplifications': self._cn_amplifications,
+            'hierarchy': self._hierarchy,
+            'parent_network': self._parent_network,
+            'batchsize': self._batchsize,
+            'epoch': self._epoch,
+            'zscore_method': self._zscore_method,
+            'lr': self._lr,
+            'wd': self._wd,
+            'alpha': self._alpha,
+            'genotype_hiddens': self._genotype_hiddens,
+            'patience': self._patience,
+            'delta': self._delta,
+            'min_dropout_layer': self._min_dropout_layer,
+            'dropout_fraction': self._dropout_fraction,
+            'optimize': self._optimize,
+            'n_trials': self._n_trials,
+            'cuda': self._cuda,
+            'skip_parent_copy': self._skip_parent_copy,
+            'slurm': self._slurm,
+            'use_gpu': self._use_gpu,
+            'slurm_partition': self._slurm_partition,
+            'slurm_account': self._slurm_account,
+            'std': self._stdfile
+        }
+        return params
 
     def _get_model_dest_file(self):
         """
@@ -322,14 +377,14 @@ class VNNTrain:
                       self._register_hierarchy(outdir, description, keywords, provenance_utils),
                       self._register_pruned_hierarchy(outdir, description, keywords, provenance_utils),
                       vnnutil.copy_and_register_gene2id_file(self._gene2id, outdir, description, keywords,
-                                                     provenance_utils)]
+                                                             provenance_utils)]
         if not self._skip_parent_copy:
             id_hierarchy_parent = self._copy_and_register_hierarchy_parent(outdir, description, keywords,
                                                                            provenance_utils)
             if id_hierarchy_parent is not None:
                 return_ids.append(id_hierarchy_parent)
-        if self._optimize != 0:
-            id_config = self._register_config_file(outdir, description, keywords, provenance_utils)
+        id_config = self._register_config_file(outdir, description, keywords, provenance_utils)
+        if id_config is not None:
             return_ids.append(id_config)
         return return_ids
 
@@ -414,6 +469,9 @@ class VNNTrain:
         :return: The dataset ID assigned to the registered standard deviation file.
         """
         dest_path = os.path.join(self._outdir, vnnconstants.CONFIG_FILENAME)
+        if not os.path.isfile(dest_path):
+            logger.warning('Config file %s not found; skipping registration.', dest_path)
+            return None
         description = f'{description} config file'
         keywords = keywords
         keywords.extend(['file'])
