@@ -125,6 +125,33 @@ class TestCellmaps_vnn(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_prepare_mode_inputs_accepts_model_file_path(self):
+        """Ensures model file paths are accepted"""
+        temp_dir = tempfile.mkdtemp()
+        try:
+            input_crate = os.path.join(temp_dir, 'input')
+            model_crate = os.path.join(temp_dir, 'model')
+            self._create_rocrate(input_crate)
+            self._create_rocrate(model_crate, {
+                cellmaps_vnncmd.vnnconstants.MODEL_FILENAME: 'model',
+                cellmaps_vnncmd.vnnconstants.CONFIG_FILENAME: 'conf'
+            })
+            model_path = os.path.join(model_crate, cellmaps_vnncmd.vnnconstants.MODEL_FILENAME)
+            args = argparse.Namespace(
+                command=cellmaps_vnncmd.VNNPredict.COMMAND,
+                mode='predict',
+                command_source='mode',
+                input_crate=input_crate,
+                model_crate=model_path,
+                inputdir=None,
+                config_file=None
+            )
+            cellmaps_vnncmd._prepare_mode_inputs(args)
+            self.assertIn(os.path.abspath(model_crate), args.inputdir)
+            self.assertIn(os.path.abspath(input_crate), args.inputdir)
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_prepare_mode_inputs_requires_rocrate_manifest(self):
         """Ensures missing ro-crate manifest raises error"""
         temp_dir = tempfile.mkdtemp()

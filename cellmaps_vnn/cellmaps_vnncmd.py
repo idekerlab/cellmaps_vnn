@@ -159,24 +159,33 @@ def _ensure_rocrate_directory(path, label):
 
 
 def _ensure_model_crate(path):
-    abs_path = _ensure_rocrate_directory(path, 'Model RO-Crate')
-    model_file = _find_existing_file(abs_path, MODEL_FILE_CANDIDATES)
-    if model_file is None:
-        out_train_dir = os.path.join(abs_path, 'out_train')
-        if os.path.isdir(out_train_dir):
-            model_file = _find_existing_file(out_train_dir, MODEL_FILE_CANDIDATES)
-    if model_file is None:
-        raise CellmapsvnnError(f'Model RO-Crate "{abs_path}" does not contain a model.* file.')
+    if path is None:
+        raise CellmapsvnnError('Model path is required when using --mode predict/test.')
 
-    config_file = _find_existing_file(abs_path, CONFIG_FILE_CANDIDATES)
+    abs_path = os.path.abspath(path)
+    if os.path.isfile(abs_path):
+        model_file = abs_path
+        crate_dir = os.path.dirname(abs_path)
+        _ensure_rocrate_directory(crate_dir, 'Model RO-Crate')
+    else:
+        crate_dir = _ensure_rocrate_directory(abs_path, 'Model RO-Crate')
+        model_file = _find_existing_file(crate_dir, MODEL_FILE_CANDIDATES)
+        if model_file is None:
+            out_train_dir = os.path.join(crate_dir, 'out_train')
+            if os.path.isdir(out_train_dir):
+                model_file = _find_existing_file(out_train_dir, MODEL_FILE_CANDIDATES)
+        if model_file is None:
+            raise CellmapsvnnError(f'Model RO-Crate "{crate_dir}" does not contain a model.* file.')
+
+    config_file = _find_existing_file(crate_dir, CONFIG_FILE_CANDIDATES)
     if config_file is None:
-        out_train_dir = os.path.join(abs_path, 'out_train')
+        out_train_dir = os.path.join(crate_dir, 'out_train')
         if os.path.isdir(out_train_dir):
             config_file = _find_existing_file(out_train_dir, CONFIG_FILE_CANDIDATES)
     if config_file is None:
-        raise CellmapsvnnError(f'Model RO-Crate "{abs_path}" is missing a config.yml/config.yaml file.')
+        raise CellmapsvnnError(f'Model RO-Crate "{crate_dir}" is missing a config.yml/config.yaml file.')
 
-    return abs_path, model_file, config_file
+    return crate_dir, model_file, config_file
 
 
 def _prepare_mode_inputs(args):
