@@ -93,12 +93,15 @@ def _transform_mode_invocation(args, parser):
     mode_parser.add_argument('--mode', required=True,
                              choices=sorted(MODE_TO_COMMAND.keys()),
                              help='Execution mode to run.')
-    mode_parser.add_argument('--input_crate', '--input_rocrate',
+    mode_parser.add_argument('--input_crate', '--input_rocrate', '--input',
                              dest='input_crate',
                              help='Path to the input RO-Crate that contains feature table files and hierarchy.')
     mode_parser.add_argument('--model',
                              dest='model_crate',
                              help='Path to the trained model RO-Crate.')
+    mode_parser.add_argument('--config', '--config_file',
+                             dest='config_file',
+                             help='Path to configuration YAML file.')
     parsed, remaining = mode_parser.parse_known_args(args)
 
     command = MODE_TO_COMMAND[parsed.mode]
@@ -127,13 +130,17 @@ def _transform_mode_invocation(args, parser):
             if '--optimize' not in remaining:
                 transformed.extend(['--optimize', '1'])
 
+    if parsed.config_file is not None:
+        transformed.extend(['--config_file', parsed.config_file])
+
     transformed.extend(remaining)
 
     metadata = {
         'mode': parsed.mode,
         'input_crate': parsed.input_crate,
         'model_crate': parsed.model_crate,
-        'outdir': parsed.outdir
+        'outdir': parsed.outdir,
+        'config_file': parsed.config_file
     }
     return transformed, metadata
 
@@ -261,6 +268,7 @@ def _parse_arguments(desc, args):
         namespace.mode = metadata['mode']
         namespace.input_crate = metadata['input_crate']
         namespace.model_crate = metadata['model_crate']
+        namespace.config_file = metadata['config_file']
         namespace.command_source = 'mode'
         return namespace
 

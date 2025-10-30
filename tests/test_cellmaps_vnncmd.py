@@ -73,6 +73,17 @@ class TestCellmaps_vnn(unittest.TestCase):
         self.assertEqual('crate_dir', res.input_crate)
         self.assertEqual('mode', res.command_source)
 
+    def test_parse_arguments_mode_train_with_config(self):
+        """Ensures config file flag is propagated when using mode interface"""
+        res = cellmaps_vnncmd._parse_arguments(
+            'hi',
+            ['outdir', '--mode', 'train', '--input_crate', 'crate_dir', '--config', 'conf.yml']
+        )
+
+        self.assertEqual('train', res.command)
+        self.assertEqual('conf.yml', res.config_file)
+        self.assertEqual('mode', res.command_source)
+
     def test_parse_arguments_mode_test(self):
         """Tests parse arguments in mode interface for test"""
         res = cellmaps_vnncmd._parse_arguments(
