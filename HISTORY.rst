@@ -2,7 +2,7 @@
 History
 =======
 
-0.3.0 (TBD)
+0.3.0 (2026-07-27)
 ------------------
 
 * Add size attribute to hierarchy nodes indicating the number of genes with data in each node.
